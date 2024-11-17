@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Chart.Name}}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{.Chart.Name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Chart.Name}}
+  template:
+    metadata:
+      name: {{.Chart.Name}}
+      labels:
+        app: {{.Chart.Name}}
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/mysql:5.7.26
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+              hostPort: {{.Values.port}}
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "{{.Values.password}}"
+          volumeMounts:
+          {{if .Values.dataPath }}
+            - mountPath: /var/lib/mysql
+              name: {{.Chart.Name}}-data
+          {{end}}
+            - mountPath: /etc/mysql/conf.d/remote.cnf
+              name: vol1
+              subPath: remote.conf
+          resources:
+            requests:
+              memory: "1300Mi"
+              cpu: "2"
+            limits:
+              memory: "3048Mi"
+              cpu: "4"
+      restartPolicy: Always
+      volumes:
+      {{- if .Values.dataPath }}
+        - name: {{.Chart.Name}}-data
+          hostPath:
+            path: {{.Values.dataPath}}
+            type: DirectoryOrCreate
+      {{- end}}
+        - configMap:
+            defaultMode: 256
+            items:
+              - key: all-remote
+                mode: 420
+                path: remote.cnf
+            name: {{.Chart.Name}}-remote
+            optional: true
+          name: vol1
+
+---
+apiVersion: v1
+data:
+  all-remote: |-
+    [mysqld]
+    bind-address=0.0.0.0
+kind: ConfigMap
+metadata:
+  labels:
+    cattle.io/creator: norman
+  name: {{.Chart.Name}}-remote
+  namespace: {{ .Release.Namespace }}

@@ -1,0 +1,18 @@
+annotations:
+  catalog.cattle.io/release-name: snowy
+apiVersion: v2
+name: snowy
+version: 1.0.25
+description: A Helm chart for deploying the Snowy application
+type: application
+keywords:
+  - snowy
+  - nacos
+home: https://example.com/snowy
+sources:
+  - https://github.com/your-repo/snowy
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://gitee.com/xiaonuobase/snowy/raw/master/snowy-admin-web/public/img/logo.png
+appVersion: "1.0.1"

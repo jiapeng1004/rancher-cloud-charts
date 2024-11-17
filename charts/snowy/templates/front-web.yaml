@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snowy-admin-web-app
+  labels:
+    app: snowy-admin-web-app
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snowy-front-web
+  template:
+    metadata:
+      name: snowy-front-web
+      labels:
+        app: snowy-front-web
+    spec:
+      containers:
+        - name: snowy-front-web
+          image: {{.Values.baseRepo}}{{.Values.image.frontweb.repository}}:{{.Values.image.frontweb.tag}}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always
+      

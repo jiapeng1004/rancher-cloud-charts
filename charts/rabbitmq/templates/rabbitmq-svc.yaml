@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Chart.Name}}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: {{.Chart.Name}}
+  ports:
+    - protocol: TCP
+      port: 5672
+      targetPort: 5672
+      nodePort: 30672
+      name: {{.Chart.Name}}-5672
+    - protocol: TCP
+      port: 15672
+      targetPort: 15672
+      nodePort: 31672
+      name: {{.Chart.Name}}-15672
+  type: NodePort
+  

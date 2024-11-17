@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snowy-biz-app
+  labels:
+    app: snowy-biz-app
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snowy-biz-app
+  template:
+    metadata:
+      name: snowy-biz-app
+      labels:
+        app: snowy-biz-app
+    spec:
+      initContainers:
+        - name: ping-nacos
+          image: m.daocloud.io/busybox
+          command: ["/bin/sh"]
+          args:
+             - "-c"
+             - "until wget '{{.Values.image.nacos.repository}}:8848/nacos/'; do echo 'wait nacos'; sleep 1; done"
+          imagePullPolicy: IfNotPresent
+      containers:
+        - name: snowy-biz-app
+          image: {{.Values.baseRepo}}{{.Values.image.biz.repository}}:{{.Values.image.biz.tag}}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9102
+              protocol: TCP
+          env:
+            - name: NACOS_SERVER
+              value: "{{.Values.image.nacos.repository}}:8848"
+      imagePullSecrets:
+        - name: my-registry-secret
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always
+      

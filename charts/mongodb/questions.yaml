@@ -1,0 +1,21 @@
+categories:
+  - mongodb
+questions:
+  - variable: mongodb.dataPath
+    type: string
+    default: "/bitnami/mongodb/data/db"
+    required: false
+    description: "数据路径"
+    label: "数据路径"
+  - variable: mongodb.user
+    default: "root"
+    type: string
+    required: false
+    description: "用户名"
+    label: "用户名"
+  - variable: mongodb.password
+    default: "123456"
+    type: string
+    required: false
+    description: "密码"
+    label: "密码"

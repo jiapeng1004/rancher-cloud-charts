@@ -1,0 +1,4 @@
+dataPath: "/var/lib/mysql"
+port: "3306"
+password: "123456"
+

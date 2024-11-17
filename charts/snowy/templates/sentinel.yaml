@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snowy-sentinel-app
+  labels:
+    app: snowy-sentinel-app
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snowy-sentinel-app
+  template:
+    metadata:
+      name: snowy-sentinel-app
+      labels:
+        app: snowy-sentinel-app
+    spec:
+      initContainers:
+        - name: ping-nacos
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/registry.k8s.io/e2e-test-images/busybox:1.29-4
+          command: ["/bin/sh"]
+          args:
+             - "-c"
+             - "until wget '{{.Values.image.nacos.repository}}:8848/nacos/'; do echo 'wait nacos'; sleep 1; done"
+          imagePullPolicy: IfNotPresent
+      containers:
+        - name: snowy-sentinel-app
+          image: {{.Values.baseRepo}}{{.Values.image.sentinel.repository}}:{{.Values.image.sentinel.tag}}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9002
+              protocol: TCP
+          env:
+            - name: NACOS_SERVER
+              value: "{{.Values.image.nacos.repository}}:8848"
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always
+      

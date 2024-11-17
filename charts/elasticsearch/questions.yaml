@@ -1,0 +1,14 @@
+categories:
+  - elasticsearch
+questions:
+  - variable: host
+    default: "es.dev.jiapeng.icu"
+    type: string
+    required: true
+    description: "es域名"
+    label: "es域名"
+  - variable: createIngress
+    default: "true"
+    type: boolean
+    description: "是否创建ingress"
+    label: "是否创建ingress"

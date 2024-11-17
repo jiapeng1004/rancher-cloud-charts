@@ -1,0 +1,17 @@
+annotations:
+  catalog.cattle.io/release-name: &appName rabbitmq
+apiVersion: v2
+name: *appName
+version: 1.0.3
+description: A Helm chart for deploying the mysql application
+type: application
+keywords:
+  - *appName
+home: https://example.com/snowy
+sources:
+  - https://github.com/your-repo/snowy
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://pic.rmb.bdstatic.com/7462d5d74516f2e5f47d562833c8e03b.jpeg@wm_2,t_55m+5a625Y+3L+S9kOS9keenkeaKgA==,fc_ffffff,ff_U2ltSGVp
+appVersion: "1.0.1"

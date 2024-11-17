@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: snowy-front-web
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: snowy-front-web
+  ports:
+    - protocol: TCP
+      name: admin-web-80
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+  

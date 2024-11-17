@@ -1,0 +1,17 @@
+annotations:
+  catalog.cattle.io/release-name: mysql
+apiVersion: v2
+name: mysql
+version: 1.0.15
+description: A Helm chart for deploying the mysql application
+type: application
+keywords:
+  - mysql
+home: https://example.com/snowy
+sources:
+  - https://github.com/your-repo/snowy
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://tse4-mm.cn.bing.net/th/id/OIP-C.urLHYMYPFxkcs6AC4Io9vwHaHa?w=199&h=199&c=7&r=0&o=5&dpr=2&pid=1.7
+appVersion: "1.0.1"

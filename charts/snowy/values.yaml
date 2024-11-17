@@ -1,0 +1,40 @@
+global:
+  init:
+    importSql: false
+  server:
+    mysql:
+      host: "mysql.server"
+      port: "3306"
+      user: "root"
+      password: "123456"
+      dataPath:
+    redis:
+      host:
+      port:
+      password:
+baseRepo: "registry.cn-hangzhou.aliyuncs.com/jp-java/"
+image:
+  nacos:
+    repository: "snowy-nacos-app"
+    tag: "1.0.1"
+  gateway:
+    repository: "snowy-gateway-app"
+    tag: "1.0.1"
+  sentinel:
+    repository: "snowy-sentinel-app"
+    tag: "1.0.1"
+  actuator:
+    repository: "snowy-actuator-app"
+    tag: "1.0.1"
+  xxljob:
+    repository: "snowy-xxl-job-app"
+    tag: "1.0.1"
+  biz:
+    repository: "snowy-biz-app"
+    tag: "1.0.1"
+  web:
+    repository: "snowy-web-app"
+    tag: "1.0.1"
+  frontweb:
+    repository: "snowy-front-web"
+    tag: "1.0.1"

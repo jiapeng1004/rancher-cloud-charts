@@ -1,0 +1,17 @@
+annotations:
+  catalog.cattle.io/release-name: kafka
+apiVersion: v2
+name: kafka
+version: 1.0.1
+description: A Helm chart for deploying the kafka application
+type: application
+keywords:
+  - kafka
+home: https://example.com/snowy
+sources:
+  - https://github.com/your-repo/snowy
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://img2.baidu.com/it/u=1630380167,564781265&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=500
+appVersion: "1.0.1"

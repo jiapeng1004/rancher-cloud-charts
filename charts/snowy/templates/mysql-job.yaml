@@ -1,0 +1,62 @@
+{{ if .Values.global.init.importSql }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Chart.Name }}-import-sql"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    job: importSql
+  annotations:
+    "helm.sh/hook": pre-install
+spec:
+  template:
+    metadata:
+      name: "{{ .Chart.Name }}-import-sql"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: "{{ .Chart.Name }}-import-sql"
+          image: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/alpine:3.20.3"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #换阿里镜像仓库
+              echo "http://mirrors.aliyun.com/alpine/v3.20/main" > /etc/apk/repositories
+              #安装mysql客户端
+              apk add --no-cache mysql-client
+              #执行sql
+              mkdir -p /opt
+              cd /opt
+              ##下载sql
+              ###下载nacos的sql 文件名前面加序号
+              wget --no-check-certificate https://gitee.com/jiapengCode/snowy-cloud/raw/dev-jp/snowy-server/snowy-nacos-app/src/main/resources/META-INF/nacos-db.sql -O 1_nacos-db.sql
+              wget --no-check-certificate https://gitee.com/jiapengCode/snowy-cloud/raw/dev-jp/snowy-server/snowy-nacos-app/src/main/resources/META-INF/nacos-db-snowy-config-init.sql -O 2_nacos-db-snowy-config-init.sql
+              ###下载xxl-job的sql
+              wget --no-check-certificate https://gitee.com/jiapengCode/snowy-cloud/raw/dev-jp/snowy-server/snowy-xxl-job-app/src/main/resources/db/tables_xxl_job.sql -O 3_xxl-job.sql
+              ###下载snowy-web-app的sql
+              wget --no-check-certificate https://gitee.com/jiapengCode/snowy-cloud/raw/master/snowy-modules/snowy-web-app/src/main/resources/_sql/snowy_cloud_mysql.sql -O 4_snowy_cloud_mysql.sql
+              ####在这个文件最上面加上几行
+              echo "SET FOREIGN_KEY_CHECKS=0\;" > /opt/snowy_cloud_mysql.sql
+              sed -i "1i\-- -------------------------\n -- snowy-cloud 不存在则创建 \n-- ---------------------------\n create database IF NOT EXISTS \`snowy-cloud\` default character set utf8mb4 COLLATE utf8mb4_general_ci; \n use \`snowy-cloud\`;" 4_snowy_cloud_mysql.sql
+              echo 'mysql 连接中'
+              for sql_file in $(ls /opt/*.sql);do
+                echo "执行sql文件：$sql_file"
+                # 如果名字带有nacos和config则处理其中的mysql和redis连接信息
+                if [[ $sql_file =~ "nacos" || $sql_file =~ "config" ]];then
+                  # 处理mysql
+                  sed -i "s/jdbc:mysql:\/\/127.0.0.1:3306/jdbc:mysql:\/\/{{.Values.global.server.mysql.host}}:{{.Values.global.server.mysql.port}}/g" $sql_file
+                  sed -i "s/jdbc:mysql:\/\/localhost:3306/jdbc:mysql:\/\/{{.Values.global.server.mysql.host}}:{{.Values.global.server.mysql.port}}/g" $sql_file
+                  # 处理redis
+                  sed -i "s/jdbc:redis:\/\/127.0.0.1:6379/jdbc:redis:\/\/{{.Values.global.server.redis.host}}:{{.Values.global.server.redis.port}}/g" $sql_file
+                  sed -i "s/jdbc:redis:\/\/localhost:6379/jdbc:redis:\/\/{{.Values.global.server.redis.host}}:{{.Values.global.server.redis.port}}/g" $sql_file
+                  # 处理 actuator
+                  sed -i "s/localhost:9001/snowy-actuator-app.{{.Release.Namespace}}:9001/g" $sql_file
+                  # 处理 sentinel
+                  sed -i "s/localhost:9002/snowy-sentinel-app.{{.Release.Namespace}}:9002/g" $sql_file
+                fi
+                mysql -h{{.Values.global.server.mysql.host}} -P{{.Values.global.server.mysql.port}} -u{{.Values.global.server.mysql.user}} -p{{.Values.global.server.mysql.password}} --ssl=0 -e "source $sql_file"
+                echo "执行sql文件：$sql_file 结束"
+              done
+{{end}}
+

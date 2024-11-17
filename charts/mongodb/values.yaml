@@ -1,0 +1,4 @@
+mongodb:
+  dataPath: /bitnami/mongodb/data/db
+  user: "root"
+  password: "123456"

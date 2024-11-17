@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: snowy-actuator-app
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: snowy-actuator-app
+  ports:
+    - protocol: TCP
+      name: actuator-9001
+      port: 9001
+      targetPort: 9001
+  type: ClusterIP
+  

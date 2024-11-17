@@ -1,0 +1,33 @@
+categories:
+  - snowy
+questions:
+  - variable: global.init.importSql
+    default: "false"
+    type: boolean
+    required: false
+    description: "是否导入sql"
+    label: "是否导入sql"
+  - variable: global.server.mysql.host
+    default: "mysql.server"
+    type: string
+    required: false
+    description: "mysql地址"
+    label: "mysql地址"
+  - variable: global.server.mysql.port
+    default: "3306"
+    type: string
+    required: false
+    description: "msql端口"
+    label: "msql端口"
+  - variable: global.server.mysql.user
+    default: "root"
+    type: string
+    required: false
+    description: "mysql用户"
+    label: "mysql用户"
+  - variable: global.server.mysql.password
+    default: "123456"
+    type: string
+    required: false
+    description: "mysql密码"
+    label: "mysql密码"

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-registry-secret
+  namespace: {{.Release.Namespace}}
+  annotations:
+    "helm.sh/hook": pre-install
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: |
+    eyJhdXRocyI6eyJodHRwczovL3JlZ2lzdHJ5LmNuLWhhbmd6aG91LmFsaXl1bmNzLmNvbSI6eyJ1
+    c2VybmFtZSI6ImFsaXl1bjcyNDg5MzMyNzkiLCAicGFzc3dvcmQiOiJqcDg4dGN4Si8iLCAiZW1h
+    aWwiOiJqaWFwZW5nX2FvYUAxNjMuY29tIiwgImF1dGgiOiIifX19

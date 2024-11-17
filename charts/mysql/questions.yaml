@@ -1,0 +1,21 @@
+categories:
+  - mysql
+questions:
+  - variable: dataPath
+    type: string
+    default: "/var/lib/mysql"
+    required: false
+    description: "数据路径"
+    label: "数据路径"
+  - variable: port
+    default: "3306"
+    type: int
+    required: true
+    description: "端口"
+    label: "端口"
+  - variable: password
+    default: "123456"
+    type: string
+    required: true
+    description: "密码"
+    label: "密码"

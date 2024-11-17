@@ -1,0 +1,17 @@
+annotations:
+  catalog.cattle.io/release-name: &jenkins jenkins
+apiVersion: v2
+name: *jenkins
+version: 1.0.7
+description: A Helm chart for deploying the kafka application
+type: application
+keywords:
+  - *jenkins
+home: https://example.com/snowy
+sources:
+  - https://github.com/your-repo/snowy
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://img0.baidu.com/it/u=4105256155,674584039&fm=253&fmt=auto&app=138&f=JPEG?w=1280&h=412
+appVersion: "1.0.1"

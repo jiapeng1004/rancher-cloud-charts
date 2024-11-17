@@ -1,0 +1,14 @@
+categories:
+  - elasticsearch
+questions:
+  - variable: user
+    default: "admin"
+    type: string
+    required: false
+    description: "管理员账户"
+    label: "管理员账户"
+  - variable: password
+    default: "123456"
+    type: string
+    description: "管理员密码"
+    label: "管理员密码"

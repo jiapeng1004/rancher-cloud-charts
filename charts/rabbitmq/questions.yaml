@@ -1,0 +1,21 @@
+categories:
+  - mysql
+questions:
+  - variable: dataPath
+    type: string
+    default: "/var/lib/rabbitmq"
+    required: false
+    description: "数据路径"
+    label: "数据路径"
+  - variable: user
+    default: "root"
+    type: string
+    required: false
+    description: "用户"
+    label: "用户"
+  - variable: password
+    default: "123456"
+    type: string
+    required: true
+    description: "密码"
+    label: "密码"

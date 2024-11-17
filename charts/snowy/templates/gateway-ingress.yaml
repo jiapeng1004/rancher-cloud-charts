@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: snowy-gateway-app-ingress
+{{/*  annotations:*/}}
+{{/*    nginx.ingress.kubernetes.io/rewrite-target: /*/}}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{.Release.Namespace}}.jiapeng.icu
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: snowy-gateway-app
+                port:
+                  number: 9003

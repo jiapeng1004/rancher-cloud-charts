@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Chart.Name}}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{.Chart.Name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Chart.Name}}
+  template:
+    metadata:
+      name: {{.Chart.Name}}
+      labels:
+        app: {{.Chart.Name}}
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/rabbitmq:3.8.17-management-alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: "{{.Values.user}}"
+            - name: RABBITMQ_DEFAULT_PASS
+              value: "{{.Values.password}}"
+          ports:
+            - containerPort: 15672
+              protocol: TCP
+              name: {{.Chart.Name}}-15672
+            - containerPort: 5672
+              protocol: TCP
+              name: {{.Chart.Name}}-5672
+          volumeMounts:
+            - mountPath: /var/lib/rabbitmq
+              name: {{.Chart.Name}}-data
+            - mountPath: /etc/rabbitmq/rabbitmq.conf
+              subPath: rabbitmq.conf
+              name: {{.Chart.Name}}-config
+          resources:
+            requests:
+              memory: "1300Mi"
+              cpu: "2"
+            limits:
+              memory: "3048Mi"
+              cpu: "4"
+      restartPolicy: Always
+      volumes:
+        - name: {{.Chart.Name}}-data
+          hostPath:
+            path: {{.Values.dataPath}}
+            type: DirectoryOrCreate
+        - configMap:
+            defaultMode: 256
+            items:
+              - key: config
+                mode: 420
+                path: rabbitmq.conf
+            name: {{.Chart.Name}}-config
+            optional: true
+          name: {{.Chart.Name}}-config
+
+---
+apiVersion: v1
+data:
+  config: |
+
+kind: ConfigMap
+metadata:
+  labels:
+    cattle.io/creator: norman
+  name: {{.Chart.Name}}-config
+  namespace: {{ .Release.Namespace }}

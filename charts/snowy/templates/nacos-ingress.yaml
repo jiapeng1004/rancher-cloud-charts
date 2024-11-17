@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: snowy-nacos-app-ingress
+{{/*  annotations:*/}}
+{{/*    nginx.ingress.kubernetes.io/rewrite-target: /*/}}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{.Release.Namespace}}.jiapeng.icu
+      http:
+        paths:
+          - path: /nacos
+            pathType: Prefix
+            backend:
+              service:
+                name: snowy-nacos-app
+                port:
+                  number: 8848

@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Chart.Name}}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{.Chart.Name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Chart.Name}}
+  template:
+    metadata:
+      name: {{.Chart.Name}}
+      labels:
+        app: {{.Chart.Name}}
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/bitnami/mongodb:7.0.14
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 27017
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /bitnami/mongodb/data/db
+              name: mongo-data
+            - mountPath: /opt/bitnami/mongodb/conf/mongodb.conf
+              name: mongodb-conf
+              subPath: mongodb.conf
+          env:
+            - name: MONGODB_ROOT_USERNAME
+              value: "{{.Values.mongodb.user}}"
+            - name: MONGODB_ROOT_PASSWORD
+              value: "{{.Values.mongodb.password}}"
+      volumes:
+        - name: mongo-data
+          hostPath:
+            path: {{.Values.mongodb.dataPath}}
+            type: DirectoryOrCreate
+        - configMap:
+            defaultMode: 256
+            items:
+              - key: mongodb.conf
+                mode: 420
+                path: mongodb.conf
+            name: {{.Chart.Name}}-config
+            optional: true
+          name: mongodb-conf
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Chart.Name}}-config
+  namespace: {{ .Release.Namespace }}
+data:
+  mongodb.conf: |
+    # mongod.conf
+    # for documentation of all options, see:
+    #   http://docs.mongodb.org/manual/reference/configuration-options/
+
+    # where and how to store data.
+    storage:
+      dbPath: /bitnami/mongodb/data/db
+      directoryPerDB: false
+
+    # where to write logging data.
+    systemLog:
+      destination: file
+      quiet: false
+      logAppend: true
+      logRotate: reopen
+      path: /opt/bitnami/mongodb/logs/mongodb.log
+      verbosity: 0
+
+    # network interfaces
+    net:
+      port: 27017
+      unixDomainSocket:
+        enabled: true
+        pathPrefix: /opt/bitnami/mongodb/tmp
+      ipv6: false
+      bindIpAll: true
+      #bindIp:
+
+    # replica set options
+    #replication:
+      #replSetName: replicaset
+      #enableMajorityReadConcern: true
+
+    # sharding options
+    #sharding:
+      #clusterRole:
+
+    # process management options
+    processManagement:
+       fork: false
+       pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
+
+    # set parameter options
+    setParameter:
+       enableLocalhostAuthBypass: false
+
+    # security options
+    security:
+      authorization: enabled
+      #keyFile: replace_me

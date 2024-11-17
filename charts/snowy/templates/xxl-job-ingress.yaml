@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: snowy-xxl-jpb-app-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{.Release.Namespace}}.jiapeng.icu
+      http:
+        paths:
+          - path: /job/(.*|$)
+            pathType: Prefix
+            backend:
+              service:
+                name: snowy-xxl-jpb-app
+                port:
+                  number: 9004

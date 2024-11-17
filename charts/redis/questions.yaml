@@ -1,0 +1,9 @@
+categories:
+  - mysql
+questions:
+  - variable: port
+    default: "6379"
+    type: int
+    required: true
+    description: "端口"
+    label: "端口"

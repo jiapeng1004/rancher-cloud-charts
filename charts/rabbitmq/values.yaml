@@ -1,0 +1,4 @@
+dataPath: "/var/lib/rabbitmq"
+user: "root"
+password: "123456"
+

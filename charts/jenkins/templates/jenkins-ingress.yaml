@@ -1,0 +1,25 @@
+{{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: networking.k8s.io/v1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{.Release.Name}}-ingress
+{{/*  annotations:*/}}
+{{/*    nginx.ingress.kubernetes.io/rewrite-target: / */}}
+spec:
+{{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
+  ingressClassName: nginx
+{{- end }}
+  rules:
+    - host: {{.Release.Name}}.jiapeng.icu
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{.Release.Name}}
+                port:
+                  number: 8080

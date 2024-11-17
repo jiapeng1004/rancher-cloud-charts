@@ -1,0 +1,17 @@
+annotations:
+  catalog.cattle.io/release-name: nginx-ingress-controller
+apiVersion: v2
+name: mysql
+version: 1.0.1
+description: A nginx ingress controller
+type: application
+keywords:
+  - mysql
+home: https://example.com/snowy
+sources:
+  - https://github.com/your-repo/snowy
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://picx.zhimg.com/v2-b85b782a57c2d202bc953c9681909300_720w.jpg?source=172ae18b
+appVersion: "1.0.1"

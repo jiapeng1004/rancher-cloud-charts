@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rabbitmq-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{.Chart.Name}}.{{.Release.Namespace}}.jiapeng.icu
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{.Chart.Name}}
+                port:
+                  number: 15672

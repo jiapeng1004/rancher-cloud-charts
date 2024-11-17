@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snowy-nacos-app
+  labels:
+    app: snowy-nacos-app
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snowy-nacos-app
+  template:
+    metadata:
+      name: snowy-nacos-app
+      labels:
+        app: snowy-nacos-app
+    spec:
+      containers:
+        - name: snowy-nacos-app
+          image: {{.Values.baseRepo}}{{.Values.image.nacos.repository}}:{{.Values.image.nacos.tag}}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8848
+              protocol: TCP
+            - containerPort: 9848
+              protocol: TCP
+            - containerPort: 9849
+              protocol: TCP
+          env:
+            - name: DB_HOST
+              value: "{{.Values.global.server.mysql.host}}:{{.Values.global.server.mysql.port}}"
+            - name: DB_USER
+              value: "{{.Values.global.server.mysql.user}}"
+            - name: DB_PASSWORD
+              value: "{{.Values.global.server.mysql.password}}"
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always
+      
