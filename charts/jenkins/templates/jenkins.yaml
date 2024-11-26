@@ -26,7 +26,7 @@ spec:
       affinity: {}
       containers:
         - image: >-
-            registry.cn-hangzhou.aliyuncs.com/jp-java/jenkins:1.0.0
+            registry.cn-hangzhou.aliyuncs.com/jp-java/jenkins:1.0.1
           imagePullPolicy: IfNotPresent
           name: jenkins
           ports:
@@ -44,7 +44,7 @@ spec:
               value: "{{.Values.password}}"
           securityContext:
             allowPrivilegeEscalation: false
-            privileged: false
+            privileged: true
             readOnlyRootFilesystem: false
             runAsNonRoot: false
           volumeMounts:
@@ -52,9 +52,6 @@ spec:
               name: jenkins-data
             - mountPath: /root/.m2
               name: maven-data
-            - mountPath: /var/run/docker.sock
-              name: docker-sock
-              readOnly: false
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       volumes:
@@ -66,10 +63,6 @@ spec:
           hostPath:
             path: /root/.m2
             type: DirectoryOrCreate
-        - name: docker-sock
-          hostPath:
-            path: /var/run/docker.sock
-            type: Socket
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
