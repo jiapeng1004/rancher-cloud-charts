@@ -1,0 +1,12 @@
+FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/ilanni2460/jenkins:2.481-alpine-jdk21
+LABEL authors="jiapeng"
+MAINTAINER jiapeng
+
+ENV STORAGE_DRIVER=vfs
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk update \
+    && apk add maven \
+    && apk add kubectl \
+    && apk add buildah \
+    && apk add netavark \
+    && apk add iptables
