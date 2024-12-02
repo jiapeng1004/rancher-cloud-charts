@@ -1,0 +1,33 @@
+categories:
+  - mysql
+questions:
+  - variable: dbHost
+    default: "mysql.server"
+    type: string
+    required: false
+    description: "mysql地址"
+    label: "mysql地址"
+  - variable: dbPost
+    default: "3306"
+    type: string
+    required: false
+    description: "mysql端口"
+    label: "mysql端口"
+  - variable: dbName
+    default: "nacos"
+    type: string
+    required: false
+    description: "mysql数据库名"
+    label: "mysql数据库名"
+  - variable: dbUser
+    default: "root"
+    type: string
+    required: false
+    description: "mysql用户名"
+    label: "mysql用户名"
+  - variable: dbPassword
+    default: "123456"
+    type: string
+    required: false
+    description: "mysql密码"
+    label: "mysql密码"

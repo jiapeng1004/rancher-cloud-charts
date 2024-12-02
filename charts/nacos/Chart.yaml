@@ -1,0 +1,17 @@
+annotations:
+  catalog.cattle.io/release-name: &appName nacos
+apiVersion: v2
+name: *appName
+version: 1.0.3
+description: A Helm chart for deploying the mysql application
+type: application
+keywords:
+  - *appName
+home: https://example.com/snowy
+sources:
+  - https://github.com/your-repo/snowy
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://i-blog.csdnimg.cn/blog_migrate/a27d8aaf0e0721a6feb67e3dd49a18e0.jpeg#pic_center
+appVersion: "1.0.1"

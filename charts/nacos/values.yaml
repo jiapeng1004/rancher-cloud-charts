@@ -1,0 +1,6 @@
+dbHost: "mysql.server"
+dbPost: "3306"
+dbName: "nacos"
+dbUser: "root"
+dbPassword: "123456"
+dbParam: "useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&tinyInt1isBit=false&allowMultiQueries=true&serverTimezone=UTC"

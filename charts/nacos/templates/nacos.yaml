@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Chart.Name}}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{.Chart.Name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Chart.Name}}
+  template:
+    metadata:
+      name: {{.Chart.Name}}
+      labels:
+        app: {{.Chart.Name}}
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/nacos/nacos-server:v2.4.3
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SPRING_DATASOURCE_PLATFORM
+              value: "mysql"
+            - name: MYSQL_SERVICE_HOST
+              value: "{{.Values.dbHost}}"
+            - name: MYSQL_SERVICE_PORT
+              value: "{{.Values.dbPost}}"
+            - name: MYSQL_SERVICE_DB_NAME
+              value: "{{.Values.dbName}}"
+            - name: MYSQL_SERVICE_USER
+              value: "{{.Values.dbUser}}"
+            - name: MYSQL_SERVICE_PASSWORD
+              value: "{{.Values.dbPassword}}"
+          ports:
+            - containerPort: 8848
+              hostPort: 8848
+              protocol: TCP
+              name: {{.Chart.Name}}-8848
+            - containerPort: 9848
+              protocol: TCP
+              hostPort: 9848
+              name: {{.Chart.Name}}-9848
+          resources:
+            requests:
+              memory: "1300Mi"
+              cpu: "2"
+            limits:
+              memory: "3048Mi"
+              cpu: "4"
+      restartPolicy: OnFailure
