@@ -43,7 +43,7 @@ spec:
             - name: JENKINS_ADMIN_PASSWORD
               value: "{{.Values.password}}"
           securityContext:
-            allowPrivilegeEscalation: false
+            allowPrivilegeEscalation: true
             privileged: true
             readOnlyRootFilesystem: false
             runAsNonRoot: false

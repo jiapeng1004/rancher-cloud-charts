@@ -2,7 +2,7 @@ annotations:
   catalog.cattle.io/release-name: &jenkins jenkins
 apiVersion: v2
 name: *jenkins
-version: 1.0.7
+version: 1.0.8
 description: A Helm chart for deploying the kafka application
 type: application
 keywords:
