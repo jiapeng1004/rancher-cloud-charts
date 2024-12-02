@@ -18,7 +18,7 @@ spec:
     spec:
       initContainers:
         - name: ping-nacos
-          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/registry.k8s.io/e2e-test-images/busybox:1.29-4
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/google-containers/busybox:latest
           command: ["/bin/sh"]
           args:
              - "-c"
