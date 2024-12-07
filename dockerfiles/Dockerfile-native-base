@@ -1,0 +1,8 @@
+FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/alpine:3.20.3
+
+COPY ffmpeg-release-amd64-static.tar.xz /usr/local/ffmpeg.tar.xz
+RUN mkdir -p /usr/local/ffmpeg && tar -Jxvf /usr/local/ffmpeg.tar.xz -C /usr/local/ffmpeg --strip-components 1 && RUN rm -rf /usr/local/ffmpeg.tar.xz
+
+ENV FFMPEG_HOME=/usr/local/ffmpeg
+ENV PATH=$FFMPEG_HOME:$PATH
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories     && apk update     && apk add gcompat

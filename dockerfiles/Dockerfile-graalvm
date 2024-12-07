@@ -1,0 +1,27 @@
+FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/ubuntu:24.04
+
+#换阿里源ubuntu24.04
+RUN echo "deb https://mirrors.aliyun.com/ubuntu/ noble main restricted universe multiverse" > /etc/apt/sources.list && \
+    echo "deb-src https://mirrors.aliyun.com/ubuntu/ noble main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb https://mirrors.aliyun.com/ubuntu/ noble-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb-src https://mirrors.aliyun.com/ubuntu/ noble-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb https://mirrors.aliyun.com/ubuntu/ noble-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb-src https://mirrors.aliyun.com/ubuntu/ noble-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb https://mirrors.aliyun.com/ubuntu/ noble-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb-src https://mirrors.aliyun.com/ubuntu/ noble-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
+    apt update
+
+#下载maven
+RUN apt install -y wget && wget https://mirrors.aliyun.com/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+
+COPY graalvm-jdk-23_linux-x64_bin.tar.gz graalvm.tar.gz
+RUN mkdir -p /opt/graalvm  \
+    && mkdir -p /opt/maven \
+    && tar -zxvf graalvm.tar.gz -C /opt/graalvm --strip-components=1 \
+    && apt install -y gcc zlib1g-dev \
+    && tar -zxvf apache-maven-3.9.6-bin.tar.gz -C /opt/maven --strip-components=1 \
+    && rm -rf graalvm.tar.gz
+ENV GRAALVM_HOME=/opt/graalvm
+ENV JAVA_HOME=$GRAALVM_HOME
+ENV MAVEN_HOME=/opt/maven
+ENV PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH
