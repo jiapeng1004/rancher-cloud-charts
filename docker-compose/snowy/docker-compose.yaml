@@ -1,0 +1,168 @@
+# yaml 配置实例
+version: '3.8'
+# 统一在cloud下
+networks:
+  cloud:
+    driver: bridge
+    name: cloud
+services:
+#  mysql:
+#    image: mysql:5.7.26
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - /var/lib/mysql:/var/lib/mysql
+#    networks:
+#      - cloud
+#    environment:
+#      MYSQL_ROOT_PASSWORD: "123456"
+#    restart: "always"
+#    container_name: mysql
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - cloud
+    container_name: redis
+  importSql:
+    image: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/alpine:3.20.3"
+    command: |
+      /bin/sh -c "
+      sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories &&
+      apk add --no-cache mysql-client &&
+      mkdir -p /opt &&
+      cd /opt &&
+      wget --no-check-certificate https://gitee.com/jiapengCode/snowy-cloud/raw/dev-jp/snowy-server/snowy-nacos-app/src/main/resources/META-INF/nacos-db.sql -O 1_nacos-db.sql &&
+      wget --no-check-certificate https://gitee.com/jiapengCode/snowy-cloud/raw/dev-jp/snowy-server/snowy-nacos-app/src/main/resources/META-INF/nacos-db-snowy-config-init.sql -O 2_nacos-db-snowy-config-init.sql &&
+      wget --no-check-certificate https://gitee.com/jiapengCode/snowy-cloud/raw/dev-jp/snowy-server/snowy-xxl-job-app/src/main/resources/db/tables_xxl_job.sql -O 3_xxl-job.sql &&
+      wget --no-check-certificate https://gitee.com/jiapengCode/snowy-cloud/raw/master/snowy-modules/snowy-web-app/src/main/resources/_sql/snowy_cloud_mysql.sql -O 4_snowy_cloud_mysql.sql &&
+      echo 'SET FOREIGN_KEY_CHECKS=0;' > /opt/snowy_cloud_mysql.sql &&
+      sed -i '1i-- -------------------------\n -- snowy-cloud 不存在则创建 \n-- ---------------------------\n create database IF NOT EXISTS `snowy-cloud` default character set utf8mb4 COLLATE utf8mb4_general_ci; \n use `snowy-cloud`;' 4_snowy_cloud_mysql.sql &&
+      echo 'mysql 连接中'
+      for sql_file in $$(ls /opt/*.sql); do
+        echo '执行sql文件：$$sql_file';
+        chmod 777 $$sql_file;
+        ls -lh $$sql_file;
+        if [[ $$sql_file =~ 'nacos' || $$sql_file =~ 'config' ]]; then
+          sed -i 's/jdbc:mysql:\/\/127.0.0.1:3306/jdbc:mysql:\/\/mysql:3306/g' $$sql_file;
+          sed -i 's/jdbc:mysql:\/\/localhost:3306/jdbc:mysql:\/\/mysql:3306/g' $$sql_file;
+          sed -i 's/jdbc:redis:\/\/127.0.0.1:6379/jdbc:redis:\/\/redis:6379/g' $$sql_file;
+          sed -i 's/jdbc:redis:\/\/localhost:6379/jdbc:redis:\/\/redis:6379/g' $$sql_file;
+          sed -i 's/localhost:9001/snowy-actuator-app:9001/g' $$sql_file;
+          sed -i 's/localhost:9002/snowy-sentinel-app:9002/g' $$sql_file;
+        fi;
+        mysql -hmysql.cloud -P3306 -uroot -p123456 --ssl=0  < $$sql_file;
+        echo '执行sql文件：$$sql_file 结束';
+      done
+      "
+    networks:
+      - cloud
+    restart: "no"
+    container_name: importSql
+  snowy-nacos-app:
+    image: registry.cn-hangzhou.aliyuncs.com/jp-java/snowy-nacos-app:1.0.1
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    environment:
+      DB_HOST: "mysql:3306"
+      DB_USER: "root"
+      DB_PASSWORD: "123456"
+    networks:
+      - cloud
+    depends_on:
+      - importSql
+    container_name: snowy-nacos-app
+    stdin_open: true
+    tty: true
+  snowy-gateway-app:
+    image: registry.cn-hangzhou.aliyuncs.com/jp-java/snowy-gateway-app:1.0.1
+    ports:
+      - "9003:9003"
+    environment:
+      NACOS_SERVER: "snowy-nacos-app:8848"
+    networks:
+      - cloud
+    depends_on:
+      - snowy-nacos-app
+    container_name: snowy-gateway-app
+    stdin_open: true
+    tty: true
+  snowy-sentinel-app:
+    image: registry.cn-hangzhou.aliyuncs.com/jp-java/snowy-sentinel-app:1.0.1
+    ports:
+      - "9002:9002"
+    environment:
+      NACOS_SERVER: "snowy-nacos-app:8848"
+    networks:
+      - cloud
+    depends_on:
+      - snowy-nacos-app
+    container_name: snowy-sentinel-app
+    stdin_open: true
+    tty: true
+  snowy-actuator-app:
+    image: registry.cn-hangzhou.aliyuncs.com/jp-java/snowy-actuator-app:1.0.1
+    ports:
+      - "9001:9001"
+    environment:
+      NACOS_SERVER: "snowy-nacos-app:8848"
+    networks:
+      - cloud
+    depends_on:
+      - snowy-nacos-app
+    container_name: snowy-actuator-app
+    stdin_open: true
+    tty: true
+  snowy-biz-app:
+    image: registry.cn-hangzhou.aliyuncs.com/jp-java/snowy-biz-app:1.0.1
+    ports:
+      - "9102:9102"
+    environment:
+      NACOS_SERVER: "snowy-nacos-app:8848"
+    networks:
+      - cloud
+    depends_on:
+      - snowy-nacos-app
+      - redis
+    container_name: snowy-biz-app
+    stdin_open: true
+    tty: true
+  snowy-web-app:
+    image: registry.cn-hangzhou.aliyuncs.com/jp-java/snowy-web-app:1.0.1
+    ports:
+      - "9101:9101"
+    environment:
+      NACOS_SERVER: "snowy-nacos-app:8848"
+    networks:
+      - cloud
+    depends_on:
+      - snowy-nacos-app
+      - redis
+    container_name: snowy-web-app
+    stdin_open: true
+    tty: true
+  snowy-xxl-jpb-app:
+    image: registry.cn-hangzhou.aliyuncs.com/jp-java/snowy-xxl-job-app:1.0.1
+    ports:
+      - "9004:9004"
+    environment:
+      NACOS_SERVER: "snowy-nacos-app:8848"
+    networks:
+      - cloud
+    depends_on:
+      - snowy-nacos-app
+    container_name: snowy-xxl-jpb-app
+    stdin_open: true
+    tty: true
+  snowy-front-web:
+    image: registry.cn-hangzhou.aliyuncs.com/jp-java/snowy-front-web:1.0.1
+    ports:
+      - "8080:8080"
+    networks:
+      - cloud
+    container_name: snowy-front-web
+    stdin_open: true
+    tty: true
