@@ -1,0 +1,113 @@
+version: '3.8'
+services:
+  pgsql:
+    image: postgres:9.6
+    restart: always  #每次总是启动
+    networks:
+      - cloud
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_DB: kong
+      POSTGRES_PASSWORD: kong
+    ports:
+      - "5432:5432"
+    container_name: pgsql
+    tty: true
+    stdin_open: true
+  #######################
+  # 执行数据库迁移
+  ######################
+  kong-init:
+    image: kong:2.5.1
+    command: "kong migrations bootstrap"
+    networks:
+      - cloud
+    restart: on-failure
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_DATABASE=kong
+      - KONG_PG_PASSWORD=kong
+      - KONG_PG_HOST=pgsql
+    depends_on:
+      - pgsql #依赖于kong-database服务
+    container_name: kong-init
+  #####################
+  # kong gateway
+  #####################
+  kong:
+    image: kong:2.5.1
+    restart: unless-stopped
+    networks:
+      - cloud
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: pgsql
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_PROXY_LISTEN_SSL: 0.0.0.0:8443
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+    depends_on:
+      - kong-init
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://kong:8001"]
+      interval: 5s
+      timeout: 2s
+      retries: 15
+    ports:
+      - "8001:8001"
+      - "80:8000"
+      - "8443:8443"
+      - "8444:8444"
+    stdin_open: true
+    tty: true
+    container_name: kong
+  #######################
+  #以下两个是konga  GUI
+  #######################
+  konga-init:
+    image: pantsel/konga:0.14.9
+    networks:
+      - cloud
+    restart: on-failure
+    environment:
+      - DB_ADAPTER=postgres
+      - DB_HOST=pgsql
+      - DB_PORT=5432
+      - DB_PASSWORD=kong
+      - DB_NAME=konga
+      - NODE_ENV=development
+      - DB_DATABASE=konga
+    depends_on:
+      - kong        #依赖kong服务
+      - pgsql #依赖kong-database服务
+    container_name: konga-init
+  konga:
+    image: pantsel/konga:0.14.9
+    networks:
+      - cloud
+    restart: on-failure
+    environment:
+      - DB_ADAPTER=postgres
+      - DB_HOST=pgsql
+      - DB_PORT=5432
+      - DB_USER=kong
+      - DB_PASSWORD=kong
+      - DB_DATABASE=konga
+    depends_on:
+      - kong        #依赖kong服务
+      - kong-init
+      - pgsql #依赖kong-database服务
+    ports:
+      - "1337:1337"
+    stdin_open: true
+    tty: true
+    container_name: konga
+networks:
+  cloud:
+    driver: bridge
+    name: cloud

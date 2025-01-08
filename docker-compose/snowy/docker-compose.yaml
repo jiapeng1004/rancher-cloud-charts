@@ -6,18 +6,18 @@ networks:
     driver: bridge
     name: cloud
 services:
-#  mysql:
-#    image: mysql:5.7.26
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - /var/lib/mysql:/var/lib/mysql
-#    networks:
-#      - cloud
-#    environment:
-#      MYSQL_ROOT_PASSWORD: "123456"
-#    restart: "always"
-#    container_name: mysql
+  mysql:
+    image: mysql:5.7.26
+    ports:
+      - "3306:3306"
+    volumes:
+      - /var/lib/mysql:/var/lib/mysql
+    networks:
+      - cloud
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+    restart: "always"
+    container_name: mysql
   redis:
     image: redis
     ports:
