@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   pgsql:
-    image: postgres:9.6
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgres:10-alpine
     restart: always  #每次总是启动
     networks:
       - cloud
@@ -18,7 +18,7 @@ services:
   # 执行数据库迁移
   ######################
   kong-init:
-    image: kong:2.5.1
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong:2.8.1
     command: "kong migrations bootstrap"
     networks:
       - cloud
@@ -35,7 +35,7 @@ services:
   # kong gateway
   #####################
   kong:
-    image: kong:2.5.1
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong:2.8.1
     restart: unless-stopped
     networks:
       - cloud
@@ -70,7 +70,7 @@ services:
   #以下两个是konga  GUI
   #######################
   konga-init:
-    image: pantsel/konga:0.14.9
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/pantsel/konga:latest
     networks:
       - cloud
     restart: on-failure
@@ -87,7 +87,7 @@ services:
       - pgsql #依赖kong-database服务
     container_name: konga-init
   konga:
-    image: pantsel/konga:0.14.9
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/pantsel/konga:latest
     networks:
       - cloud
     restart: on-failure
