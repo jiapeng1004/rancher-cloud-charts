@@ -45,12 +45,12 @@ services:
         chmod 777 $$sql_file;
         ls -lh $$sql_file;
         if [[ $$sql_file =~ 'nacos' || $$sql_file =~ 'config' ]]; then
-          sed -i 's/jdbc:mysql:\/\/127.0.0.1:3306/jdbc:mysql:\/\/mysql:3306/g' $$sql_file;
-          sed -i 's/jdbc:mysql:\/\/localhost:3306/jdbc:mysql:\/\/mysql:3306/g' $$sql_file;
-          sed -i 's/jdbc:redis:\/\/127.0.0.1:6379/jdbc:redis:\/\/redis:6379/g' $$sql_file;
-          sed -i 's/jdbc:redis:\/\/localhost:6379/jdbc:redis:\/\/redis:6379/g' $$sql_file;
-          sed -i 's/localhost:9001/snowy-actuator-app:9001/g' $$sql_file;
-          sed -i 's/localhost:9002/snowy-sentinel-app:9002/g' $$sql_file;
+          # sed -i 's/jdbc:mysql:\/\/127.0.0.1:3306/jdbc:mysql:\/\/mysql:3306/g' $$sql_file;
+          # sed -i 's/jdbc:mysql:\/\/localhost:3306/jdbc:mysql:\/\/mysql:3306/g' $$sql_file;
+          # sed -i 's/jdbc:redis:\/\/127.0.0.1:6379/jdbc:redis:\/\/redis:6379/g' $$sql_file;
+          # sed -i 's/jdbc:redis:\/\/localhost:6379/jdbc:redis:\/\/redis:6379/g' $$sql_file;
+          # sed -i 's/localhost:9001/snowy-actuator-app:9001/g' $$sql_file;
+          # sed -i 's/localhost:9002/snowy-sentinel-app:9002/g' $$sql_file;
         fi;
         mysql -hmysql.cloud -P3306 -uroot -p123456 --ssl=0  < $$sql_file;
         echo '执行sql文件：$$sql_file 结束';
