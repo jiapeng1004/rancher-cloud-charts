@@ -55,6 +55,14 @@ services:
         mysql -hmysql.cloud -P3306 -uroot -p123456 --ssl=0  < $$sql_file;
         echo '执行sql文件：$$sql_file 结束';
       done
+      # 建立kong路由
+      export PGPASSWORD=kong;
+      cat << EOF | psql -h pgsql -U kong -d kong
+      INSERT INTO "public"."services" ("id", "created_at", "updated_at", "name", "retries", "protocol", "host", "port", "path", "connect_timeout", "write_timeout", "read_timeout", "tags", "client_certificate_id", "tls_verify", "tls_verify_depth", "ca_certificates", "ws_id", "enabled") VALUES ('c5f3350e-5acb-490a-a2eb-1e3c91ebb6f4', '2025-01-12 08:17:35+00', '2025-01-12 08:41:28+00', 'gateway-service', 5, 'http', 'snowy-gateway-app', 9003, '/api/', 60000, 60000, 60000, '{}', NULL, NULL, NULL, NULL, '834eec81-a91b-40ee-9782-1acd37517dbe', 't');
+      INSERT INTO "public"."services" ("id", "created_at", "updated_at", "name", "retries", "protocol", "host", "port", "path", "connect_timeout", "write_timeout", "read_timeout", "tags", "client_certificate_id", "tls_verify", "tls_verify_depth", "ca_certificates", "ws_id", "enabled") VALUES ('43f5fe41-8290-4e87-934f-2b16a9a80e3b', '2025-01-12 05:26:44+00', '2025-01-12 09:05:33+00', 'web-front', 5, 'http', 'snowy-front-web', 8080, '/', 60000, 60000, 60000, '{}', NULL, NULL, NULL, NULL, '834eec81-a91b-40ee-9782-1acd37517dbe', 't');  
+      INSERT INTO "public"."routes" ("id", "created_at", "updated_at", "name", "service_id", "protocols", "methods", "hosts", "paths", "snis", "sources", "destinations", "regex_priority", "strip_path", "preserve_host", "tags", "https_redirect_status_code", "headers", "path_handling", "ws_id", "request_buffering", "response_buffering") VALUES ('baec2eb0-1769-4a63-a5a6-2ea8980420bd', '2025-01-12 08:18:21+00', '2025-01-12 08:32:49+00', 'gateway', 'c5f3350e-5acb-490a-a2eb-1e3c91ebb6f4', '{http,https}', NULL, NULL, '{/api}', NULL, NULL, NULL, 0, 'f', 'f', NULL, 426, NULL, 'v1', '834eec81-a91b-40ee-9782-1acd37517dbe', 't', 't');
+      INSERT INTO "public"."routes" ("id", "created_at", "updated_at", "name", "service_id", "protocols", "methods", "hosts", "paths", "snis", "sources", "destinations", "regex_priority", "strip_path", "preserve_host", "tags", "https_redirect_status_code", "headers", "path_handling", "ws_id", "request_buffering", "response_buffering") VALUES ('c5f28824-50fd-4960-92cf-c47356d6bc03', '2025-01-12 05:32:58+00', '2025-01-12 09:06:14+00', 'web', '43f5fe41-8290-4e87-934f-2b16a9a80e3b', '{http,https}', NULL, NULL, '{/}', NULL, NULL, NULL, 0, 'f', 'f', NULL, 426, NULL, 'v1', '834eec81-a91b-40ee-9782-1acd37517dbe', 't', 't');
+      EOF
       "
     networks:
       - cloud
