@@ -6,18 +6,18 @@ networks:
     driver: bridge
     name: cloud
 services:
-  mysql:
-    image: mysql:5.7.26
-    ports:
-      - "3306:3306"
-    volumes:
-      - /var/lib/mysql:/var/lib/mysql
-    networks:
-      - cloud
-    environment:
-      MYSQL_ROOT_PASSWORD: "123456"
-    restart: "always"
-    container_name: mysql
+#  mysql:
+#    image: mysql:5.7.26
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - /var/lib/mysql:/var/lib/mysql
+#    networks:
+#      - cloud
+#    environment:
+#      MYSQL_ROOT_PASSWORD: "123456"
+#    restart: "always"
+#    container_name: mysql
   redis:
     image: redis
     ports:
@@ -88,6 +88,15 @@ services:
     container_name: snowy-nacos-app
     stdin_open: true
     tty: true
+  # 检查nacos服务正常启动
+  nacos-init-check:
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/registry.k8s.io/e2e-test-images/busybox:1.29-4
+    command: |
+      /bin/sh -c "
+      until wget snowy-nacos-app:8848/nacos/; do echo 'wait nacos'; sleep 1; done
+      "
+    depends_on:
+      - snowy-nacos-app
   snowy-gateway-app:
     image: registry.cn-hangzhou.aliyuncs.com/jp-java/snowy-gateway-app:1.0.1
     ports:
@@ -97,7 +106,8 @@ services:
     networks:
       - cloud
     depends_on:
-      - snowy-nacos-app
+      nacos-init-check:
+        condition: service_completed_successfully
     container_name: snowy-gateway-app
     stdin_open: true
     tty: true
@@ -110,7 +120,8 @@ services:
     networks:
       - cloud
     depends_on:
-      - snowy-nacos-app
+      nacos-init-check:
+        condition: service_completed_successfully
     container_name: snowy-sentinel-app
     stdin_open: true
     tty: true
@@ -123,7 +134,8 @@ services:
     networks:
       - cloud
     depends_on:
-      - snowy-nacos-app
+      nacos-init-check:
+        condition: service_completed_successfully
     container_name: snowy-actuator-app
     stdin_open: true
     tty: true
@@ -136,8 +148,10 @@ services:
     networks:
       - cloud
     depends_on:
-      - snowy-nacos-app
-      - redis
+      nacos-init-check:
+        - condition: service_completed_successfully
+      redis:
+        - condition: service_started
     container_name: snowy-biz-app
     stdin_open: true
     tty: true
@@ -150,8 +164,10 @@ services:
     networks:
       - cloud
     depends_on:
-      - snowy-nacos-app
-      - redis
+      nacos-init-check:
+        - condition: service_completed_successfully
+      redis:
+        - condition: service_started
     container_name: snowy-web-app
     stdin_open: true
     tty: true
@@ -164,7 +180,8 @@ services:
     networks:
       - cloud
     depends_on:
-      - snowy-nacos-app
+      nacos-init-check:
+        condition: service_completed_successfully
     container_name: snowy-xxl-jpb-app
     stdin_open: true
     tty: true
