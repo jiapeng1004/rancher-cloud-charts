@@ -2,7 +2,7 @@ annotations:
   catalog.cattle.io/release-name: nginx-ingress-controller
 apiVersion: v2
 name: nginx-ingress
-version: 1.0.1
+version: 1.0.2
 description: A nginx ingress controller
 type: application
 keywords:
