@@ -1,0 +1,65 @@
+{{- /* Check if the "server" namespace already exists */}}
+{{- if not (lookup "v1" "Namespace" "" "server") }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: server  {{- /* 创建名为 "server" 的命名空间 */}}
+{{- end }}
+{{- /* Check if the mysql Service already exists in the "server" namespace */}}
+{{- if and (not (lookup "v1" "Service" "server" "mysql")) .Values.global.server.mysql.hostIp }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: server  {{- /* Hardcode the namespace to "server" */}}
+  labels:
+    app: mysql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: mysql
+  namespace: server  {{- /* Hardcode the namespace to "server" */}}
+  labels:
+    app: mysql
+subsets:
+  - addresses:
+      - ip: {{.Values.global.server.mysql.hostIp}}
+    ports:
+      - port: 3306
+{{- end }}
+{{- /* Check if the redis Service already exists in the "server" namespace */}}
+{{- if and (not (lookup "v1" "Service" "server" "redis")) .Values.global.server.redis.hostIp }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: server  {{- /* Hardcode the namespace to "server" */}}
+  labels:
+    app: redis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379  {{- /* Redis default port */}}
+      targetPort: 6379
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: redis
+  namespace: server  {{- /* Hardcode the namespace to "server" */}}
+  labels:
+    app: redis
+subsets:
+  - addresses:
+      - ip: {{.Values.global.server.redis.hostIp}}  {{- /* Redis external IP */}}
+    ports:
+      - port: 6379  {{- /* Redis default port */}}
+{{- end }}

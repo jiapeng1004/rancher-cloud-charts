@@ -2,7 +2,7 @@ annotations:
   catalog.cattle.io/release-name: &appName nacos
 apiVersion: v2
 name: *appName
-version: 1.0.3
+version: 1.0.4
 description: A Helm chart for deploying the mysql application
 type: application
 keywords:

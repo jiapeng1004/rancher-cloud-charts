@@ -4,13 +4,15 @@ global:
   server:
     mysql:
       host: "mysql.server"
+      hostIp:
       port: "3306"
       user: "root"
       password: "123456"
       dataPath:
     redis:
-      host:
-      port:
+      host: redis.server
+      hostIp:
+      port: "6379"
       password:
 baseRepo: "registry.cn-hangzhou.aliyuncs.com/jp-java/"
 image:
