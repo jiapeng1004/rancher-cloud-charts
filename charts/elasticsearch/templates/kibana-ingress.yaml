@@ -1,4 +1,4 @@
-{{if .Values.createIngress}}
+{{- if .Values.installKibana }}
 {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
 apiVersion: networking.k8s.io/v1
 {{- else }}
@@ -6,7 +6,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{.Chart.Name}}-ingress
+  name: kibana-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: $1$2
 spec:
@@ -17,11 +17,11 @@ spec:
     - host: {{.Release.Namespace}}.jiapeng.icu
       http:
         paths:
-          - path: /es($|/)(.*)
+          - path: /kibana($|/)(.*)
             pathType: Prefix
             backend:
               service:
-                name: {{.Chart.Name}}
+                name: kibana
                 port:
-                  number: 9200
-  {{end}}
+                  number: 5601
+{{- end }}

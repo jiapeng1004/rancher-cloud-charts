@@ -1,2 +1,2 @@
-host:
-createIngress:
+createIngress: true
+installKibana: true

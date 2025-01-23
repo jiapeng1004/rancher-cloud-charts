@@ -1,0 +1,15 @@
+{{- if .Values.installKibana }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: &name kibana
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: *name
+  ports:
+    - protocol: TCP
+      port: 5601
+      targetPort: 5601
+  type: NodePort
+{{- end }}
