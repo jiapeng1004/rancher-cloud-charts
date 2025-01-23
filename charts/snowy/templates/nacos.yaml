@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: snowy-nacos-app
-          image: {{.Values.baseRepo}}{{.Values.image.nacos.repository}}:{{.Values.image.nacos.tag}}
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/nacos/nacos-server:v2.4.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8848
