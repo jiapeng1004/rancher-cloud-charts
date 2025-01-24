@@ -40,6 +40,13 @@ spec:
               value: "{{.Values.global.server.mysql.user}}"
             - name: MYSQL_SERVICE_PASSWORD
               value: "{{.Values.global.server.mysql.password}}"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
       dnsPolicy: ClusterFirst
       terminationGracePeriodSeconds: 30
       restartPolicy: Always
