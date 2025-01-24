@@ -22,7 +22,7 @@ spec:
           command: ["/bin/sh"]
           args:
              - "-c"
-             - "until wget '{{.Values.image.nacos.repository}}:8848/nacos/'; do echo 'wait nacos'; sleep 1; done"
+             - "until wget '{{.Values.image.nacos.repository}}.{{.Release.Namespace}}:8848/nacos/'; do echo 'wait nacos'; sleep 1; done"
           imagePullPolicy: IfNotPresent
       containers:
         - name: snowy-xxl-job-app
@@ -33,7 +33,7 @@ spec:
               protocol: TCP
           env:
             - name: NACOS_SERVER
-              value: "{{.Values.image.nacos.repository}}:8848"
+              value: "{{.Values.image.nacos.repository}}.{{.Release.Namespace}}:8848"
       dnsPolicy: ClusterFirst
       terminationGracePeriodSeconds: 30
       restartPolicy: Always
