@@ -35,7 +35,7 @@ spec:
             - name: MYSQL_SERVICE_PORT
               value: "{{.Values.global.server.mysql.port}}"
             - name: MYSQL_SERVICE_DB_NAME
-              value: "nacos"
+              value: "snowy-nacos-app"
             - name: MYSQL_SERVICE_USER
               value: "{{.Values.global.server.mysql.user}}"
             - name: MYSQL_SERVICE_PASSWORD

@@ -38,7 +38,7 @@ spec:
               ###下载snowy-web-app的sql
               wget --no-check-certificate https://gitee.com/jiapengCode/snowy-cloud/raw/master/snowy-modules/snowy-web-app/src/main/resources/_sql/snowy_cloud_mysql.sql -O 4_snowy_cloud_mysql.sql
               ####在这个文件最上面加上几行
-              echo "SET FOREIGN_KEY_CHECKS=0\;" > /opt/snowy_cloud_mysql.sql
+              echo 'SET FOREIGN_KEY_CHECKS=0;' > /opt/snowy_cloud_mysql.sql
               sed -i "1i\-- -------------------------\n -- snowy-cloud 不存在则创建 \n-- ---------------------------\n create database IF NOT EXISTS \`snowy-cloud\` default character set utf8mb4 COLLATE utf8mb4_general_ci; \n use \`snowy-cloud\`;" 4_snowy_cloud_mysql.sql
               echo 'mysql 连接中'
               for sql_file in $(ls /opt/*.sql);do
