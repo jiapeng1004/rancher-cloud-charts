@@ -1,6 +1,6 @@
 global:
   init:
-    importSql: false
+    importSql: true
   server:
     mysql:
       host: "mysql.server"
