@@ -12,7 +12,7 @@ spec:
       targetPort: 8848
       name: {{.Chart.Name}}-8848
     - protocol: TCP
-      port: 30848
+      port: 30948
       targetPort: 9848
       name: {{.Chart.Name}}-9848
   type: NodePort
