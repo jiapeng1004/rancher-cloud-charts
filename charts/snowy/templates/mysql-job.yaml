@@ -45,12 +45,13 @@ spec:
                 echo "执行sql文件：$sql_file"
                 # 如果名字带有nacos和config则处理其中的mysql和redis连接信息
                 if [[ $sql_file =~ "nacos" || $sql_file =~ "config" ]];then
+                  # 已提前处理过，这里就不用再处理了
                   # 处理mysql
-                  sed -i "s/jdbc:mysql:\/\/127.0.0.1:3306/jdbc:mysql:\/\/{{.Values.global.server.mysql.host}}.server:{{.Values.global.server.mysql.port}}/g" $sql_file
-                  sed -i "s/jdbc:mysql:\/\/localhost:3306/jdbc:mysql:\/\/{{.Values.global.server.mysql.host}}.server:{{.Values.global.server.mysql.port}}/g" $sql_file
+                  # sed -i "s/jdbc:mysql:\/\/127.0.0.1:3306/jdbc:mysql:\/\/{{.Values.global.server.mysql.host}}.server:{{.Values.global.server.mysql.port}}/g" $sql_file
+                  # sed -i "s/jdbc:mysql:\/\/localhost:3306/jdbc:mysql:\/\/{{.Values.global.server.mysql.host}}.server:{{.Values.global.server.mysql.port}}/g" $sql_file
                   # 处理redis
-                  sed -i "s/jdbc:redis:\/\/127.0.0.1:6379/jdbc:redis:\/\/{{.Values.global.server.redis.host}}.server:{{.Values.global.server.redis.port}}/g" $sql_file
-                  sed -i "s/jdbc:redis:\/\/localhost:6379/jdbc:redis:\/\/{{.Values.global.server.redis.host}}.server:{{.Values.global.server.redis.port}}/g" $sql_file
+                  # sed -i "s/jdbc:redis:\/\/127.0.0.1:6379/jdbc:redis:\/\/{{.Values.global.server.redis.host}}.server:{{.Values.global.server.redis.port}}/g" $sql_file
+                  # sed -i "s/jdbc:redis:\/\/localhost:6379/jdbc:redis:\/\/{{.Values.global.server.redis.host}}.server:{{.Values.global.server.redis.port}}/g" $sql_file
                   # 处理 actuator
                   sed -i "s/localhost:9001/snowy-actuator-app.{{.Release.Namespace}}:9001/g" $sql_file
                   # 处理 sentinel

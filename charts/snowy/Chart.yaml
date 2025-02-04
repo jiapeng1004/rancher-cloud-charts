@@ -2,7 +2,7 @@ annotations:
   catalog.cattle.io/release-name: snowy
 apiVersion: v2
 name: snowy
-version: 1.0.40
+version: 1.0.41
 description: A Helm chart for deploying the Snowy application
 type: application
 keywords:

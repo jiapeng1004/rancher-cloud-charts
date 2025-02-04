@@ -10,7 +10,7 @@ global:
       password: "123456"
       dataPath:
     redis:
-      host: redis.server
+      host: "redis.server"
       hostIp:
       port: "6379"
       password:
