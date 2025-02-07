@@ -1,4 +1,5 @@
 mongodb:
+  # 注意这个路径是不是有权限
   dataPath: /bitnami/mongodb/data/db
   user: "root"
   password: "123456"
