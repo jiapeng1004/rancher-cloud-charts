@@ -1,0 +1,3 @@
+createIngress: true
+installKibana: true
+password: 123456
