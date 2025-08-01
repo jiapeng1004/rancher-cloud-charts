@@ -33,12 +33,14 @@ spec:
               value: zh-CN
             - name: SERVER_BASEPATH
               value: /kibana
+            - name: ELASTICSEARCH_SERVICEACCOUNTTOKEN
+              value: ELASTICSEARCH_SERVICEACCOUNTTOKEN
           resources:
             requests:
-              memory: "1300Mi"
-              cpu: "2"
+              memory: "512Mi"
+              cpu: "1"
             limits:
-              memory: "3048Mi"
-              cpu: "4"
+              memory: "1024Mi"
+              cpu: "2"
       restartPolicy: Always
 {{- end }}
