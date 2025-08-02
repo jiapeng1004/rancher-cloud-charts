@@ -1,0 +1,24 @@
+annotations:
+  catalog.cattle.io/release-name: server
+apiVersion: v2
+name: server
+version: 2.0.2
+description: A Helm chart for deploying the server application
+type: application
+keywords:
+  - server
+home: https://example.com/snowy
+sources:
+  - https://github.com/your-repo/snowy
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@163.com
+icon: https://img1.baidu.com/it/u=584071556,2247942332&fm=253&fmt=auto&app=120&f=JPEG?w=1423&h=800
+appVersion: "2.0.1"
+dependencies:
+  - name: redis
+    version: 1.0.1
+    repository: file://../redis
+  - name: mysql
+    version: 1.0.15
+    repository: file://../mysql

@@ -1,5 +1,5 @@
 categories:
-  - mysql
+  - redis
 questions:
   - variable: port
     default: "6379"
@@ -7,3 +7,4 @@ questions:
     required: true
     description: "端口"
     label: "端口"
+    group: "redis配置"
