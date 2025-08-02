@@ -8,12 +8,26 @@ questions:
     description: "端口"
     label: "端口"
     group: "redis配置"
+  - variable: redis.enabled
+    default: "false"
+    type: boolean
+    required: true
+    description: "是否安装redis"
+    label: "是否安装redis"
+    group: "redis配置"
   - variable: mysql.port
     default: "3306"
     type: int
     required: true
     description: "端口"
     label: "端口"
+    group: "mysql配置"
+  - variable: mysql.enabled
+    default: "false"
+    type: boolean
+    required: true
+    description: "端口"
+    label: "是否安装mysql"
     group: "mysql配置"
   - variable: mysql.dataPath
     type: string

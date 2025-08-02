@@ -2,7 +2,7 @@ annotations:
   catalog.cattle.io/release-name: server
 apiVersion: v2
 name: server
-version: 1.0.5
+version: 1.0.6
 description: A Helm chart for deploying the server application
 type: application
 keywords:
@@ -19,6 +19,8 @@ dependencies:
   - name: redis
     version: 1.0.1
     repository: file://../redis
+    condition: redis.enabled
   - name: mysql
     version: 1.0.15
     repository: file://../mysql
+    condition: mysql.enabled
