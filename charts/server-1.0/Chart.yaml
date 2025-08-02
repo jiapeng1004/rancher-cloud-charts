@@ -2,7 +2,7 @@ annotations:
   catalog.cattle.io/release-name: server
 apiVersion: v2
 name: server
-version: 1.0.4
+version: 1.0.5
 description: A Helm chart for deploying the server application
 type: application
 keywords:
