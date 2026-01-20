@@ -1,0 +1,19 @@
+annotations:
+  catalog.cattle.io/release-name: minio
+apiVersion: v2
+name: minio
+version: 2024.01.10
+appVersion: "2024-01-10"
+description: A Helm chart for MinIO Object Storage
+keywords:
+  - minio
+  - storage
+  - object-storage
+  - s3
+home: https://min.io/
+sources:
+  - https://github.com/minio/minio
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://min.io/resources/img/logo/MINIO_wordmark.png

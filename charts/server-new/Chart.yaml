@@ -1,0 +1,36 @@
+annotations:
+  catalog.cattle.io/release-name: server
+apiVersion: v2
+name: server
+version: 1.0.0
+appVersion: "1.0"
+description: A composite Helm chart for common server components (MySQL, Redis, MinIO)
+type: application
+keywords:
+  - server
+  - mysql
+  - redis
+  - minio
+  - composite
+home: https://example.com/
+sources:
+  - https://github.com/your-repo/rancher-cloud-charts
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://tse4-mm.cn.bing.net/th/id/OIP-C.urLHYMYPFxkcs6AC4Io9vwHaHa?w=199&h=199&c=7&r=0&o=5&dpr=2&pid=1.7
+
+# Dependencies - Reference other charts in the same repository
+dependencies:
+  - name: mysql
+    version: "5.7.0"
+    repository: "file://../mysql-new/5.7"
+    condition: mysql.enabled
+  - name: redis
+    version: "7.0.0"
+    repository: "file://../redis-new/7.0"
+    condition: redis.enabled
+  - name: minio
+    version: "2024.01.10"
+    repository: "file://../minio-new/2024-01"
+    condition: minio.enabled

@@ -1,0 +1,59 @@
+# Server Composite Chart Configuration
+
+# MySQL configuration
+mysql:
+  enabled: true
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/mysql
+    tag: 5.7.39
+  service:
+    type: ClusterIP
+    port: 3306
+  mysql:
+    rootPassword: "mysql-root-password"
+    database: "appdb"
+    username: "appuser"
+    password: "app-password"
+  persistence:
+    enabled: true
+    size: 10Gi
+
+# Redis configuration
+redis:
+  enabled: true
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/redis
+    tag: 7.0.11
+  service:
+    type: ClusterIP
+    port: 6379
+  redis:
+    password: "redis-password"
+  persistence:
+    enabled: true
+    size: 5Gi
+
+# MinIO configuration
+minio:
+  enabled: true
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio
+    tag: RELEASE.2024-01-10T00-54-08Z
+  service:
+    type: ClusterIP
+    port: 9000
+  consoleService:
+    type: ClusterIP
+    port: 9001
+  minio:
+    accessKey: "minioadmin"
+    secretKey: "minioadmin"
+    defaultBucket: "app-bucket"
+  persistence:
+    enabled: true
+    size: 20Gi
+
+# Kubernetes compatibility settings
+compatibility:
+  # Use ingress v1 or v1beta1 based on k8s version
+  ingressApiVersion: "networking.k8s.io/v1"

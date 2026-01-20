@@ -1,0 +1,54 @@
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/mysql
+  tag: 5.7.39
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 3306
+  # For NodePort or LoadBalancer, specify nodePort
+  # nodePort: 30306
+
+# MySQL configuration
+mysql:
+  rootPassword: "123456"
+  database: "mysql"
+  username: "mysql"
+  password: "mysql"
+  # Additional MySQL configuration options
+  extraConfig:
+    bind-address: "0.0.0.0"
+    max_connections: "1000"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  # storageClass: "standard"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  # hostPath: /var/lib/mysql
+
+# Resources configuration
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "1Gi"
+    cpu: "1"
+
+# Kubernetes compatibility settings
+compatibility:
+  # Use ingress v1 or v1beta1 based on k8s version
+  ingressApiVersion: "networking.k8s.io/v1"
+
+# Ingress configuration (optional)
+ingress:
+  enabled: false
+  className: "nginx"
+  hosts:
+    - host: mysql.example.com
+      paths:
+        - path: /
+          pathType: Prefix

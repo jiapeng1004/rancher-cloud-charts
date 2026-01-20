@@ -1,0 +1,17 @@
+annotations:
+  catalog.cattle.io/release-name: mysql
+apiVersion: v2
+name: mysql
+version: 8.0.0
+appVersion: "8.0"
+description: A Helm chart for MySQL Database
+keywords:
+  - mysql
+  - database
+home: https://www.mysql.com/
+sources:
+  - https://github.com/mysql/mysql-server
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://www.mysql.com/common/logos/logo-mysql-170x115.png
