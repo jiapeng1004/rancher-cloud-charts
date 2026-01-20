@@ -39,6 +39,31 @@ fe:
     size: 10Gi
     accessMode: ReadWriteOnce
     storageClass: ""
+  nodeSelector:
+    # Match nodes with disk type label (example)
+    # disktype: ssd
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: node-role.kubernetes.io/worker
+                operator: In
+                values:
+                  - ""
+  tolerations:
+    # Tolerate master node taint (uncomment if needed)
+    # - key: node-role.kubernetes.io/master
+    #   operator: Exists
+    #   effect: NoSchedule
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
 
 # BE settings
 be:
@@ -53,6 +78,33 @@ be:
   persistence:
     enabled: true
     size: 20Gi
+    accessMode: ReadWriteOnce
+    storageClass: ""
+  nodeSelector:
+    # Match nodes with disk type label (example)
+    # disktype: ssd
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: node-role.kubernetes.io/worker
+                operator: In
+                values:
+                  - ""
+  tolerations:
+    # Tolerate master node taint (uncomment if needed)
+    # - key: node-role.kubernetes.io/master
+    #   operator: Exists
+    #   effect: NoSchedule
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
 
 # Kubernetes compatibility settings
 compatibility:

@@ -1,0 +1,17 @@
+apiVersion: v2
+name: shopxo
+version: 0.1.0
+description: A Helm chart for ShopXO e-commerce system
+type: application
+keywords:
+  - shopxo
+  - e-commerce
+  - cms
+  - online-store
+home: https://shopxo.net/
+sources:
+  - https://github.com/gongfuxiang/shopxo
+maintainers:
+  - name: TraeAI
+    email: trae@example.com
+appVersion: "v2.6.0"

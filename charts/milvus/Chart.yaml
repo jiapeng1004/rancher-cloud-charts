@@ -1,0 +1,17 @@
+apiVersion: v2
+name: milvus
+version: 0.1.0
+description: A Helm chart for Milvus vector database
+type: application
+keywords:
+  - milvus
+  - vector-database
+  - embedding
+  - ai
+home: https://milvus.io/
+sources:
+  - https://github.com/milvus-io/milvus
+maintainers:
+  - name: TraeAI
+    email: trae@example.com
+appVersion: "v2.2.12"

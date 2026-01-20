@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: default
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MILVUS_MODE
+              value: {{ .Values.milvus.mode }}
+            - name: ETCD_ENDPOINTS
+              value: {{ .Values.milvus.etcdEndpoints }}
+            - name: MINIO_ADDRESS
+              value: {{ .Values.milvus.minioAddress }}
+            - name: MINIO_ACCESS_KEY
+              value: {{ .Values.milvus.minioAccessKey }}
+            - name: MINIO_SECRET_KEY
+              value: {{ .Values.milvus.minioSecretKey }}
+            - name: MINIO_BUCKET_NAME
+              value: {{ .Values.milvus.minioBucketName }}
+            - name: LOG_LEVEL
+              value: {{ .Values.milvus.logLevel }}
+          ports:
+            - name: grpc
+              containerPort: 19530
+              protocol: TCP
+            - name: web
+              containerPort: 9091
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: grpc
+          readinessProbe:
+            tcpSocket:
+              port: grpc
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: milvus-storage
+              mountPath: /var/lib/milvus
+      volumes:
+        - name: milvus-storage
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-{{ .Chart.Name }}

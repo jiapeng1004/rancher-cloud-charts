@@ -1,55 +1,49 @@
 image:
-  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio
-  tag: RELEASE.2024-01-10T00-54-08Z
+  repository: milvusdb/milvus
+  tag: v2.2.12
   pullPolicy: IfNotPresent
 
 # Service configuration
 service:
   type: ClusterIP
-  port: 9000
+  port: 19530
+  webPort: 9091
   # For NodePort or LoadBalancer, specify nodePort
-  # nodePort: 30900
-  
-# Console service configuration
-consoleService:
-  type: ClusterIP
-  port: 9001
-  # For NodePort or LoadBalancer, specify nodePort
-  # nodePort: 30901
+  # nodePort: 31953
 
-# MinIO configuration
-minio:
-  accessKey: "minioadmin"
-  secretKey: "minioadmin"
-  defaultBucket: "default"
-  # Additional MinIO configuration options
-  extraArgs:
-    - --console-address=:9001
-    # MinIO 2024 specific configuration
-    - --metadata-heatmap
-    - --metadata-heatmap-bucket=minio-metadata
+# Milvus configuration
+milvus:
+  mode: "standalone"
+  etcdEndpoints: "etcd:2379"
+  minioAddress: "minio:9000"
+  minioAccessKey: "minioadmin"
+  minioSecretKey: "minioadmin"
+  minioBucketName: "milvus"
+  logLevel: "info"
 
 # Persistence configuration
 persistence:
   enabled: true
   # storageClass: "standard"
   accessMode: ReadWriteOnce
-  size: 10Gi
-  # hostPath: /var/lib/minio
+  size: 50Gi
+  # hostPath: /var/lib/milvus
 
 # Resources configuration
 resources:
   requests:
-    memory: "1Gi"
-    cpu: "500m"
+    memory: "4Gi"
+    cpu: "2"
   limits:
-    memory: "2Gi"
-    cpu: "1"
+    memory: "8Gi"
+    cpu: "4"
 
 # Node selector configuration
 nodeSelector:
   # Match nodes with disk type label (example)
   # disktype: ssd
+  # Match nodes with enough memory
+  # node.kubernetes.io/memory: "4Gi"
 
 # Affinity configuration
 affinity:
@@ -68,8 +62,8 @@ affinity:
         podAffinityTerm:
           labelSelector:
             matchLabels:
-                app.kubernetes.io/name: minio
-                app.kubernetes.io/instance: minio
+              app.kubernetes.io/name: milvus
+              app.kubernetes.io/instance: milvus
           topologyKey: "kubernetes.io/hostname"
 
 # Tolerations configuration
@@ -92,25 +86,14 @@ securityContext:
 
 # Kubernetes compatibility settings
 compatibility:
-  # Use ingress v1 or v1beta1 based on k8s version
   ingressApiVersion: "networking.k8s.io/v1"
 
-# Ingress configuration for API
+# Ingress configuration
 ingress:
   enabled: false
   className: "nginx"
   hosts:
-    - host: minio.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-
-# Ingress configuration for Console
-consoleIngress:
-  enabled: false
-  className: "nginx"
-  hosts:
-    - host: minio-console.example.com
+    - host: milvus.example.com
       paths:
         - path: /
           pathType: Prefix
