@@ -32,5 +32,5 @@ dependencies:
     condition: redis.enabled
   - name: minio
     version: "2024.01.10"
-    repository: "file://../minio-new/2024-01"
+    repository: "file://../minio-new"
     condition: minio.enabled
