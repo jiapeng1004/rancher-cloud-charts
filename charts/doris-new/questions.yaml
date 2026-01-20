@@ -1,0 +1,132 @@
+categories:
+  - doris
+questions:
+  # Image settings
+  - variable: image.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/apache/doris"
+    required: true
+    description: "镜像仓库"
+    label: "镜像仓库"
+    group: "镜像配置"
+  - variable: image.tag
+    type: string
+    default: "1.2.8"
+    required: true
+    description: "镜像标签"
+    label: "镜像标签"
+    group: "镜像配置"
+  - variable: image.pullPolicy
+    type: enum
+    default: "IfNotPresent"
+    options:
+      - "IfNotPresent"
+      - "Always"
+      - "Never"
+    required: true
+    description: "镜像拉取策略"
+    label: "镜像拉取策略"
+    group: "镜像配置"
+
+  # FE settings
+  - variable: fe.replicas
+    type: int
+    default: 1
+    required: true
+    description: "FE节点数量"
+    label: "FE节点数量"
+    group: "FE配置"
+  - variable: fe.service.type
+    type: enum
+    default: "ClusterIP"
+    options:
+      - "ClusterIP"
+      - "NodePort"
+      - "LoadBalancer"
+    required: true
+    description: "FE服务类型"
+    label: "FE服务类型"
+    group: "FE配置"
+  - variable: fe.resources.requests.memory
+    type: string
+    default: "2Gi"
+    required: true
+    description: "FE内存请求"
+    label: "FE内存请求"
+    group: "FE配置"
+  - variable: fe.resources.requests.cpu
+    type: string
+    default: "1"
+    required: true
+    description: "FE CPU请求"
+    label: "FE CPU请求"
+    group: "FE配置"
+  - variable: fe.resources.limits.memory
+    type: string
+    default: "4Gi"
+    required: true
+    description: "FE内存限制"
+    label: "FE内存限制"
+    group: "FE配置"
+  - variable: fe.resources.limits.cpu
+    type: string
+    default: "2"
+    required: true
+    description: "FE CPU限制"
+    label: "FE CPU限制"
+    group: "FE配置"
+
+  # BE settings
+  - variable: be.replicas
+    type: int
+    default: 1
+    required: true
+    description: "BE节点数量"
+    label: "BE节点数量"
+    group: "BE配置"
+  - variable: be.service.type
+    type: enum
+    default: "ClusterIP"
+    options:
+      - "ClusterIP"
+      - "NodePort"
+      - "LoadBalancer"
+    required: true
+    description: "BE服务类型"
+    label: "BE服务类型"
+    group: "BE配置"
+  - variable: be.resources.requests.memory
+    type: string
+    default: "4Gi"
+    required: true
+    description: "BE内存请求"
+    label: "BE内存请求"
+    group: "BE配置"
+  - variable: be.resources.requests.cpu
+    type: string
+    default: "2"
+    required: true
+    description: "BE CPU请求"
+    label: "BE CPU请求"
+    group: "BE配置"
+  - variable: be.resources.limits.memory
+    type: string
+    default: "8Gi"
+    required: true
+    description: "BE内存限制"
+    label: "BE内存限制"
+    group: "BE配置"
+  - variable: be.resources.limits.cpu
+    type: string
+    default: "4"
+    required: true
+    description: "BE CPU限制"
+    label: "BE CPU限制"
+    group: "BE配置"
+  - variable: be.persistence.size
+    type: string
+    default: "20Gi"
+    required: true
+    description: "BE存储大小"
+    label: "BE存储大小"
+    group: "BE配置"

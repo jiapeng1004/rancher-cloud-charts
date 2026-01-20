@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "doris.fe.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - {{ .Values.fe.persistence.accessMode | default "ReadWriteOnce" }}
+  {{- if .Values.fe.persistence.storageClass }}
+  {{- if (eq "-" .Values.fe.persistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .Values.fe.persistence.storageClass }}
+  {{- end }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.fe.persistence.size | default "10Gi" }}
