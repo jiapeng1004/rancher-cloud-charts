@@ -1,0 +1,19 @@
+annotations:
+  catalog.cattle.io/release-name: doris
+apiVersion: v2
+name: doris
+version: 1.2.0
+appVersion: "1.2.8"
+description: A Helm chart for Apache Doris (incubating) analytics database
+keywords:
+  - doris
+  - database
+  - analytics
+  - olap
+home: https://doris.apache.org/
+sources:
+  - https://github.com/apache/doris
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@126.com
+icon: https://doris.apache.org/img/doris-logo.png

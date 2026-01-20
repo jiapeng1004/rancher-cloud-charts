@@ -1,0 +1,55 @@
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/redis
+  tag: 7.0.11
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 6379
+  # For NodePort or LoadBalancer, specify nodePort
+  # nodePort: 30379
+
+# Redis configuration
+redis:
+  password: "123456"
+  # Additional Redis configuration options
+  extraConfig:
+    maxmemory: "1gb"
+    maxmemory-policy: "allkeys-lru"
+    appendonly: "yes"
+    # Redis 7.0 specific configuration
+    replica-priority: "100"
+    replica-read-only: "yes"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  # storageClass: "standard"
+  accessMode: ReadWriteOnce
+  size: 5Gi
+  # hostPath: /var/lib/redis
+
+# Resources configuration
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+# Kubernetes compatibility settings
+compatibility:
+  # Use ingress v1 or v1beta1 based on k8s version
+  ingressApiVersion: "networking.k8s.io/v1"
+
+# Ingress configuration (optional)
+ingress:
+  enabled: false
+  className: "nginx"
+  hosts:
+    - host: redis.example.com
+      paths:
+        - path: /
+          pathType: Prefix

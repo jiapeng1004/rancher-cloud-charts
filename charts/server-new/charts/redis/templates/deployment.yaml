@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "redis.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "redis.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "redis.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "redis.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          env:
+            - name: REDIS_PASSWORD
+              value: {{ .Values.redis.password }}
+          command:
+            - redis-server
+          args:
+            - --requirepass
+            - "$(REDIS_PASSWORD)"
+            {{- range $key, $value := .Values.redis.extraConfig }}
+            - --{{ $key }}
+            - {{ $value }}
+            {{- end }}
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+      volumes:
+        - name: redis-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "redis.fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

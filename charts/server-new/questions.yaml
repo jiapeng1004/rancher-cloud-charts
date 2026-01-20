@@ -23,6 +23,13 @@ questions:
     description: "启用MinIO组件"
     label: "启用MinIO"
     group: "组件配置"
+  - variable: doris.enabled
+    type: boolean
+    default: true
+    required: true
+    description: "启用Doris组件"
+    label: "启用Doris"
+    group: "组件配置"
 
   # MySQL basic settings
   - variable: mysql.mysql.rootPassword
@@ -149,3 +156,85 @@ questions:
     label: "MinIO存储大小"
     group: "MinIO配置"
     show_if: minio.enabled=true
+
+  # Doris basic settings
+  - variable: doris.fe.replicas
+    type: int
+    default: 1
+    required: true
+    description: "Doris FE节点数量"
+    label: "FE节点数量"
+    group: "Doris配置"
+    show_if: doris.enabled=true
+  - variable: doris.fe.service.type
+    type: enum
+    default: "ClusterIP"
+    options:
+      - "ClusterIP"
+      - "NodePort"
+      - "LoadBalancer"
+    required: true
+    description: "Doris FE服务类型"
+    label: "FE服务类型"
+    group: "Doris配置"
+    show_if: doris.enabled=true
+  - variable: doris.fe.resources.requests.memory
+    type: string
+    default: "2Gi"
+    required: true
+    description: "Doris FE内存请求"
+    label: "FE内存请求"
+    group: "Doris配置"
+    show_if: doris.enabled=true
+  - variable: doris.fe.resources.requests.cpu
+    type: string
+    default: "1"
+    required: true
+    description: "Doris FE CPU请求"
+    label: "FE CPU请求"
+    group: "Doris配置"
+    show_if: doris.enabled=true
+  - variable: doris.be.replicas
+    type: int
+    default: 1
+    required: true
+    description: "Doris BE节点数量"
+    label: "BE节点数量"
+    group: "Doris配置"
+    show_if: doris.enabled=true
+  - variable: doris.be.service.type
+    type: enum
+    default: "ClusterIP"
+    options:
+      - "ClusterIP"
+      - "NodePort"
+      - "LoadBalancer"
+    required: true
+    description: "Doris BE服务类型"
+    label: "BE服务类型"
+    group: "Doris配置"
+    show_if: doris.enabled=true
+  - variable: doris.be.resources.requests.memory
+    type: string
+    default: "4Gi"
+    required: true
+    description: "Doris BE内存请求"
+    label: "BE内存请求"
+    group: "Doris配置"
+    show_if: doris.enabled=true
+  - variable: doris.be.resources.requests.cpu
+    type: string
+    default: "2"
+    required: true
+    description: "Doris BE CPU请求"
+    label: "BE CPU请求"
+    group: "Doris配置"
+    show_if: doris.enabled=true
+  - variable: doris.be.persistence.size
+    type: string
+    default: "20Gi"
+    required: true
+    description: "Doris BE存储大小"
+    label: "BE存储大小"
+    group: "Doris配置"
+    show_if: doris.enabled=true

@@ -1,0 +1,201 @@
+categories:
+  - minio
+questions:
+  # Image settings
+  - variable: image.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio"
+    required: true
+    description: "镜像仓库"
+    label: "镜像仓库"
+    group: "镜像配置"
+  - variable: image.tag
+    type: string
+    default: "RELEASE.2024-01-10T00-54-08Z"
+    required: true
+    description: "镜像标签"
+    label: "镜像标签"
+    group: "镜像配置"
+  - variable: image.pullPolicy
+    type: enum
+    default: "IfNotPresent"
+    options:
+      - "IfNotPresent"
+      - "Always"
+      - "Never"
+    required: true
+    description: "镜像拉取策略"
+    label: "镜像拉取策略"
+    group: "镜像配置"
+
+  # API Service settings
+  - variable: service.type
+    type: enum
+    default: "ClusterIP"
+    options:
+      - "ClusterIP"
+      - "NodePort"
+      - "LoadBalancer"
+    required: true
+    description: "API服务类型"
+    label: "API服务类型"
+    group: "API服务配置"
+  - variable: service.port
+    type: int
+    default: 9000
+    required: true
+    description: "API服务端口"
+    label: "API服务端口"
+    group: "API服务配置"
+
+  # Console Service settings
+  - variable: consoleService.type
+    type: enum
+    default: "ClusterIP"
+    options:
+      - "ClusterIP"
+      - "NodePort"
+      - "LoadBalancer"
+    required: true
+    description: "Console服务类型"
+    label: "Console服务类型"
+    group: "Console服务配置"
+  - variable: consoleService.port
+    type: int
+    default: 9001
+    required: true
+    description: "Console服务端口"
+    label: "Console服务端口"
+    group: "Console服务配置"
+
+  # MinIO settings
+  - variable: minio.accessKey
+    type: string
+    default: "minioadmin"
+    required: true
+    description: "MinIO访问密钥"
+    label: "MinIO访问密钥"
+    group: "MinIO配置"
+  - variable: minio.secretKey
+    type: password
+    default: "minioadmin"
+    required: true
+    description: "MinIO秘密密钥"
+    label: "MinIO秘密密钥"
+    group: "MinIO配置"
+  - variable: minio.defaultBucket
+    type: string
+    default: "default"
+    required: true
+    description: "默认存储桶名称"
+    label: "默认存储桶名称"
+    group: "MinIO配置"
+
+  # Persistence settings
+  - variable: persistence.enabled
+    type: boolean
+    default: true
+    required: true
+    description: "启用持久化存储"
+    label: "启用持久化存储"
+    group: "持久化配置"
+  - variable: persistence.accessMode
+    type: enum
+    default: "ReadWriteOnce"
+    options:
+      - "ReadWriteOnce"
+      - "ReadOnlyMany"
+      - "ReadWriteMany"
+    required: true
+    description: "存储访问模式"
+    label: "存储访问模式"
+    group: "持久化配置"
+    show_if: persistence.enabled=true
+  - variable: persistence.size
+    type: string
+    default: "10Gi"
+    required: true
+    description: "存储大小"
+    label: "存储大小"
+    group: "持久化配置"
+    show_if: persistence.enabled=true
+
+  # Resources settings
+  - variable: resources.requests.memory
+    type: string
+    default: "512Mi"
+    required: true
+    description: "内存请求"
+    label: "内存请求"
+    group: "资源配置"
+  - variable: resources.requests.cpu
+    type: string
+    default: "200m"
+    required: true
+    description: "CPU请求"
+    label: "CPU请求"
+    group: "资源配置"
+  - variable: resources.limits.memory
+    type: string
+    default: "2Gi"
+    required: true
+    description: "内存限制"
+    label: "内存限制"
+    group: "资源配置"
+  - variable: resources.limits.cpu
+    type: string
+    default: "1"
+    required: true
+    description: "CPU限制"
+    label: "CPU限制"
+    group: "资源配置"
+
+  # API Ingress settings
+  - variable: ingress.enabled
+    type: boolean
+    default: false
+    required: true
+    description: "启用API Ingress"
+    label: "启用API Ingress"
+    group: "API Ingress配置"
+  - variable: ingress.className
+    type: string
+    default: "nginx"
+    required: false
+    description: "API Ingress类名"
+    label: "API Ingress类名"
+    group: "API Ingress配置"
+    show_if: ingress.enabled=true
+  - variable: ingress.hosts[0].host
+    type: string
+    default: "minio.example.com"
+    required: false
+    description: "API Ingress主机名"
+    label: "API Ingress主机名"
+    group: "API Ingress配置"
+    show_if: ingress.enabled=true
+
+  # Console Ingress settings
+  - variable: consoleIngress.enabled
+    type: boolean
+    default: false
+    required: true
+    description: "启用Console Ingress"
+    label: "启用Console Ingress"
+    group: "Console Ingress配置"
+  - variable: consoleIngress.className
+    type: string
+    default: "nginx"
+    required: false
+    description: "Console Ingress类名"
+    label: "Console Ingress类名"
+    group: "Console Ingress配置"
+    show_if: consoleIngress.enabled=true
+  - variable: consoleIngress.hosts[0].host
+    type: string
+    default: "minio-console.example.com"
+    required: false
+    description: "Console Ingress主机名"
+    label: "Console Ingress主机名"
+    group: "Console Ingress配置"
+    show_if: consoleIngress.enabled=true

@@ -20,17 +20,21 @@ maintainers:
     email: jiapeng_aoa@126.com
 icon: https://tse4-mm.cn.bing.net/th/id/OIP-C.urLHYMYPFxkcs6AC4Io9vwHaHa?w=199&h=199&c=7&r=0&o=5&dpr=2&pid=1.7
 
-# Dependencies - Reference other charts in the same repository
+# Dependencies - Self-contained charts
 dependencies:
   - name: mysql
     version: "5.7.0"
-    repository: "file://../mysql-new"
+    repository: "file://charts/mysql"
     condition: mysql.enabled
   - name: redis
     version: "7.0.0"
-    repository: "file://../redis-new/7.0"
+    repository: "file://charts/redis"
     condition: redis.enabled
   - name: minio
     version: "2024.01.10"
-    repository: "file://../minio-new/2024-01"
+    repository: "file://charts/minio"
     condition: minio.enabled
+  - name: doris
+    version: "1.2.0"
+    repository: "file://charts/doris"
+    condition: doris.enabled

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "doris.fe.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "doris.fe.selectorLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.fe.replicas }}
+  selector:
+    matchLabels:
+      {{- include "doris.fe.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.fe.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "doris.fe.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.fe.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "doris.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.fe.podSecurityContext | nindent 8 }}
+      containers:
+        - name: fe
+          securityContext:
+            {{- toYaml .Values.fe.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
+            - /opt/apache-doris/fe/bin/start_fe.sh --daemon && tail -f /opt/apache-doris/fe/log/fe.log
+          ports:
+            - name: rpc
+              containerPort: 8030
+              protocol: TCP
+            - name: http
+              containerPort: 8031
+              protocol: TCP
+            - name: query
+              containerPort: 9030
+              protocol: TCP
+          env:
+            - name: FE_HOME
+              value: /opt/apache-doris/fe
+          volumeMounts:
+            - name: fe-data
+              mountPath: /opt/apache-doris/fe/doris-meta
+          resources:
+            {{- toYaml .Values.fe.resources | nindent 12 }}
+      volumes:
+        - name: fe-data
+          {{- if .Values.fe.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "doris.fe.fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

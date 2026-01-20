@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "doris.be.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "doris.be.selectorLabels" . | nindent 4 }}
+  {{- with .Values.be.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.be.service.type }}
+  ports:
+    - port: {{ .Values.be.service.port }}
+      targetPort: rpc
+      protocol: TCP
+      name: rpc
+    - port: {{ .Values.be.service.webServerPort }}
+      targetPort: web
+      protocol: TCP
+      name: web
+    - port: {{ .Values.be.service.heartbeatPort }}
+      targetPort: heartbeat
+      protocol: TCP
+      name: heartbeat
+  clusterIP: None
+  selector:
+    {{- include "doris.be.selectorLabels" . | nindent 4 }}
