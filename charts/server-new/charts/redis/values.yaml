@@ -39,6 +39,50 @@ resources:
     memory: "1Gi"
     cpu: "500m"
 
+# Node selector configuration
+nodeSelector:
+  # Match nodes with disk type label (example)
+  # disktype: ssd
+
+# Affinity configuration
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+            - key: node-role.kubernetes.io/worker
+              operator: In
+              values:
+                - ""
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+                app.kubernetes.io/name: redis
+                app.kubernetes.io/instance: redis
+          topologyKey: "kubernetes.io/hostname"
+
+# Tolerations configuration
+tolerations:
+  # Tolerate master node taint (uncomment if needed)
+  # - key: node-role.kubernetes.io/master
+  #   operator: Exists
+  #   effect: NoSchedule
+
+# Pod security context configuration
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+
+# Container security context configuration
+securityContext:
+  runAsUser: 999
+  runAsGroup: 999
+
 # Kubernetes compatibility settings
 compatibility:
   # Use ingress v1 or v1beta1 based on k8s version

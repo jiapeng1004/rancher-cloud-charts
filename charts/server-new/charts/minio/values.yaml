@@ -43,8 +43,52 @@ resources:
     memory: "1Gi"
     cpu: "500m"
   limits:
-    memory: "4Gi"
-    cpu: "2"
+    memory: "2Gi"
+    cpu: "1"
+
+# Node selector configuration
+nodeSelector:
+  # Match nodes with disk type label (example)
+  # disktype: ssd
+
+# Affinity configuration
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+            - key: node-role.kubernetes.io/worker
+              operator: In
+              values:
+                - ""
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+                app.kubernetes.io/name: minio
+                app.kubernetes.io/instance: minio
+          topologyKey: "kubernetes.io/hostname"
+
+# Tolerations configuration
+tolerations:
+  # Tolerate master node taint (uncomment if needed)
+  # - key: node-role.kubernetes.io/master
+  #   operator: Exists
+  #   effect: NoSchedule
+
+# Pod security context configuration
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Container security context configuration
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
 
 # Kubernetes compatibility settings
 compatibility:
