@@ -1,0 +1,151 @@
+categories:
+  - server
+questions:
+  # Component enable/disable
+  - variable: mysql.enabled
+    type: boolean
+    default: true
+    required: true
+    description: "启用MySQL组件"
+    label: "启用MySQL"
+    group: "组件配置"
+  - variable: redis.enabled
+    type: boolean
+    default: true
+    required: true
+    description: "启用Redis组件"
+    label: "启用Redis"
+    group: "组件配置"
+  - variable: minio.enabled
+    type: boolean
+    default: true
+    required: true
+    description: "启用MinIO组件"
+    label: "启用MinIO"
+    group: "组件配置"
+
+  # MySQL basic settings
+  - variable: mysql.mysql.rootPassword
+    type: password
+    default: "mysql-root-password"
+    required: true
+    description: "MySQL root密码"
+    label: "MySQL root密码"
+    group: "MySQL配置"
+    show_if: mysql.enabled=true
+  - variable: mysql.mysql.database
+    type: string
+    default: "appdb"
+    required: true
+    description: "MySQL默认数据库名称"
+    label: "MySQL默认数据库名称"
+    group: "MySQL配置"
+    show_if: mysql.enabled=true
+  - variable: mysql.mysql.username
+    type: string
+    default: "appuser"
+    required: true
+    description: "MySQL默认用户名"
+    label: "MySQL默认用户名"
+    group: "MySQL配置"
+    show_if: mysql.enabled=true
+  - variable: mysql.mysql.password
+    type: password
+    default: "app-password"
+    required: true
+    description: "MySQL默认用户密码"
+    label: "MySQL默认用户密码"
+    group: "MySQL配置"
+    show_if: mysql.enabled=true
+  - variable: mysql.service.port
+    type: int
+    default: 3306
+    required: true
+    description: "MySQL服务端口"
+    label: "MySQL服务端口"
+    group: "MySQL配置"
+    show_if: mysql.enabled=true
+  - variable: mysql.persistence.size
+    type: string
+    default: "10Gi"
+    required: true
+    description: "MySQL存储大小"
+    label: "MySQL存储大小"
+    group: "MySQL配置"
+    show_if: mysql.enabled=true
+
+  # Redis basic settings
+  - variable: redis.redis.password
+    type: password
+    default: "redis-password"
+    required: true
+    description: "Redis密码"
+    label: "Redis密码"
+    group: "Redis配置"
+    show_if: redis.enabled=true
+  - variable: redis.service.port
+    type: int
+    default: 6379
+    required: true
+    description: "Redis服务端口"
+    label: "Redis服务端口"
+    group: "Redis配置"
+    show_if: redis.enabled=true
+  - variable: redis.persistence.size
+    type: string
+    default: "5Gi"
+    required: true
+    description: "Redis存储大小"
+    label: "Redis存储大小"
+    group: "Redis配置"
+    show_if: redis.enabled=true
+
+  # MinIO basic settings
+  - variable: minio.minio.accessKey
+    type: string
+    default: "minioadmin"
+    required: true
+    description: "MinIO访问密钥"
+    label: "MinIO访问密钥"
+    group: "MinIO配置"
+    show_if: minio.enabled=true
+  - variable: minio.minio.secretKey
+    type: password
+    default: "minioadmin"
+    required: true
+    description: "MinIO秘密密钥"
+    label: "MinIO秘密密钥"
+    group: "MinIO配置"
+    show_if: minio.enabled=true
+  - variable: minio.minio.defaultBucket
+    type: string
+    default: "app-bucket"
+    required: true
+    description: "MinIO默认存储桶名称"
+    label: "MinIO默认存储桶名称"
+    group: "MinIO配置"
+    show_if: minio.enabled=true
+  - variable: minio.service.port
+    type: int
+    default: 9000
+    required: true
+    description: "MinIO API服务端口"
+    label: "MinIO API端口"
+    group: "MinIO配置"
+    show_if: minio.enabled=true
+  - variable: minio.consoleService.port
+    type: int
+    default: 9001
+    required: true
+    description: "MinIO Console服务端口"
+    label: "MinIO Console端口"
+    group: "MinIO配置"
+    show_if: minio.enabled=true
+  - variable: minio.persistence.size
+    type: string
+    default: "20Gi"
+    required: true
+    description: "MinIO存储大小"
+    label: "MinIO存储大小"
+    group: "MinIO配置"
+    show_if: minio.enabled=true

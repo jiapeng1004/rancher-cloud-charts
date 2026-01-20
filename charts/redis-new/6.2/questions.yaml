@@ -1,0 +1,142 @@
+categories:
+  - redis
+questions:
+  # Image settings
+  - variable: image.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/redis"
+    required: true
+    description: "镜像仓库"
+    label: "镜像仓库"
+    group: "镜像配置"
+  - variable: image.tag
+    type: string
+    default: "6.2.7"
+    required: true
+    description: "镜像标签"
+    label: "镜像标签"
+    group: "镜像配置"
+  - variable: image.pullPolicy
+    type: enum
+    default: "IfNotPresent"
+    options:
+      - "IfNotPresent"
+      - "Always"
+      - "Never"
+    required: true
+    description: "镜像拉取策略"
+    label: "镜像拉取策略"
+    group: "镜像配置"
+
+  # Service settings
+  - variable: service.type
+    type: enum
+    default: "ClusterIP"
+    options:
+      - "ClusterIP"
+      - "NodePort"
+      - "LoadBalancer"
+    required: true
+    description: "服务类型"
+    label: "服务类型"
+    group: "服务配置"
+  - variable: service.port
+    type: int
+    default: 6379
+    required: true
+    description: "服务端口"
+    label: "服务端口"
+    group: "服务配置"
+
+  # Redis settings
+  - variable: redis.password
+    type: password
+    default: "123456"
+    required: true
+    description: "Redis密码"
+    label: "Redis密码"
+    group: "Redis配置"
+
+  # Persistence settings
+  - variable: persistence.enabled
+    type: boolean
+    default: true
+    required: true
+    description: "启用持久化存储"
+    label: "启用持久化存储"
+    group: "持久化配置"
+  - variable: persistence.accessMode
+    type: enum
+    default: "ReadWriteOnce"
+    options:
+      - "ReadWriteOnce"
+      - "ReadOnlyMany"
+      - "ReadWriteMany"
+    required: true
+    description: "存储访问模式"
+    label: "存储访问模式"
+    group: "持久化配置"
+    show_if: persistence.enabled=true
+  - variable: persistence.size
+    type: string
+    default: "5Gi"
+    required: true
+    description: "存储大小"
+    label: "存储大小"
+    group: "持久化配置"
+    show_if: persistence.enabled=true
+
+  # Resources settings
+  - variable: resources.requests.memory
+    type: string
+    default: "256Mi"
+    required: true
+    description: "内存请求"
+    label: "内存请求"
+    group: "资源配置"
+  - variable: resources.requests.cpu
+    type: string
+    default: "100m"
+    required: true
+    description: "CPU请求"
+    label: "CPU请求"
+    group: "资源配置"
+  - variable: resources.limits.memory
+    type: string
+    default: "1Gi"
+    required: true
+    description: "内存限制"
+    label: "内存限制"
+    group: "资源配置"
+  - variable: resources.limits.cpu
+    type: string
+    default: "500m"
+    required: true
+    description: "CPU限制"
+    label: "CPU限制"
+    group: "资源配置"
+
+  # Ingress settings
+  - variable: ingress.enabled
+    type: boolean
+    default: false
+    required: true
+    description: "启用Ingress"
+    label: "启用Ingress"
+    group: "Ingress配置"
+  - variable: ingress.className
+    type: string
+    default: "nginx"
+    required: false
+    description: "Ingress类名"
+    label: "Ingress类名"
+    group: "Ingress配置"
+    show_if: ingress.enabled=true
+  - variable: ingress.hosts[0].host
+    type: string
+    default: "redis.example.com"
+    required: false
+    description: "Ingress主机名"
+    label: "Ingress主机名"
+    group: "Ingress配置"
+    show_if: ingress.enabled=true
