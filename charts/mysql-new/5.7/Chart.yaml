@@ -1,7 +1,7 @@
 annotations:
   catalog.cattle.io/release-name: mysql
 apiVersion: v2
-name: mysql
+name: mysql-new
 version: 5.7.0
 appVersion: "5.7"
 description: A Helm chart for MySQL Database
