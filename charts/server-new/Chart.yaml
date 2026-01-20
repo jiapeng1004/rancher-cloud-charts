@@ -24,7 +24,7 @@ icon: https://tse4-mm.cn.bing.net/th/id/OIP-C.urLHYMYPFxkcs6AC4Io9vwHaHa?w=199&h
 dependencies:
   - name: mysql
     version: "5.7.0"
-    repository: "file://../mysql"
+    repository: "file://../mysql-new"
     condition: mysql.enabled
   - name: redis
     version: "7.0.0"
