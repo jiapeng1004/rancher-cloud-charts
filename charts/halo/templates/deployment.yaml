@@ -56,6 +56,14 @@ spec:
               value: "{{ .Values.application.contextPath }}"
             - name: JVM_OPTS
               value: "{{ .Values.application.jvmOpts }}"
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: {{ if eq .Values.database.type "h2" }}org.h2.Driver{{ else if eq .Values.database.type "mysql" }}com.mysql.cj.jdbc.Driver{{ else if eq .Values.database.type "postgresql" }}org.postgresql.Driver{{ end }}
+            - name: SPRING_DATASOURCE_URL
+              value: {{ if eq .Values.database.type "h2" }}jdbc:h2:file:/root/.halo2/db/halo{{ else if .Values.database.url }}{{ .Values.database.url }}{{ else if eq .Values.database.type "mysql" }}jdbc:mysql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai{{ else if eq .Values.database.type "postgresql" }}jdbc:postgresql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}?sslmode=disable{{ end }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ if not (eq .Values.database.type "h2") }}{{ .Values.database.user }}{{ end }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ if not (eq .Values.database.type "h2") }}{{ .Values.database.password }}{{ end }}
           ports:
             - name: http
               containerPort: 8090

@@ -18,6 +18,17 @@ application:
   # JVM options
   jvmOpts: "-Xmx512m -Xms256m"
 
+# Database configuration
+database:
+  type: h2
+  # For MySQL or PostgreSQL
+  # host: mysql
+  # port: 3306
+  # user: halo
+  # password: halo
+  # name: halo
+  # url: jdbc:mysql://mysql:3306/halo?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+
 # Persistence configuration
 persistence:
   enabled: true

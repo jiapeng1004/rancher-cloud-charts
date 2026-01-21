@@ -1,0 +1,211 @@
+categories:
+  - CMS
+  - Blog
+  - Java
+  - Content Management
+questions:
+  - variable: image.repository
+    label: 镜像仓库
+    description: Halo CMS 的 Docker 镜像仓库
+    type: string
+    default: halohub/halo
+    required: true
+    group: 镜像配置
+
+  - variable: image.tag
+    label: 镜像版本
+    description: Halo CMS 的 Docker 镜像版本
+    type: string
+    default: 2.21.0
+    required: true
+    group: 镜像配置
+
+  - variable: image.pullPolicy
+    label: 镜像拉取策略
+    description: Halo CMS 的 Docker 镜像拉取策略
+    type: enum
+    options:
+      - Always
+      - IfNotPresent
+      - Never
+    default: IfNotPresent
+    required: true
+    group: 镜像配置
+
+  - variable: service.type
+    label: 服务类型
+    description: Halo CMS 的 Kubernetes 服务类型
+    type: enum
+    options:
+      - ClusterIP
+      - NodePort
+      - LoadBalancer
+    default: ClusterIP
+    required: true
+    group: 服务配置
+
+  - variable: service.port
+    label: 服务端口
+    description: Halo CMS 的服务端口
+    type: int
+    default: 8090
+    required: true
+    group: 服务配置
+
+  - variable: service.nodePort
+    label: 节点端口
+    description: 当服务类型为 NodePort 时的节点端口
+    type: int
+    default: 30090
+    required: false
+    group: 服务配置
+    show_subquestion_if: NodePort
+    subquestions:
+      - variable: service.nodePort
+        label: 节点端口
+        description: 当服务类型为 NodePort 时的节点端口
+        type: int
+        default: 30090
+        required: true
+
+  - variable: application.jvmOpts
+    label: JVM 选项
+    description: Halo CMS 的 JVM 运行参数
+    type: string
+    default: "-Xmx512m -Xms256m"
+    required: true
+    group: 应用配置
+
+  - variable: database.type
+    label: 数据库类型
+    description: Halo CMS 使用的数据库类型
+    type: enum
+    options:
+      - h2
+      - mysql
+      - postgresql
+    default: h2
+    required: true
+    group: 数据库配置
+
+  - variable: database.host
+    label: 数据库主机
+    description: 数据库服务器主机地址
+    type: string
+    default: mysql
+    required: false
+    group: 数据库配置
+    show_if: database.type not in ["h2"]
+
+  - variable: database.port
+    label: 数据库端口
+    description: 数据库服务器端口
+    type: int
+    default: 3306
+    required: false
+    group: 数据库配置
+    show_if: database.type not in ["h2"]
+
+  - variable: database.user
+    label: 数据库用户名
+    description: 数据库访问用户名
+    type: string
+    default: halo
+    required: false
+    group: 数据库配置
+    show_if: database.type not in ["h2"]
+
+  - variable: database.password
+    label: 数据库密码
+    description: 数据库访问密码
+    type: password
+    default: halo
+    required: false
+    group: 数据库配置
+    show_if: database.type not in ["h2"]
+
+  - variable: database.name
+    label: 数据库名称
+    description: 数据库名称
+    type: string
+    default: halo
+    required: false
+    group: 数据库配置
+    show_if: database.type not in ["h2"]
+
+  - variable: database.url
+    label: 数据库连接 URL
+    description: 完整的数据库连接 URL，优先级高于单独的配置项
+    type: string
+    default: ""
+    required: false
+    group: 数据库配置
+    show_if: database.type not in ["h2"]
+
+  - variable: persistence.enabled
+    label: 启用持久化
+    description: 是否为 Halo CMS 启用持久化存储
+    type: boolean
+    default: true
+    required: true
+    group: 存储配置
+
+  - variable: persistence.size
+    label: 存储大小
+    description: Halo CMS 的持久化存储大小
+    type: string
+    default: 5Gi
+    required: true
+    group: 存储配置
+
+  - variable: persistence.accessMode
+    label: 访问模式
+    description: Halo CMS 的持久化存储访问模式
+    type: enum
+    options:
+      - ReadWriteOnce
+      - ReadOnlyMany
+      - ReadWriteMany
+    default: ReadWriteOnce
+    required: true
+    group: 存储配置
+
+  - variable: persistence.storageClass
+    label: 存储类
+    description: Halo CMS 的持久化存储类
+    type: storageclass
+    default: ""
+    required: false
+    group: 存储配置
+
+  - variable: resources.requests.memory
+    label: 请求内存
+    description: Halo CMS 的请求内存大小
+    type: string
+    default: 512Mi
+    required: true
+    group: 资源配置
+
+  - variable: resources.requests.cpu
+    label: 请求 CPU
+    description: Halo CMS 的请求 CPU 大小
+    type: string
+    default: 250m
+    required: true
+    group: 资源配置
+
+  - variable: resources.limits.memory
+    label: 限制内存
+    description: Halo CMS 的限制内存大小
+    type: string
+    default: 1Gi
+    required: true
+    group: 资源配置
+
+  - variable: resources.limits.cpu
+    label: 限制 CPU
+    description: Halo CMS 的限制 CPU 大小
+    type: string
+    default: 500m
+    required: true
+    group: 资源配置
