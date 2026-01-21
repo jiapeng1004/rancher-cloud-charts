@@ -1,0 +1,97 @@
+# Image configuration
+image:
+  repository: mall4j/mall4j
+  tag: 1.0.0
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  # For NodePort or LoadBalancer, specify nodePort
+  # nodePort: 30880
+
+# Database configuration
+database:
+  type: mysql
+  host: mysql
+  port: 3306
+  database: mall4j
+  username: root
+  password: root
+
+# Redis configuration
+redis:
+  host: redis
+  port: 6379
+  password: ""
+  database: 0
+
+# Persistence configuration
+persistence:
+  enabled: false
+  # storageClass: "standard"
+  accessMode: ReadWriteOnce
+  size: 50Gi
+  # hostPath: /var/lib/mall4j
+
+# Resources configuration
+resources:
+  requests:
+    memory: "2Gi"
+    cpu: "1"
+  limits:
+    memory: "4Gi"
+    cpu: "2"
+
+# Node selector configuration
+nodeSelector:
+  # Match nodes with disk type label (example)
+  # disktype: ssd
+
+# Affinity configuration
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/os
+              operator: In
+              values:
+                - linux
+
+# Tolerations configuration
+tolerations:
+  - key: node.kubernetes.io/not-ready
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 300
+  - key: node.kubernetes.io/unreachable
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 300
+
+# Pod security context
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Security context
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Pod annotations
+podAnnotations:
+  # Example annotation
+  # prometheus.io/scrape: "true"
+
+# Service annotations
+serviceAnnotations:
+  # Example annotation
+  # prometheus.io/scrape: "true"

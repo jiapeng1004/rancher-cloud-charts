@@ -1,0 +1,100 @@
+# Image configuration
+image:
+  repository: gitea/gitea
+  tag: 1.21.0
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  httpPort: 3000
+  sshPort: 22
+  # For NodePort or LoadBalancer, specify nodePort
+  # httpNodePort: 30000
+  # sshNodePort: 30022
+
+# Application configuration
+application:
+  name: Gitea
+  domain: gitea.local
+  rootUrl: http://gitea.local:3000
+  sshDomain: gitea.local
+
+# Database configuration
+database:
+  type: sqlite3
+  # For MySQL or PostgreSQL
+  # host: mysql
+  # port: 3306
+  # user: gitea
+  # password: gitea
+  # name: gitea
+
+# Persistence configuration
+persistence:
+  enabled: true
+  # storageClass: "standard"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  # hostPath: /var/lib/gitea
+
+# Resources configuration
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+# Node selector configuration
+nodeSelector:
+  # Match nodes with disk type label (example)
+  # disktype: ssd
+
+# Affinity configuration
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/os
+              operator: In
+              values:
+                - linux
+
+# Tolerations configuration
+tolerations:
+  - key: node.kubernetes.io/not-ready
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 300
+  - key: node.kubernetes.io/unreachable
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 300
+
+# Pod security context
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Security context
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Pod annotations
+podAnnotations:
+  # Example annotation
+  # prometheus.io/scrape: "true"
+
+# Service annotations
+serviceAnnotations:
+  # Example annotation
+  # prometheus.io/scrape: "true"

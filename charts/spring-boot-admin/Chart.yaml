@@ -1,0 +1,16 @@
+apiVersion: v2
+name: spring-boot-admin
+version: 1.0.0
+description: Spring Boot Admin 是一个用于监控Spring Boot应用的管理界面
+keywords:
+  - spring-boot-admin
+  - java
+  - spring-boot
+  - monitoring
+home: https://codecentric.github.io/spring-boot-admin/
+sources:
+  - https://github.com/codecentric/spring-boot-admin
+maintainers:
+  - name: codecentric
+    email: info@codecentric.de
+appVersion: "2.7.10"

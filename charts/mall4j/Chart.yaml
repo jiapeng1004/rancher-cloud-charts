@@ -1,0 +1,18 @@
+apiVersion: v2
+name: mall4j
+version: 1.0.0
+description: Mall4j 是一款基于Spring Boot的开源电商系统
+keywords:
+  - mall4j
+  - e-commerce
+  - java
+  - spring-boot
+  - shopping
+  - store
+home: https://mall4j.com
+sources:
+  - https://github.com/mall4j/mall4j
+maintainers:
+  - name: mall4j
+    email: admin@mall4j.com
+appVersion: "1.0.0"

@@ -1,0 +1,86 @@
+# Image configuration
+image:
+  repository: codecentric/spring-boot-admin-server
+  tag: 2.7.10
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  # For NodePort or LoadBalancer, specify nodePort
+  # nodePort: 30880
+
+# Application configuration
+application:
+  name: Spring Boot Admin
+  contextPath: /
+
+# Persistence configuration
+persistence:
+  enabled: false
+  # storageClass: "standard"
+  accessMode: ReadWriteOnce
+  size: 1Gi
+  # hostPath: /var/lib/spring-boot-admin
+
+# Resources configuration
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+# Node selector configuration
+nodeSelector:
+  # Match nodes with disk type label (example)
+  # disktype: ssd
+
+# Affinity configuration
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/os
+              operator: In
+              values:
+                - linux
+
+# Tolerations configuration
+tolerations:
+  - key: node.kubernetes.io/not-ready
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 300
+  - key: node.kubernetes.io/unreachable
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 300
+
+# Pod security context
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Security context
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Pod annotations
+podAnnotations:
+  # Example annotation
+  # prometheus.io/scrape: "true"
+
+# Service annotations
+serviceAnnotations:
+  # Example annotation
+  # prometheus.io/scrape: "true"

@@ -1,0 +1,15 @@
+apiVersion: v2
+name: gitea
+version: 1.0.0
+description: Gitea 是一个轻量级Git服务器，使用Go语言开发
+keywords:
+  - gitea
+  - git
+  - go
+  - version-control
+  - code-hosting
+home: https://gitea.io
+maintainers:
+  - name: gitea
+    email: maintainers@gitea.io
+appVersion: "1.21.0"

@@ -1,0 +1,15 @@
+apiVersion: v2
+name: halo
+version: 1.0.0
+description: Halo 是一个开源的内容管理系统，使用Java开发
+keywords:
+  - halo
+  - cms
+  - java
+  - content-management
+  - blog
+home: https://halo.run
+maintainers:
+  - name: halo
+    email: support@halo.run
+appVersion: "2.21.0"
