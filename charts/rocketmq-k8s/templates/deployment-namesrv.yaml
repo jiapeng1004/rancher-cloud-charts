@@ -1,0 +1,34 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- if .Values.namesrv.enabled }}
+{{- $svc := printf "%s-namesrv" $fullname }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $svc }}
+  labels:
+    {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}
+    component: namesrv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $svc }}
+  template:
+    metadata:
+      labels:
+        app: {{ $svc }}
+        {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 8 }}
+        component: namesrv
+    spec:
+      containers:
+        - name: namesrv
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - "sh"
+            - "mqnamesrv"
+          ports:
+            - name: namesrv
+              containerPort: 9876
+{{- end }}

@@ -1,0 +1,11 @@
+{{- if .Values.stubConfigMap.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-harbor-readme
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  README: |
+    Harbor 请使用 goharbor 官方 Helm： https://helm.goharbor.io
+{{- end }}

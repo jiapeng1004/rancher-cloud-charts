@@ -1,0 +1,7 @@
+apiVersion: v2
+name: onlyoffice-docs
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/vscode/vscode-original.svg
+description: ONLYOFFICE Docs 占位（文书协同编辑）；JWT/存储请参阅官方文档
+maintainers:
+  - name: rancher-cloud-charts

@@ -1,0 +1,28 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/gvenzl/oracle-free
+  tag: "23.5-slim-faststart"
+  pullPolicy: IfNotPresent
+
+oracle:
+  # 必填：SYS / SYSTEM / PDB_ADMIN 等均使用该口令（请参考官方镜像文档）
+  password: "oracle-change-me"
+
+service:
+  type: ClusterIP
+  port: 1521
+
+persistence:
+  enabled: false
+  size: 20Gi
+
+resources:
+  requests:
+    memory: "2Gi"
+    cpu: "500m"
+  limits:
+    memory: "4Gi"
+
+ingress:
+  enabled: false

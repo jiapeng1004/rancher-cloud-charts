@@ -2,3 +2,14 @@ dataPath: "/var/lib/rabbitmq"
 user: "root"
 password: "123456"
 
+ingress:
+  enabled: false
+  className: nginx
+  # Service 端口 15672 → 控制台
+  servicePort: 15672
+  annotations: {}
+  hosts:
+    - host: rabbitmq.example.com
+      paths:
+        - path: /
+          pathType: Prefix

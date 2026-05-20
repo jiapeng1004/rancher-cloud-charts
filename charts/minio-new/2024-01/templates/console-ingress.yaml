@@ -1,5 +1,7 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- if .Values.consoleIngress.enabled -}}
-{{- $fullName := include "minio.fullname" . -}}
 {{- $svcPort := .Values.consoleService.port -}}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
@@ -13,7 +15,7 @@ metadata:
   name: {{ $fullName }}-console
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "minio.labels" . | nindent 4 }}
+    {{- $baseLbl := dict "helm.sh/chart" $chartLabel "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/managed-by" .Release.Service }}{{- if .Chart.AppVersion }}{{ mustMergeOverwrite $baseLbl (dict "app.kubernetes.io/version" .Chart.AppVersion) | toYaml | nindent 4 }}{{- else }}{{ $baseLbl | toYaml | nindent 4 }}{{- end }}
   {{- with .Values.consoleIngress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

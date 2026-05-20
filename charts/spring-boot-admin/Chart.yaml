@@ -1,6 +1,7 @@
 apiVersion: v2
 name: spring-boot-admin
 version: 1.0.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/spring/spring-original.svg
 description: Spring Boot Admin 是一个用于监控Spring Boot应用的管理界面
 keywords:
   - spring-boot-admin

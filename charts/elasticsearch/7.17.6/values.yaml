@@ -1,2 +1,6 @@
-createIngress: true
+createIngress: false
 installKibana: true
+
+elasticsearchIngress:
+  host: ""
+  className: nginx

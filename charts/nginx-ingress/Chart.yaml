@@ -3,6 +3,7 @@ annotations:
 apiVersion: v2
 name: nginx-ingress
 version: 1.0.2
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/nginx/nginx-original.svg
 description: A nginx ingress controller
 type: application
 keywords:
@@ -13,5 +14,4 @@ sources:
 maintainers:
   - name: 贾鹏
     email: jiapeng_aoa@126.com
-icon: https://picx.zhimg.com/v2-7aac9ef2a6fe63d71971adfa7ff7695b_720w.jpg?source=172ae18b
 appVersion: "1.0.1"

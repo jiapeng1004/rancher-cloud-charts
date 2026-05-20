@@ -1,0 +1,42 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/traefik
+  tag: v3.2.3
+  pullPolicy: IfNotPresent
+
+args:
+  - "--configFile=/etc/traefik/traefik.yaml"
+
+service:
+  type: ClusterIP
+  webPort: 8000
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: traefik.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources: {}
+
+staticConfig: |
+  global:
+    checkNewVersion: false
+  api:
+    dashboard: true
+    insecure: true
+  entryPoints:
+    web:
+      address: ":8000"
+  providers:
+    file:
+      filename: /etc/traefik/dynamic.yaml
+      watch: true
+
+dynamicConfig: |
+  http: {}

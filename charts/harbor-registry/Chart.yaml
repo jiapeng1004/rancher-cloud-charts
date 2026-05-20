@@ -1,0 +1,11 @@
+apiVersion: v2
+name: harbor-registry
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/harbor/harbor-original.svg
+description: |
+  Harbor 说明型占位 — 请使用 goharbor 官方 Helm（本 chart 可仅装 NOTES）
+type: application
+keywords:
+  - harbor
+maintainers:
+  - name: rancher-cloud-charts

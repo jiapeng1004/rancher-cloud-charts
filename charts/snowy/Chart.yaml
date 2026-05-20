@@ -3,6 +3,7 @@ annotations:
 apiVersion: v2
 name: snowy
 version: 1.0.42
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/spring/spring-original.svg
 description: A Helm chart for deploying the Snowy application
 type: application
 keywords:
@@ -14,5 +15,4 @@ sources:
 maintainers:
   - name: 贾鹏
     email: jiapeng_aoa@126.com
-icon: https://gitee.com/xiaonuobase/snowy/raw/master/snowy-admin-web/public/img/logo.png
 appVersion: "1.0.1"

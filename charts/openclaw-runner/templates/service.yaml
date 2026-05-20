@@ -1,0 +1,15 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullname }}
+spec:
+  ports:
+    - port: {{ int .Values.service.port }}
+      targetPort: http
+      name: http
+  selector:
+    {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}
+{{- end }}

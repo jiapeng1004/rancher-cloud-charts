@@ -1,0 +1,15 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- if .Values.jobs.default.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-default-script
+  labels:
+    {{- $baseLbl := dict "helm.sh/chart" $chartLabel "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/managed-by" .Release.Service }}{{- if .Chart.AppVersion }}{{ mustMergeOverwrite $baseLbl (dict "app.kubernetes.io/version" .Chart.AppVersion) | toYaml | nindent 4 }}{{- else }}{{ $baseLbl | toYaml | nindent 4 }}{{- end }}
+    app.kubernetes.io/component: loadtest-script
+data:
+  smoke.js: |
+{{- .Values.jobs.default.scriptBody | nindent 4 }}
+{{- end }}

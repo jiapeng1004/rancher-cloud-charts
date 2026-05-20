@@ -1,0 +1,46 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $masterHostname := printf "%s-master" $fullname | trunc 63 | trimSuffix "-" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-worker" $fullname }}
+  labels:
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ int .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "worker" | toYaml | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "worker" | toYaml | nindent 8 }}
+    spec:
+      containers:
+        - name: locust-worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "-f"
+            - "/mnt/locust/locustfile.py"
+            - "--worker"
+            - "--master-host"
+            - {{ printf "%s.%s.svc.cluster.local" $masterHostname .Release.Namespace | quote }}
+          env:
+            - name: LOCUST_OPTS
+              value: {{ printf "--host=%s" .Values.target.host | quote }}
+          volumeMounts:
+            - name: locust-root
+              mountPath: /mnt/locust
+              readOnly: true
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+      volumes:
+        - name: locust-root
+          configMap:
+            name: {{ $fullname }}-code
+            items:
+              - key: locustfile.py
+                path: locustfile.py

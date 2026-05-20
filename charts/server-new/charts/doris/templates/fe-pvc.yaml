@@ -1,8 +1,13 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- $feFullname := printf "%s-fe" $fullname | trunc 63 | trimSuffix "-" }}
+{{- $beFullname := printf "%s-be" $fullname | trunc 63 | trimSuffix "-" }}
 {{- if and .Values.enabled .Values.fe.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "doris.fe.fullname" . }}
+  name: {{ $feFullname }}
   namespace: {{ .Release.Namespace }}
 spec:
   accessModes:

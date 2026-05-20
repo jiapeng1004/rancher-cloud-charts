@@ -3,6 +3,7 @@ annotations:
 apiVersion: v2
 name: mysql
 version: 8.0.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/mysql/mysql-original.svg
 appVersion: "8.0"
 description: A Helm chart for MySQL Database
 keywords:
@@ -14,4 +15,3 @@ sources:
 maintainers:
   - name: 贾鹏
     email: jiapeng_aoa@126.com
-icon: https://www.mysql.com/common/logos/logo-mysql-170x115.png

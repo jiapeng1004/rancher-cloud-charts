@@ -3,6 +3,7 @@ annotations:
 apiVersion: v2
 name: doris
 version: 1.2.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/apache/apache-original.svg
 appVersion: "1.2.8"
 description: A Helm chart for Apache Doris (incubating) analytics database
 keywords:
@@ -16,4 +17,3 @@ sources:
 maintainers:
   - name: 贾鹏
     email: jiapeng_aoa@126.com
-icon: https://doris.apache.org/img/doris-logo.png

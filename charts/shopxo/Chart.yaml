@@ -1,6 +1,7 @@
 apiVersion: v2
 name: shopxo
 version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/woocommerce/woocommerce-original.svg
 description: A Helm chart for ShopXO e-commerce system
 type: application
 keywords:

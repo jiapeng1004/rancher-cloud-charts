@@ -1,0 +1,51 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $masterHostname := printf "%s-master" $fullname | trunc 63 | trimSuffix "-" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $masterHostname }}
+  labels:
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}
+    app.kubernetes.io/component: master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "master" | toYaml | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "master" | toYaml | nindent 8 }}
+    spec:
+      containers:
+        - name: locust-master
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "-f"
+            - "/mnt/locust/locustfile.py"
+            - "--master"
+          env:
+            - name: LOCUST_OPTS
+              value: {{ printf "--host=%s --web-host=0.0.0.0" .Values.target.host | quote }}
+          ports:
+            - name: comm
+              containerPort: 5557
+              protocol: TCP
+            - name: web
+              containerPort: 8089
+              protocol: TCP
+          volumeMounts:
+            - name: locust-root
+              mountPath: /mnt/locust
+              readOnly: true
+          resources:
+            {{- toYaml .Values.master.resources | nindent 12 }}
+      volumes:
+        - name: locust-root
+          configMap:
+            name: {{ $fullname }}-code
+            items:
+              - key: locustfile.py
+                path: locustfile.py

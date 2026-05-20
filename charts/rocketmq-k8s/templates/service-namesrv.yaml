@@ -1,0 +1,18 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- if .Values.namesrv.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-namesrv" $fullname }}
+  labels:
+    {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}
+    component: namesrv
+spec:
+  ports:
+    - port: 9876
+      targetPort: namesrv
+      name: namesrv
+  selector:
+    app: {{ printf "%s-namesrv" $fullname }}
+{{- end }}

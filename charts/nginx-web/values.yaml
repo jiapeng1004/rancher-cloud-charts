@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/nginx
+  tag: "1.25-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: nginx.example.com
+      paths:
+        - path: /
+          pathType: Prefix

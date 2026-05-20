@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/openresty/openresty
+  tag: "1.25.3.2-5-jammy"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: openresty.example.com
+      paths:
+        - path: /
+          pathType: Prefix

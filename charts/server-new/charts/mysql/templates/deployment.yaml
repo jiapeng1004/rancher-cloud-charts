@@ -1,15 +1,18 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "mysql.fullname" . }}
+  name: {{ $fullname }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "mysql.labels" . | nindent 4 }}
+    {{- $baseLbl := dict "helm.sh/chart" $chartLabel "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/managed-by" .Release.Service }}{{- if .Chart.AppVersion }}{{ mustMergeOverwrite $baseLbl (dict "app.kubernetes.io/version" .Chart.AppVersion) | toYaml | nindent 4 }}{{- else }}{{ $baseLbl | toYaml | nindent 4 }}{{- end }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "mysql.selectorLabels" . | nindent 6 }}
+      {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -17,7 +20,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "mysql.selectorLabels" . | nindent 8 }}
+        {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -68,10 +71,10 @@ spec:
         - name: mysql-data
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: {{ include "mysql.fullname" . }}
+            claimName: {{ $fullname }}
           {{- else }}
           emptyDir: {}
           {{- end }}
         - name: mysql-config
           configMap:
-            name: {{ include "mysql.fullname" . }}-config
+            name: {{ $fullname }}-config

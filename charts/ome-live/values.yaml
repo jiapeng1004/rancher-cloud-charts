@@ -1,0 +1,36 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/airensoft/ovenmediaengine
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# 详见官方文档：https://airensoft.gitbook.io/ovenmediaengine/ — RTP/自适应码率往往需要 hostNetwork / 固定 QoS
+hostNetwork: false
+
+args: []
+
+extraEnv:
+  []
+
+service:
+  type: ClusterIP
+  ports:
+    ovt: 9000
+    rtmpProv: 1935
+    srtProv: 9999
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  backendPort: ovt
+  hosts:
+    - host: ome.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    memory: 2Gi

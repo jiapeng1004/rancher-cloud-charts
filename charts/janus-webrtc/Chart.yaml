@@ -1,0 +1,10 @@
+apiVersion: v2
+name: janus-webrtc
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/firefox/firefox-original.svg
+description: Meetecho Janus Gateway 占位 Helm（SFU/MCU）；RTP/STUN/TURN 需单独规划
+keywords:
+  - janus
+  - webrtc
+maintainers:
+  - name: rancher-cloud-charts

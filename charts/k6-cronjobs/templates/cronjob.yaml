@@ -1,0 +1,54 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- if .Values.jobs.default.enabled }}
+{{- $j := .Values.jobs.default }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $fullname }}-default
+  labels:
+    {{- $baseLbl := dict "helm.sh/chart" $chartLabel "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/managed-by" .Release.Service }}{{- if .Chart.AppVersion }}{{ mustMergeOverwrite $baseLbl (dict "app.kubernetes.io/version" .Chart.AppVersion) | toYaml | nindent 4 }}{{- else }}{{ $baseLbl | toYaml | nindent 4 }}{{- end }}
+    app.kubernetes.io/component: loadtest
+spec:
+  schedule: {{ $j.schedule | quote }}
+  concurrencyPolicy: {{ $j.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ int $j.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ int $j.failedJobsHistoryLimit }}
+  suspend: {{ $j.suspend }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- $baseLbl := dict "helm.sh/chart" $chartLabel "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/managed-by" .Release.Service }}{{- if .Chart.AppVersion }}{{ mustMergeOverwrite $baseLbl (dict "app.kubernetes.io/version" .Chart.AppVersion) | toYaml | nindent 12 }}{{- else }}{{ $baseLbl | toYaml | nindent 12 }}{{- end }}
+            app.kubernetes.io/component: loadtest
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: k6
+              image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+              imagePullPolicy: {{ $.Values.image.pullPolicy }}
+              args:
+                - "run"
+                - "/scripts/smoke.js"
+                {{- range $j.extraArgs }}
+                - {{ . | quote }}
+                {{- end }}
+              env:
+                - name: TARGET_URL
+                  value: {{ $j.targetURL | quote }}
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+              resources:
+                {{- toYaml $.Values.resources | nindent 16 }}
+          volumes:
+            - name: scripts
+              configMap:
+                name: {{ $fullname }}-default-script
+                items:
+                  - key: smoke.js
+                    path: smoke.js
+{{- end }}

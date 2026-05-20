@@ -1,17 +1,22 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- $feFullname := printf "%s-fe" $fullname | trunc 63 | trimSuffix "-" }}
+{{- $beFullname := printf "%s-be" $fullname | trunc 63 | trimSuffix "-" }}
 {{- if .Values.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "doris.be.fullname" . }}
+  name: {{ $beFullname }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "doris.be.selectorLabels" . | nindent 4 }}
+    {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "component" "be" | toYaml | nindent 4 }}
 spec:
-  serviceName: {{ include "doris.be.fullname" . }}
+  serviceName: {{ $beFullname }}
   replicas: {{ .Values.be.replicas }}
   selector:
     matchLabels:
-      {{- include "doris.be.selectorLabels" . | nindent 6 }}
+      {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "component" "be" | toYaml | nindent 6 }}
   template:
     metadata:
       {{- with .Values.be.podAnnotations }}
@@ -19,7 +24,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "doris.be.selectorLabels" . | nindent 8 }}
+        {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "component" "be" | toYaml | nindent 8 }}
     spec:
       {{- with .Values.be.imagePullSecrets }}
       imagePullSecrets:
@@ -64,7 +69,7 @@ spec:
             - name: BE_HOME
               value: /opt/apache-doris/be
             - name: FE_HOST
-              value: {{ include "doris.fe.fullname" . }}
+              value: {{ $feFullname }}
           volumeMounts:
             - name: be-data
               mountPath: /opt/apache-doris/be/storage

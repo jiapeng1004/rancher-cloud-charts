@@ -1,0 +1,30 @@
+replicaCount: 1
+
+# 任选社区打包镜像并在华为云同步； AGPL 合规请自行复核
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/instrumentisto/janus-gateway
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+hostNetwork: false
+
+service:
+  type: ClusterIP
+  ports:
+    adminHttp: 7088
+    ws: 8188
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  backendPort: ws
+  hosts:
+    - host: janus.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources: {}

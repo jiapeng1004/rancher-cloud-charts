@@ -3,6 +3,7 @@ annotations:
 apiVersion: v2
 name: redis
 version: 7.0.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/redis/redis-original.svg
 appVersion: "7.0"
 description: A Helm chart for Redis in-memory data store
 keywords:
@@ -15,4 +16,3 @@ sources:
 maintainers:
   - name: 贾鹏
     email: jiapeng_aoa@126.com
-icon: https://redis.io/images/redis-white.png

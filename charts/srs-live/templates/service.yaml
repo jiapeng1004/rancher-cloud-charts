@@ -1,0 +1,34 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullname }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.ports.rtmp }}
+      targetPort: rtmp
+      name: rtmp
+      protocol: TCP
+    - port: {{ .Values.service.ports.httpApi }}
+      targetPort: http-api
+      name: http-api
+      protocol: TCP
+    - port: {{ .Values.service.ports.httpServer }}
+      targetPort: http-srv
+      name: http-srv
+      protocol: TCP
+    {{- if .Values.srsConfig.rtcEnabled }}
+    - port: {{ .Values.service.ports.rtcSignal }}
+      targetPort: rtc-signal
+      name: rtc-signal
+      protocol: UDP
+    {{- end }}
+  selector:
+    {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}

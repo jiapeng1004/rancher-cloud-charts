@@ -1,0 +1,13 @@
+apiVersion: v2
+name: srs-live
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/firefox/firefox-original.svg
+description: |
+  OSSRS SRS（推拉流 / HLS / HTTP-FLV），镜像默认可走华为云 SWR 前缀；WebRTC/RTP 需按节点出口 IP/NAT 调 candidate 或 hostNetwork。
+keywords:
+  - srs
+  - rtmp
+  - live
+  - streaming
+maintainers:
+  - name: rancher-cloud-charts

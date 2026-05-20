@@ -1,0 +1,28 @@
+enabled: true
+
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/ghcr.io/openclaw/openclaw
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: []
+args: []
+
+service:
+  port: 80
+  containerPort: 8080
+
+extraEnv: []
+resources: {}
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: openclaw.example.com
+      paths:
+        - path: /
+          pathType: Prefix

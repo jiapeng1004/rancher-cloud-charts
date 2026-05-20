@@ -1,0 +1,7 @@
+apiVersion: v2
+name: ruoyi-vue
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/vuejs/vuejs-original.svg
+description: RuoYi 若依占位 Helm（镜像需自行选择与同步至华为云 SWR）
+maintainers:
+  - name: rancher-cloud-charts

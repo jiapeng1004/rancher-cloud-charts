@@ -1,0 +1,10 @@
+apiVersion: v2
+name: k6-cronjobs
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/k6/k6-original.svg
+description: k6（Grafana OSS）按计划 CronJob 跑 RPS/场景压测，脚本挂载自 ConfigMap
+keywords:
+  - k6
+  - load-testing
+maintainers:
+  - name: rancher-cloud-charts

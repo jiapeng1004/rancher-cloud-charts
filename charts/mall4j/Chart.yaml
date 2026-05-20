@@ -1,6 +1,7 @@
 apiVersion: v2
 name: mall4j
 version: 1.0.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/woocommerce/woocommerce-original.svg
 description: Mall4j 是一款基于Spring Boot的开源电商系统
 keywords:
   - mall4j

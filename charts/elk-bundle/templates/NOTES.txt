@@ -1,0 +1,8 @@
+========================================
+ elk-bundle — 请先 helm dependency update
+========================================
+
+Elasticsearch +（可选）Kibana：见子 chart elasticsearch
+Logstash ingest：TCP 5044 → elasticsearch:9200
+
+详见 README.md。

@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kubemq/kubemq
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  ports:
+    rest: 9090
+    grpc: 50000
+
+extraEnv: []
+resources: {}
+
+ingress:
+  enabled: false
+  className: nginx
+  backendPort: rest
+  annotations: {}
+  hosts:
+    - host: kubemq.example.com
+      paths:
+        - path: /
+          pathType: Prefix

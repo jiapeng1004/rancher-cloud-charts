@@ -1,0 +1,22 @@
+## 华为云 SWR 镜像加速示例（前缀以控制台「镜像下载指令」为准）
+global: {}
+
+mysql:
+  enabled: true
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/mysql
+
+redis:
+  enabled: true
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/redis
+
+postgresql:
+  enabled: true
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/postgres
+
+minio:
+  enabled: false
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio

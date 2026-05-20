@@ -1,0 +1,33 @@
+replicaCount: 1
+
+# 占位：请将 repository 替换为自建 Pingora 镜像（或通过华为 SWR「第三方库」同步 ghcr/ecr）。
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/nginx
+  tag: "1.25-alpine"
+  pullPolicy: IfNotPresent
+
+# Pingora Worker 通常为自定义入口，按需填写；留空使用镜像默认 ENTRYPOINT/CMD。
+command: []
+args: []
+
+service:
+  type: ClusterIP
+  port: 80
+  containerPort: 80
+
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: pingora.example.com
+      paths:
+        - path: /
+          pathType: Prefix

@@ -1,0 +1,82 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- if .Values.broker.enabled }}
+{{- $ns := $.Release.Namespace }}
+{{- $nms := printf "%s-namesrv" $fullname }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-broker" $fullname }}
+  labels:
+    {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}
+    component: broker
+spec:
+  ports:
+    - port: 10909
+      targetPort: vip
+      name: vip
+    - port: 10911
+      targetPort: main
+      name: main
+    - port: 10912
+      targetPort: ha
+      name: ha
+  selector:
+    app: {{ printf "%s-broker" $fullname }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-broker" $fullname }}
+  labels:
+    {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}
+    component: broker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ printf "%s-broker" $fullname }}
+  template:
+    metadata:
+      labels:
+        app: {{ printf "%s-broker" $fullname }}
+        {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 8 }}
+        component: broker
+    spec:
+      containers:
+        - name: broker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - "sh"
+            - "mqbroker"
+            - "-n"
+            - {{ printf "%s.%s.svc.cluster.local:9876" $nms $ns | quote }}
+          env:
+            - name: JAVA_OPT_EXT
+              value: {{ .Values.broker.javaOptsMemory | quote }}
+          ports:
+            - name: vip
+              containerPort: 10909
+            - name: main
+              containerPort: 10911
+            - name: ha
+              containerPort: 10912
+          volumeMounts:
+            - name: data
+              mountPath: /home/rocketmq/store
+          {{- if .Values.resources.broker }}
+          resources:
+            {{- toYaml .Values.resources.broker | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.broker.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ printf "%s-broker" $fullname }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}

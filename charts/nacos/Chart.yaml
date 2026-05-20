@@ -3,6 +3,7 @@ annotations:
 apiVersion: v2
 name: *appName
 version: 1.0.7
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/java/java-original.svg
 description: A Helm chart for deploying the mysql application
 type: application
 keywords:
@@ -13,5 +14,4 @@ sources:
 maintainers:
   - name: 贾鹏
     email: jiapeng_aoa@126.com
-icon: https://i-blog.csdnimg.cn/blog_migrate/a27d8aaf0e0721a6feb67e3dd49a18e0.jpeg#pic_center
 appVersion: "1.0.1"

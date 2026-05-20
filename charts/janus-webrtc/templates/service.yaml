@@ -1,0 +1,18 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullname }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: admin-http
+      port: {{ .Values.service.ports.adminHttp }}
+      targetPort: admin-http
+    - name: ws
+      port: {{ .Values.service.ports.ws }}
+      targetPort: ws
+  selector:
+    {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}

@@ -3,6 +3,7 @@ annotations:
 apiVersion: v2
 name: *appName
 version: 1.0.6
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/mongodb/mongodb-original.svg
 description: A Helm chart for deploying the kafka application
 type: application
 keywords:
@@ -13,5 +14,4 @@ sources:
 maintainers:
   - name: 贾鹏
     email: jiapeng_aoa@126.com
-icon: https://img2.baidu.com/it/u=452507761,625109803&fm=253&fmt=auto&app=138&f=JPEG?w=614&h=472
 appVersion: "1.0.1"

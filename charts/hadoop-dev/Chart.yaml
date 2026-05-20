@@ -1,0 +1,7 @@
+apiVersion: v2
+name: hadoop-dev
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/hadoop/hadoop-original.svg
+description: Hadoop 栈说明占位（HDFS/YARN/HA 请用 Stackable/ZetaScale 官方或云上 EMR）；本 chart 不部署集群
+maintainers:
+  - name: rancher-cloud-charts

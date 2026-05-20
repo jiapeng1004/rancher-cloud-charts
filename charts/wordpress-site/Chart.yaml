@@ -1,0 +1,9 @@
+apiVersion: v2
+name: wordpress-site
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/wordpress/wordpress-original.svg
+description: WordPress（Apache+PHP 官方镜像）占位；需外部 MySQL/MariaDB
+keywords:
+  - wordpress
+maintainers:
+  - name: rancher-cloud-charts

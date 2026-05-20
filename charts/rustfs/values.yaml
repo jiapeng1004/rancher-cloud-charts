@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/rustfs/rustfs
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# 传给容器的自定义参数（视镜像 entrypoint 而定）
+extraArgs: []
+
+service:
+  type: ClusterIP
+  apiPort: 9000
+
+persistence:
+  enabled: false
+  size: 50Gi
+
+resources: {}
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: rustfs.example.com
+      paths:
+        - path: /
+          pathType: Prefix

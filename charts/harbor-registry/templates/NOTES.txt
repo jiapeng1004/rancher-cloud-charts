@@ -1,0 +1,10 @@
+{{- $ns := .Release.Namespace }}
+====================================
+ Harbor 占位 Chart（未创建 Harbor 工作负载）
+====================================
+
+推荐使用官方 Helm：
+  helm repo add harbor https://helm.goharbor.io
+  helm install harbor harbor/harbor -n {{ $ns }} --create-namespace
+
+详见本 chart 的 README.md

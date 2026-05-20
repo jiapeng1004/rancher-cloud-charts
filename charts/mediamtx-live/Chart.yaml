@@ -1,0 +1,10 @@
+apiVersion: v2
+name: mediamtx-live
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/firefox/firefox-original.svg
+description: MediaMTX（原名 rtsp-simple-server）—— 轻量 RTS P/ RTMP/WebRTC/HLS/Low-Latency HLS 一体化网关（bluenviron）
+keywords:
+  - mediamtx
+  - streaming
+maintainers:
+  - name: rancher-cloud-charts

@@ -1,0 +1,10 @@
+elasticsearch:
+  enabled: true
+  createIngress: false
+  installKibana: true
+
+logstash-oss:
+  enabled: true
+  elasticsearch:
+    hosts:
+      - "http://elasticsearch:9200"

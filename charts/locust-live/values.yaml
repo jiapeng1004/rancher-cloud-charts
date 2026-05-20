@@ -1,0 +1,42 @@
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/locustio/locust
+  tag: "2.31.8"
+  pullPolicy: IfNotPresent
+
+master:
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+worker:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: locust.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+# HttpUser.host 可被 Locust `--host` CLI 覆盖；此处作为默认基址
+target:
+  host: "https://httpbin.org"
+
+locustfile: |
+  from locust import HttpUser, task, between
+
+
+  class QuickstartUser(HttpUser):
+      wait_time = between(1, 2)
+
+      @task
+      def ping(self):
+          self.client.get("/get")

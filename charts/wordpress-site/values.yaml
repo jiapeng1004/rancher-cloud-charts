@@ -1,0 +1,32 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/wordpress
+  tag: php8.2-apache
+  pullPolicy: IfNotPresent
+
+wordpress:
+  db:
+    host: mysql.middleware.svc.cluster.local
+    name: wordpress
+    user: wordpress
+    password: wordpress-change-me
+  tablePrefix: wp_
+
+service:
+  port: 80
+  containerPort: 80
+
+persistence:
+  enabled: true
+  size: 10Gi
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: blog.example.com
+      paths:
+        - path: /
+          pathType: Prefix

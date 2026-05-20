@@ -1,0 +1,9 @@
+apiVersion: v2
+name: kubemq-standalone
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/kubernetes/kubernetes-original.svg
+description: KubeMQ 单机占位（消息中间件）；生产请按官方集群/CRD 指引扩展
+keywords:
+  - kubemq
+maintainers:
+  - name: rancher-cloud-charts

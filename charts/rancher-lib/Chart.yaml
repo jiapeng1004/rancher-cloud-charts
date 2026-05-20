@@ -1,0 +1,8 @@
+apiVersion: v2
+name: rancher-lib
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/rancher/rancher-original.svg
+description: Helm library — shared Ingress / API compatibility helpers for charts in this repo
+type: library
+version: 0.1.0
+maintainers:
+  - name: rancher-cloud-charts

@@ -1,0 +1,41 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/bluenviron/mediamtx
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# 官方镜像通常在根路径读取配置文件；勿随意改挂载路径除非你确认镜像 ENTRYPOINT。
+configMountPath: "/mediamtx.yml"
+
+extraEnv: []
+
+hostNetwork: false
+
+service:
+  type: ClusterIP
+  # 常见默认端口参见 https://github.com/bluenviron/mediamtx — 按需增删映射
+  ports:
+    rtsp: 8554
+    rtmp: 1935
+    rtcHttp: 8889
+    hlsHttp: 8888
+    metrics: 9998
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  backendPort: hlsHttp
+  hosts:
+    - host: mediamtx.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources: {}
+
+mediamtx:
+  yaml: |
+    logLevel: info
+    metrics: true

@@ -1,0 +1,10 @@
+apiVersion: v2
+name: locust-live
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/python/python-original.svg
+description: Locust 分布式压力测试 — Master Web UI + Worker，脚本来自 ConfigMap
+keywords:
+  - locust
+  - load-testing
+maintainers:
+  - name: rancher-cloud-charts

@@ -1,16 +1,21 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- $feFullname := printf "%s-fe" $fullname | trunc 63 | trimSuffix "-" }}
+{{- $beFullname := printf "%s-be" $fullname | trunc 63 | trimSuffix "-" }}
 {{- if .Values.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "doris.fe.fullname" . }}
+  name: {{ $feFullname }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "doris.fe.selectorLabels" . | nindent 4 }}
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "component" "fe" | toYaml | nindent 4 }}
 spec:
   replicas: {{ .Values.fe.replicas }}
   selector:
     matchLabels:
-      {{- include "doris.fe.selectorLabels" . | nindent 6 }}
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "component" "fe" | toYaml | nindent 6 }}
   template:
     metadata:
       {{- with .Values.fe.podAnnotations }}
@@ -18,7 +23,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "doris.fe.selectorLabels" . | nindent 8 }}
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "component" "fe" | toYaml | nindent 8 }}
     spec:
       {{- with .Values.fe.imagePullSecrets }}
       imagePullSecrets:
@@ -43,7 +48,7 @@ spec:
         - name: fe
           securityContext:
             {{- toYaml .Values.fe.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.fe_tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /bin/bash
@@ -71,7 +76,7 @@ spec:
         - name: fe-data
           {{- if .Values.fe.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: {{ include "doris.fe.fullname" . }}
+            claimName: {{ $feFullname }}
           {{- else }}
           emptyDir: {}
           {{- end }}

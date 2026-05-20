@@ -1,0 +1,42 @@
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/grafana/grafana
+  tag: "10.4.5"
+  pullPolicy: IfNotPresent
+
+# 首次登录用户名固定为 admin
+admin:
+  password: "changeme-grafana"
+
+service:
+  type: ClusterIP
+  port: 3000
+
+persistence:
+  enabled: true
+  size: 5Gi
+
+# 常用 Grafana 运行期环境变量，可与官方文档对齐增补
+extraEnv:
+  - name: GF_USERS_ALLOW_SIGN_UP
+    value: "false"
+  - name: GF_SERVER_HTTP_PORT
+    value: "3000"
+
+resources:
+  requests:
+    memory: 128Mi
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: grafana.example.com
+      paths:
+        - path: /
+          pathType: Prefix

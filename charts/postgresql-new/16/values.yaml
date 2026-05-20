@@ -1,0 +1,52 @@
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/postgres
+  tag: "16"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: false
+  name: ""
+
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+imagePullSecrets: []
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 5432
+
+postgresql:
+  user: "postgres"
+  password: "postgres"
+  database: "postgres"
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  # storageClass: ""
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "2Gi"
+    cpu: "2"
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: postgresql.example.com
+      paths:
+        - path: /
+          pathType: Prefix

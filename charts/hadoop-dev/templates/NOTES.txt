@@ -1,0 +1,1 @@
+本 release 不包含 Hadoop 守护进程。请考虑云上 MRS/EMR 或社区 Operator。

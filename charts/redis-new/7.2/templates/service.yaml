@@ -1,10 +1,13 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "redis.fullname" . }}
+  name: {{ $fullname }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "redis.labels" . | nindent 4 }}
+    {{- $baseLbl := dict "helm.sh/chart" $chartLabel "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/managed-by" .Release.Service }}{{- if .Chart.AppVersion }}{{ mustMergeOverwrite $baseLbl (dict "app.kubernetes.io/version" .Chart.AppVersion) | toYaml | nindent 4 }}{{- else }}{{ $baseLbl | toYaml | nindent 4 }}{{- end }}
   {{- with .Values.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -20,4 +23,4 @@ spec:
       nodePort: {{ .Values.service.nodePort }}
       {{- end }}
   selector:
-    {{- include "redis.selectorLabels" . | nindent 4 }}
+    {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}

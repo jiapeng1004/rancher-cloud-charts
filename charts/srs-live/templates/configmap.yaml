@@ -1,0 +1,56 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-config
+  labels:
+    {{- $baseLbl := dict "helm.sh/chart" $chartLabel "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/managed-by" .Release.Service }}{{- if .Chart.AppVersion }}{{ mustMergeOverwrite $baseLbl (dict "app.kubernetes.io/version" .Chart.AppVersion) | toYaml | nindent 4 }}{{- else }}{{ $baseLbl | toYaml | nindent 4 }}{{- end }}
+data:
+  srs-kubernetes.conf: |
+    listen              {{ .Values.service.ports.rtmp }};
+    max_connections     1000;
+    srs_log_tank        console;
+    srs_log_level       trace;
+    daemon              off;
+
+    http_api {
+        enabled         on;
+        listen          {{ .Values.service.ports.httpApi }};
+    }
+    http_server {
+        enabled         on;
+        listen          {{ .Values.service.ports.httpServer }};
+        dir             ./objs/nginx/html;
+    }
+{{- if .Values.srsConfig.rtcEnabled }}
+    rtc_server {
+        enabled on;
+        listen {{ .Values.service.ports.rtcSignal }};
+        candidate {{ .Values.srsConfig.rtcCandidate }};
+    }
+{{- end }}
+
+    vhost __defaultVhost__ {
+        http_remux {
+            enabled     on;
+            mount       [vhost]/[app]/[stream].flv;
+        }
+        hls {
+            enabled         on;
+            hls_fragment    10;
+            hls_window      60;
+            hls_path        ./objs/nginx/html;
+            hls_m3u8_file   [app]/[stream].m3u8;
+            hls_ts_file     [app]/[stream]-[seq].ts;
+            hls_dispose     180;
+        }
+        play {
+            gop_cache       off;
+            queue_length    30;
+        }
+        publish {
+            mr              off;
+        }
+    }

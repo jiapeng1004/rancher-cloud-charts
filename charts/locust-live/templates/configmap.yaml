@@ -1,0 +1,12 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $masterHostname := printf "%s-master" $fullname | trunc 63 | trimSuffix "-" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-code
+  labels:
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name | toYaml | nindent 4 }}
+data:
+  locustfile.py: |
+{{- .Values.locustfile | nindent 4 }}

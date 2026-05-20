@@ -1,17 +1,56 @@
+{{- if .Values.ingress.enabled }}
+{{- $svcName := .Chart.Name }}
+{{- $svcPort := .Values.ingress.servicePort | default 15672 }}
+{{- $kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion }}
+{{- if semverCompare ">=1.19-0" $kv }}
 apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" $kv }}
+apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
-  name: rabbitmq-ingress
+  name: {{ .Chart.Name }}-ingress
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
-  ingressClassName: nginx
+  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" $kv) }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
   rules:
-    - host: {{.Chart.Name}}.{{.Release.Namespace}}.jiapeng.icu
-    - http:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
         paths:
-          - path: /
-            pathType: Prefix
+          {{- range .paths }}
+          {{- if semverCompare ">=1.19-0" $kv }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
             backend:
               service:
-                name: {{.Chart.Name}}
+                name: {{ $svcName }}
                 port:
-                  number: 15672
+                  number: {{ $svcPort }}
+          {{- else }}
+          - path: {{ .path }}
+            backend:
+              serviceName: {{ $svcName }}
+              servicePort: {{ $svcPort }}
+          {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}

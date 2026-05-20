@@ -3,6 +3,7 @@ annotations:
 apiVersion: v2
 name: minio
 version: 2024.01.10
+icon: https://cdn.jsdelivr.net/gh/minio/minio@master/.github/logo.svg
 appVersion: "2024-01-10"
 description: A Helm chart for MinIO Object Storage
 keywords:
@@ -16,4 +17,3 @@ sources:
 maintainers:
   - name: 贾鹏
     email: jiapeng_aoa@126.com
-icon: https://min.io/resources/img/logo/MINIO_wordmark.png

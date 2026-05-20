@@ -1,0 +1,47 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $masterHostname := printf "%s-master" $fullname | trunc 63 | trimSuffix "-" }}
+{{- if .Values.ingress.enabled }}
+{{- $svcPort := 8089 }}
+{{- $kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion }}
+{{- $msvc := $masterHostname }}{{- if semverCompare ">=1.19-0" $kv }}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" $kv }}
+apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $msvc }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" $kv) }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          {{- if semverCompare ">=1.19-0" $kv }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ $msvc }}
+                port:
+                  number: {{ int $svcPort }}
+          {{- else }}
+          - path: {{ .path }}
+            backend:
+              serviceName: {{ $msvc }}
+              servicePort: {{ int $svcPort }}
+          {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}

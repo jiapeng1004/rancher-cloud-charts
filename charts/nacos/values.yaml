@@ -4,3 +4,15 @@ dbName: "nacos"
 dbUser: "root"
 dbPassword: "123456"
 dbParam: "useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&tinyInt1isBit=false&allowMultiQueries=true&serverTimezone=UTC"
+
+# Optional Ingress（对齐 Service 端口 30848 → target 8848）
+ingress:
+  enabled: false
+  className: nginx
+  servicePort: 30848
+  annotations: {}
+  hosts:
+    - host: nacos.example.com
+      paths:
+        - path: /
+          pathType: Prefix

@@ -1,6 +1,7 @@
 apiVersion: v2
 name: halo
 version: 1.0.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/markdown/markdown-original.svg
 description: Halo 是一个开源的内容管理系统，使用Java开发
 keywords:
   - halo

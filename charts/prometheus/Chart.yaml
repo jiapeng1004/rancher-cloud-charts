@@ -1,6 +1,7 @@
 apiVersion: v2
 name: prometheus
 version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/prometheus/prometheus-original.svg
 description: A Helm chart for Prometheus monitoring system
 type: application
 keywords:

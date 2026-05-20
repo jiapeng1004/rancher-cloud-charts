@@ -1,0 +1,57 @@
+# 默认按计划执行 HTTP 冒烟压测（可改写 `jobs.default.scriptBody`）。
+# Cron 表达式：`schedule`。
+#
+# TARGET_URL、p95 等指标建议通过脚本内 `open`/`options` 与 extraArgs 一并调。
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/grafana/k6
+  tag: "0.52.0"
+  pullPolicy: IfNotPresent
+
+jobs:
+  default:
+    enabled: true
+    schedule: "0 */6 * * *"
+    concurrencyPolicy: Replace
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 1
+    suspend: false
+    targetURL: "https://httpbin.org/delay/1"
+    extraArgs:
+      - "--vus"
+      - "10"
+      - "--duration"
+      - "45s"
+    scriptBody: |
+      import http from 'k6/http';
+      import { check } from 'k6';
+      import { Rate } from 'k6/metrics';
+
+      const failRate = new Rate('failures');
+
+      export const options = {
+        thresholds: {
+          http_req_failed: ['rate<0.05'],
+          http_req_duration: ['p(95)<2500'],
+        },
+      };
+
+      export default function () {
+        const res = http.get(__ENV.TARGET_URL || 'https://httpbin.org/delay/1');
+        const ok = check(res, { 'status was 200': (r) => r.status === 200 });
+        if (!ok) {
+          failRate.add(1);
+        }
+      }
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+serviceAccount:
+  create: false
+  name: ""

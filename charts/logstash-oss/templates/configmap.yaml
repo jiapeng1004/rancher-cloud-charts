@@ -1,0 +1,21 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-pipe
+data:
+  logstash.conf: |
+    input {
+      tcp {
+        port => {{ int .Values.service.beatsPort }}
+        codec => json
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => {{ toJson .Values.elasticsearch.hosts }}
+        index => "logstash-bundle-%{+yyyy.MM.dd}"
+      }
+      stdout { codec => rubydebug }
+    }

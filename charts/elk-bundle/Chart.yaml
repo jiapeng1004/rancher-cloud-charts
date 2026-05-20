@@ -1,0 +1,19 @@
+apiVersion: v2
+name: elk-bundle
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/elasticsearch/elasticsearch-original.svg
+description: |
+  Elasticsearch（本仓库 chart） + Logstash 轻量捆绑；Kibana 可启用 elasticsearch.installKibana
+type: application
+maintainers:
+  - name: rancher-cloud-charts
+
+dependencies:
+  - name: elasticsearch
+    version: 2.0.11
+    repository: file://../elasticsearch/8.17.3
+    condition: elasticsearch.enabled
+  - name: logstash-oss
+    version: 0.1.0
+    repository: file://../logstash-oss
+    condition: logstash-oss.enabled

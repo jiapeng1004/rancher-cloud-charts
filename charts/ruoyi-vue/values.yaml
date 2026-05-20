@@ -1,0 +1,25 @@
+replicaCount: 1
+
+# 占位：请替换为你的 ruoyi-backend 或打包好的 all-in-one 镜像
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/nginx
+  tag: "1.25-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+extraEnv: []
+# - name: SPRING_PROFILES_ACTIVE
+#   value: prod
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: ruoyi.example.com
+      paths:
+        - path: /
+          pathType: Prefix

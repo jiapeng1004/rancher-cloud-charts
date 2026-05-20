@@ -3,6 +3,7 @@ annotations:
 apiVersion: v2
 name: server
 version: 1.0.10
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/docker/docker-original.svg
 appVersion: "1.0"
 description: A composite Helm chart for common server components (MySQL, Redis, MinIO)
 type: application
@@ -18,7 +19,6 @@ sources:
 maintainers:
   - name: 贾鹏
     email: jiapeng_aoa@126.com
-icon: https://tse4-mm.cn.bing.net/th/id/OIP-C.urLHYMYPFxkcs6AC4Io9vwHaHa?w=199&h=199&c=7&r=0&o=5&dpr=2&pid=1.7
 
 # Dependencies - Self-contained charts (only basic services)
 dependencies:
