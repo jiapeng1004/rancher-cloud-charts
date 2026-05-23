@@ -12,7 +12,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}-console
+  name: {{ $fullname }}-console
   namespace: {{ .Release.Namespace }}
   labels:
     {{- $baseLbl := dict "helm.sh/chart" $chartLabel "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/managed-by" .Release.Service }}{{- if .Chart.AppVersion }}{{ mustMergeOverwrite $baseLbl (dict "app.kubernetes.io/version" .Chart.AppVersion) | toYaml | nindent 4 }}{{- else }}{{ $baseLbl | toYaml | nindent 4 }}{{- end }}
@@ -45,13 +45,13 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $fullName }}-console
+                name: {{ $fullname }}-console
                 port:
                   number: {{ $svcPort }}
           {{- else }}
           - path: {{ .path }}
             backend:
-              serviceName: {{ $fullName }}-console
+              serviceName: {{ $fullname }}-console
               servicePort: {{ $svcPort }}
           {{- end }}
           {{- end }}

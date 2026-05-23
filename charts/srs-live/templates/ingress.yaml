@@ -14,7 +14,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullname }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -34,13 +34,13 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $fullName }}
+                name: {{ $fullname }}
                 port:
                   number: {{ int $svcPort }}
           {{- else }}
           - path: {{ .path }}
             backend:
-              serviceName: {{ $fullName }}
+              serviceName: {{ $fullname }}
               servicePort: {{ int $svcPort }}
           {{- end }}
           {{- end }}

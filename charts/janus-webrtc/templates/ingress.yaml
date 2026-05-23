@@ -14,8 +14,8 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
-  {{- $ann := mergeOverwrite (dict "nginx.ingress.kubernetes.io/websocket-services" $fullName) (.Values.ingress.annotations | default dict) }}
+  name: {{ $fullname }}
+  {{- $ann := mergeOverwrite (dict "nginx.ingress.kubernetes.io/websocket-services" $fullname) (.Values.ingress.annotations | default dict) }}
   annotations:
     {{- toYaml $ann | nindent 4 }}
 spec:
@@ -33,13 +33,13 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $fullName }}
+                name: {{ $fullname }}
                 port:
                   number: {{ int $svcPort }}
           {{- else }}
           - path: {{ .path }}
             backend:
-              serviceName: {{ $fullName }}
+              serviceName: {{ $fullname }}
               servicePort: {{ int $svcPort }}
           {{- end }}
           {{- end }}

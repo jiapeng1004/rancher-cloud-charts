@@ -14,7 +14,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullname }}
 spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" $kv) }}
   ingressClassName: {{ .Values.ingress.className }}
@@ -30,13 +30,13 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $fullName }}
+                name: {{ $fullname }}
                 port:
                   number: {{ int $svcPort }}
           {{- else }}
           - path: {{ .path }}
             backend:
-              serviceName: {{ $fullName }}
+              serviceName: {{ $fullname }}
               servicePort: {{ int $svcPort }}
           {{- end }}
           {{- end }}
