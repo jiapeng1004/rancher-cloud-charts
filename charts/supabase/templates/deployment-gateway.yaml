@@ -1,6 +1,6 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
-{{- if and .Values.enabled .Values.components.gateway }}
+{{- if and .Values.enabled (eq .Values.gateway.mode "nginx") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,8 +34,8 @@ spec:
       {{- end }}
       containers:
         - name: nginx
-          image: "{{ .Values.images.gateway.repository }}:{{ .Values.images.gateway.tag }}"
-          imagePullPolicy: {{ .Values.images.gateway.pullPolicy }}
+          image: "{{ .Values.images.nginx.repository }}:{{ .Values.images.nginx.tag }}"
+          imagePullPolicy: {{ .Values.images.nginx.pullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.gateway.listenPort }}

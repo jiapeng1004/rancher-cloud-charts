@@ -1,0 +1,107 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- if and .Values.enabled (not .Values.declarative.enabled) }}
+{{- fail "kong-gateway：declarative.enabled 须为 true（本 chart 仅支持 DB-less 声明式网关）" }}
+{{- end }}
+{{- $declPath := printf "%s/%s" .Values.declarative.mountPath .Values.declarative.filename }}
+{{- if and .Values.enabled .Values.declarative.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ quote $name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ quote $name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: kong
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ quote $name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: kong
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: kong
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: proxy
+              containerPort: 8000
+            - name: admin
+              containerPort: 8001
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: {{ $declPath | quote }}
+            - name: KONG_PLUGINS
+              value: {{ .Values.env.plugins | quote }}
+            - name: KONG_PROXY_LISTEN
+              value: "0.0.0.0:8000 reuseport backlog=16384"
+            - name: KONG_ADMIN_LISTEN
+              value: {{ .Values.env.adminListen | quote }}
+            - name: KONG_PROXY_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_PROXY_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_ADMIN_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_NGINX_PROXY_PROXY_BUFFER_SIZE
+              value: "160k"
+            - name: KONG_NGINX_PROXY_PROXY_BUFFERS
+              value: "64 160k"
+          volumeMounts:
+            - name: declarative
+              mountPath: {{ .Values.declarative.mountPath }}
+              readOnly: true
+          readinessProbe:
+            exec:
+              command:
+                - kong
+                - health
+            initialDelaySeconds: 30
+          livenessProbe:
+            exec:
+              command:
+                - kong
+                - health
+            initialDelaySeconds: 60
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: declarative
+          configMap:
+            name: {{ $fullname }}-declarative
+{{- end }}

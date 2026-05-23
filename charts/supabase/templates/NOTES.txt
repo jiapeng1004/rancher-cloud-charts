@@ -1,17 +1,28 @@
 ========================================
-charts/supabase（极简 · 外链 Postgres）
+ charts/supabase（外链优先 · 内建可选）
 ========================================
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 
-Release : {{ .Release.Name }}
-Namespace: {{ .Release.Namespace }}
+推荐：Postgres / 网关尽量 **外链**（RDS、托管 Kong、SLB）；内建仅兜底或开发。
 
-必读：
-  1）Postgres **必须已是 Supabase 自助主机初始化后的库**（角色、schema 参见官方 Docker 脚手架与文档）。
-  2）填入 values：gotrue/rest 连接串、realtime 主机口令、jwt.secret、api.externalUrl、realtimeSecretKeyBase。
+网关模式 gateway.mode：**{{ .Values.gateway.mode }}**（nginx | kong | external）
 
-网关 Service : {{ $fullname }}-gateway
-机密        : {{ $fullname }}-runtime
+{{- if eq .Values.gateway.mode "nginx" }}
+入口 Service：**{{ $fullname }}-gateway**（镜像 nginx）
+{{- else if eq .Values.gateway.mode "kong" }}
+入口 Service：**{{ $fullname }}-kong-proxy**（内置 Kong declarative）；Admin：**{{ $fullname }}-kong-admin**
+{{- else }}
+未部署内置网关：**外链 Kong**。请在本集群外将你的 Kong upstream 指向
+`{{ $fullname }}-auth/rest/realtime` 等 ClusterIP，并填好 `gateway.externalPublicUrl`
+与 `{{ $fullname }}-runtime` 中的密钥。
+{{- end }}
 
-本 chart **不含** Studio / Storage / Functions / Analytics，也**不部署**自建 Postgres 或 Redis。
+Postgres：bundled.postgres={{ .Values.bundled.postgres }}
+{{- if .Values.bundled.postgres }}
+子 chart：**Release 名后缀 `-postgresql`** 的 ClusterIP。**开发向**：单用户 postgres 连接串自动生成；正式上线请导入 Supabase 官方迁移与数据库角色后再改 URLs。
+{{- else }}
+使用 **externalDatabase.***（外链实例）。
+{{- end }}
+
+详见 **README.zh-CN.md**。

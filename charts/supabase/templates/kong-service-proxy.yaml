@@ -1,23 +1,24 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
-{{- if and .Values.enabled (eq .Values.gateway.mode "nginx") }}
+{{- $g := .Values.gateway.kong }}
+{{- if and .Values.enabled (eq .Values.gateway.mode "kong") }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $fullname }}-gateway
+  name: {{ $fullname }}-kong-proxy
   labels:
     app.kubernetes.io/name: {{ quote $name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: gateway
+    app.kubernetes.io/component: kong-proxy
 spec:
-  type: {{ .Values.service.nginx.type }}
+  type: {{ $g.service.proxy.type }}
   ports:
-    - port: {{ .Values.service.nginx.port }}
-      targetPort: {{ .Values.gateway.listenPort }}
+    - port: {{ $g.service.proxy.port }}
+      targetPort: {{ $g.service.proxy.targetPort }}
       protocol: TCP
-      name: http
+      name: proxy
   selector:
     app.kubernetes.io/name: {{ quote $name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: gateway
+    app.kubernetes.io/component: kong
 {{- end }}

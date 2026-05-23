@@ -1,13 +1,8 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 {{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- if and .Values.enabled .Values.ingress.enabled (ne .Values.gateway.mode "external") }}
-{{- $svcName := printf "%s-gateway" $fullname }}
-{{- $svcPort := .Values.service.nginx.port }}
-{{- if eq .Values.gateway.mode "kong" }}
-{{- $svcName = printf "%s-kong-proxy" $fullname }}
-{{- $svcPort = .Values.gateway.kong.service.proxy.port }}
-{{- end }}
+{{- if .Values.ingress.enabled }}
+{{- $svcPort := .Values.service.port }}
 {{- $kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion }}
 {{- if semverCompare ">=1.19-0" $kv }}
 apiVersion: networking.k8s.io/v1
@@ -18,7 +13,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullname }}
+  name: {{ $fullName }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- $baseLbl := dict "helm.sh/chart" $chartLabel "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/managed-by" .Release.Service }}{{- if .Chart.AppVersion }}{{ mustMergeOverwrite $baseLbl (dict "app.kubernetes.io/version" .Chart.AppVersion) | toYaml | nindent 4 }}{{- else }}{{ $baseLbl | toYaml | nindent 4 }}{{- end }}
@@ -51,13 +46,13 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $svcName }}
+                name: {{ $fullName }}
                 port:
                   number: {{ $svcPort }}
           {{- else }}
           - path: {{ .path }}
             backend:
-              serviceName: {{ $svcName }}
+              serviceName: {{ $fullName }}
               servicePort: {{ $svcPort }}
           {{- end }}
           {{- end }}

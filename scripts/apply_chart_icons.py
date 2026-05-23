@@ -66,6 +66,7 @@ BY_PATH_SUFFIX: dict[str, str] = {
     "prometheus/Chart.yaml": dv("prometheus"),
     "grafana-dash/Chart.yaml": dv("grafana"),
     "frp-tunnel/Chart.yaml": dv("nginx"),
+    "kong-gateway/Chart.yaml": si("kong"),
     "supabase/Chart.yaml": "https://avatars.githubusercontent.com/u/54469796?s=280&v=4",
 }
 

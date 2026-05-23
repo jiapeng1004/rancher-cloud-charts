@@ -1,36 +1,57 @@
-## `charts/supabase`（极简，符合本仓库模板约定）
+## `charts/supabase`（外链优先 · 可选内建）
 
-已**替换**原先的 community 大而全 Helm 树（大量 `_helpers.tpl`）。当前 chart：
+与本仓库一致：**优先、完整支持外链**（PostgreSQL / Kong / nginx 等可由现网或托管提供）；**内建为辅**（`bundled`、`gateway.mode=nginx/kong` 仅兜底或联调）。模板 **无 `_helpers.tpl`**。
 
-- **不引入** standalone `templates/_helpers.tpl`；在每个模板文件顶部仅用 `$name`、`$fullname`。
-- **不部署 Postgres / Redis**；默认假设你已有 **完成 Supabase 初始化迁移** 的数据库实例（云上 RDS、`postgresql-new` 等均可，但库里必须有官方自助主机要求的角色与 schema）。
-- **不部署** Kong、Studio、Storage、Functions、Analytics，仅保留常用 API 切面：**nginx 网关 → gotrue + PostgREST + realtime**。
-- Realtime **不依赖 Redis**：与上游 `docker-compose.yml` 一致，仅用 Postgres + JWT。
+### 选型原则
 
-### 必填 values
+| 能力 | **推荐（外链）** | **可选（内建）** |
+|------|------------------|------------------|
+| **数据库** | `bundled.postgres=false`，填 RDS 等 **`externalDatabase.*`** URL | `bundled.postgres=true`，子 chart **`charts/postgresql`**（拷贝自 `postgresql-new/16`） |
+| **网关** | `gateway.mode=external`，自备 Kong/nginx/SLB，上游指本集群 `*-auth/rest/realtime` | `nginx`（轻量反向代理）或 `kong`（本 chart 内嵌 declarative Kong） |
 
-| 字段 | 说明 |
-|------|------|
-| `externalDatabase.gotrueDbUrl` | 官方示例形态：`postgres://supabase_auth_admin:...@host:5432/postgres` |
-| `externalDatabase.restDbUri` | `postgres://authenticator:...@host:5432/postgres` |
-| `externalDatabase.realtime.host` / `password` | Realtime 用 `supabase_admin`（默认 user）登录 |
-| `api.externalUrl` | 浏览器/SDK 访问的 API 根，如 `https://api.example.com`（**不要**尾随 `/` 歧义时注意与 Ingress 对齐） |
-| `jwt.secret` | `GOTRUE` / PostgREST / Realtime 共用（≥32 字符） |
-| `realtimeSecretKeyBase` | Realtime `SECRET_KEY_BASE` |
+> 内建 PG 自动生成 **单一 postgres URL**（开发向）；上线请完成 Supabase 官方迁移后再用外链多角色写法。
 
-客户端（`supabase-js` 等）还需 **anon / service_role API key JWT**，须与 `jwt.secret` 配套生成（Supabase CLI 或官方脚本）；本 chart **不写进** Kubernetes，请自行安全管理。
+部署内容恒定：**gotrue + PostgREST + realtime**。网关三选一：
 
-### Redis
+| `gateway.mode` | 典型用途 |
+|----------------|----------|
+| **`external`（外链优先场景）** | 不部署内置网关 Pod；必填 **`gateway.externalPublicUrl`**（给 GOTRUE 的对外根）；你在集群外公网入口把 **`/auth|/rest|/realtime`** 指到后端 Service |
+| **`nginx`**（内建备选） | 集群内 nginx + 可选 Ingress |
+| **`kong`**（内建备选） | 集群内 Kong DB-less，`Ingress` 默认指 `*-kong-proxy` |
 
-本栈镜像环境变量沿用官方 Compose，**无 Redis**。若你以后接其它增值服务，可自行在集群里单独建 Redis chart，与本目录无关。
+### 对外 URL
 
-### 安装示例
+- **`gateway.mode != external`**：填 **`api.publicUrl`**（或兼容 **`api.externalUrl`**）。
+- **`gateway.mode == external`**：填 **`gateway.externalPublicUrl`**。
 
-```bash
-helm upgrade --install sb charts/supabase -n supabase --create-namespace \
-  -f my-secret-values.yaml
+### Postgres
+
+| `bundled.postgres` | 说明 |
+|--------------------|------|
+| **`false`（外链默认）** | 必填 `externalDatabase.*` |
+| **`true`（可选内建）** | Helm dependency `postgresql`，并设置 **`postgresql.postgresql.password`** |
+
+### 安装示例（外链 RDS + 外链网关）
+
+```yaml
+bundled:
+  postgres: false
+gateway:
+  mode: external
+  externalPublicUrl: https://api.example.com
+externalDatabase:
+  gotrueDbUrl: "postgres://..."
+  restDbUri: "postgres://..."
+  realtime:
+    host: "..."
+
 ```
 
-### 与「全量 Supabase」的关系
+### 安装示例（全内建兜底）
 
-若要 **Studio / Storage / Kong 全套**，请直接使用上游发行版：`helm repo add supabase-community https://supabase-community.github.io/supabase-kubernetes`；本仓库刻意保持可读、无外网依赖子 chart。
+参见仓库内此前示例：**`bundled.postgres=true` + `gateway.mode=kong`** + Ingress。
+
+### 与独立 chart
+
+- 独立网关仍可用 [`kong-gateway`](../kong-gateway/README.zh-CN.md)。
+- 独立 PG 仍可用 **`postgresql-new`**；本 umbrella 仅在 `bundled.postgres=false` 时与之组合。

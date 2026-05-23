@@ -1,0 +1,15 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- if and .Values.enabled .Values.declarative.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-declarative
+  labels:
+    app.kubernetes.io/name: {{ quote $name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: kong
+data:
+  {{ .Values.declarative.filename }}: |
+{{- .Values.declarative.config | nindent 4 }}
+{{- end }}

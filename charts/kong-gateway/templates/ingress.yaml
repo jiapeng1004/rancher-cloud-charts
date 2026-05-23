@@ -1,13 +1,9 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 {{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- if and .Values.enabled .Values.ingress.enabled (ne .Values.gateway.mode "external") }}
-{{- $svcName := printf "%s-gateway" $fullname }}
-{{- $svcPort := .Values.service.nginx.port }}
-{{- if eq .Values.gateway.mode "kong" }}
-{{- $svcName = printf "%s-kong-proxy" $fullname }}
-{{- $svcPort = .Values.gateway.kong.service.proxy.port }}
-{{- end }}
+{{- if and .Values.enabled .Values.declarative.enabled .Values.ingress.enabled }}
+{{- $svcName := printf "%s-proxy" $fullname }}
+{{- $svcPort := .Values.service.proxy.port }}
 {{- $kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion }}
 {{- if semverCompare ">=1.19-0" $kv }}
 apiVersion: networking.k8s.io/v1

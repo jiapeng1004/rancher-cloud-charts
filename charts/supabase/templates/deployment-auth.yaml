@@ -1,5 +1,11 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $pub := "" }}
+{{- if eq .Values.gateway.mode "external" }}
+{{- $pub = required "gateway.mode=external 时请设置 gateway.externalPublicUrl（外链 Kong 入口）" .Values.gateway.externalPublicUrl }}
+{{- else }}
+{{- $pub = required "请在 api.publicUrl（或兼容字段 api.externalUrl）填写对外网关根 URL（Ingress 前端）" (.Values.api.publicUrl | default .Values.api.externalUrl) }}
+{{- end }}
 {{- if and .Values.enabled .Values.components.auth }}
 apiVersion: apps/v1
 kind: Deployment
@@ -53,9 +59,9 @@ spec:
             - name: GOTRUE_API_PORT
               value: "9999"
             - name: API_EXTERNAL_URL
-              value: {{ .Values.api.externalUrl | quote }}
+              value: {{ $pub | quote }}
             - name: GOTRUE_SITE_URL
-              value: {{ .Values.api.externalUrl | quote }}
+              value: {{ $pub | quote }}
             - name: GOTRUE_URI_ALLOW_LIST
               value: "*"
             - name: GOTRUE_EXTERNAL_EMAIL_ENABLED
@@ -85,5 +91,5 @@ spec:
                   name: {{ $fullname }}-runtime
                   key: GOTRUE_DB_DATABASE_URL
             - name: GOTRUE_JWT_ISSUER
-              value: "{{ .Values.api.externalUrl }}/auth/v1"
+              value: {{ printf "%s/auth/v1" $pub | quote }}
 {{- end }}

@@ -10,7 +10,7 @@
 | | `charts/postgresql-new/16` | PostgreSQL 16 |
 | | `charts/mongodb` | MongoDB |
 | | `charts/oracle-free-db` | gvenzl Oracle Free（占位/测试） |
-| **BaaS** | **`charts/supabase`** | **极简**：**外链 Postgres**，nginx + gotrue/postgREST/realtime；**无** `_helpers.tpl` / 自建 PG；全量组件见上游 Helm |
+| **BaaS** | **`charts/supabase`** | **外链优先**（RDS/托管 Kong）；可选内建 PG / nginx/Kong · `README.zh-CN.md` |
 | 缓存/消息 | `charts/redis-new/6.2`、`7.0`、`7.2` | Redis |
 | | `charts/kafka`、`charts/rabbitmq`（已有单体） | 消息队列（Kafka / AMQP） |
 | | **`charts/rocketmq-k8s`** | RocketMQ Namesrv + Broker（试跑占位） |
@@ -23,6 +23,7 @@
 | 镜像/注册中心 | **`charts/harbor-registry`** | Harbor：**官方 Helm 指引占位** |
 | Ingress / 网关 | `charts/nginx-web`、`charts/openresty-web`、`charts/pingora-proxy`、`charts/nginx-ingress` | 常见网关/入口 |
 | | **`charts/traefik-gateway`** | Traefik：**文件 Provider 起步**，生产请看官方 Helm |
+| | **`charts/kong-gateway`** | **Kong**：DB-less **声明式**（`declarative.config`），可选 Ingress；详见 `README.zh-CN.md` |
 | | **`charts/frp-tunnel`** | **FRP**：首开/Demo：`frps`（TCP / 可选 HTTP vhost）+ 可选 `frpc` 暴露集群内服务 |
 | **直播/WebRTC** | `charts/srs-live` | OSSRS SRS（RTMP/HLS/HTTP-FLV，可选极简 WebRTC 块） |
 | | `charts/mediamtx-live` | MediaMTX（RTSP/RTMP/HLS/WebRTC 网关） |

@@ -1,0 +1,15 @@
+apiVersion: v2
+name: kong-gateway
+icon: https://cdn.jsdelivr.net/npm/simple-icons@11/icons/kong.svg
+description: >-
+  Kong API 网关：优先外链（托管 Kong / SLB）；可选内装 DB-less 声明式网关。
+  自定义 declarative YAML；无 _helpers.tpl。
+type: application
+version: 1.0.0
+appVersion: "3.9"
+keywords:
+  - kong
+  - gateway
+  - api-gateway
+maintainers:
+  - name: rancher-cloud-charts

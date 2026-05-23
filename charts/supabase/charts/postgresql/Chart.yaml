@@ -1,0 +1,14 @@
+annotations:
+  catalog.cattle.io/release-name: postgresql
+apiVersion: v2
+name: postgresql
+version: 16.0.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/helm/helm-original.svg
+appVersion: "16"
+description: A minimal Helm chart for PostgreSQL（单体；也可被 middleware-bundle 引用）
+keywords:
+  - postgresql
+  - postgres
+home: https://www.postgresql.org/
+maintainers:
+  - name: rancher-cloud-charts

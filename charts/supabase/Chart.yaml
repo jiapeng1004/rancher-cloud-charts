@@ -1,15 +1,24 @@
+annotations:
+  catalog.cattle.io/release-name: supabase
 apiVersion: v2
 icon: https://avatars.githubusercontent.com/u/54469796?s=280&v=4
 description: >-
-  Supabase API 极简片段：外链 Postgres，无 Postgres/Redis StatefulSet；网关为 nginx，
-  无 _helpers.tpl。须自行完成 Supabase 数据库迁移与数据库角色（gotrue/rest/realtime）。
+  Supabase API：PostgreSQL/Kong/nginx 等均优先支持与推荐外链；
+  可选内建子 chart Postgres 与内置 nginx/Kong。
+  无 _helpers.tpl。内建 Postgres 仅供联调占位，上线请迁移或使用外链 RDS。
 keywords:
   - supabase
   - postgres
+  - kong
   - nginx
 maintainers:
   - name: rancher-cloud-charts
 name: supabase
 type: application
-version: 1.0.0
+version: 1.1.0
 appVersion: "minimal"
+dependencies:
+  - name: postgresql
+    version: 16.0.0
+    repository: file://charts/postgresql
+    condition: bundled.postgres

@@ -1,0 +1,39 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $fn := .Values.gateway.kong.declarativeFilename }}
+{{- if and .Values.enabled (eq .Values.gateway.mode "kong") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-kong-deck
+  labels:
+    app.kubernetes.io/name: {{ quote $name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: kong
+data:
+  {{ $fn }}: |
+    _format_version: "3.0"
+    _transform: false
+    services:
+      - name: supabase-auth
+        url: http://{{ $fullname }}-auth:9999/
+        routes:
+          - name: sb-auth-all
+            strip_path: true
+            paths:
+              - /auth/v1/
+      - name: supabase-rest
+        url: http://{{ $fullname }}-rest:3000/
+        routes:
+          - name: sb-rest-all
+            strip_path: true
+            paths:
+              - /rest/v1/
+      - name: supabase-realtime
+        url: http://{{ $fullname }}-realtime:4000/socket/
+        routes:
+          - name: sb-rt-all
+            strip_path: true
+            paths:
+              - /realtime/v1/
+{{- end }}
