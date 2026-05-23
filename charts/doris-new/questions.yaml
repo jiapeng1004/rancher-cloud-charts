@@ -13,8 +13,8 @@ questions:
     type: string
     default: "be-4.1.0"
     required: true
-    description: "前端镜像标签"
-    label: "前端镜像标签"
+    description: "后端镜像标签"
+    label: "后端镜像标签"
     group: "镜像配置"
   - variable: image.fe_tag
     type: string
