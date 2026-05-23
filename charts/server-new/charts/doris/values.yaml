@@ -101,6 +101,30 @@ be:
     runAsUser: 1000
     runAsGroup: 1000
 
+# Privileged DaemonSet：在节点上设置 vm.max_map_count（常见于 Doris/大量 mmap）。
+# hostPath=/ 挂载到 /host 后使用 chroot 执行宿主机 sysctl；需集群允许 privileged 与该类 hostPath。
+# 默认关闭；若需与用户示例完全一致可设 hostPID/hostNetwork 为 true。
+sysctlDaemonset:
+  enabled: false
+  # 非空时使用该命名空间安装 DaemonSet（例如 kube-system）；空则使用 Release.Namespace
+  namespace: ""
+  vmMaxMapCount: 2000000
+  hostPID: false
+  hostNetwork: false
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/busybox
+    tag: "1.36"
+    pullPolicy: IfNotPresent
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
 # Kubernetes compatibility settings
 compatibility:
   ingressApiVersion: "networking.k8s.io/v1"

@@ -53,7 +53,7 @@ spec:
           command:
             - /bin/bash
             - -c
-            - /opt/apache-doris/fe/bin/start_fe.sh --daemon && tail -f /opt/apache-doris/fe/log/fe.log
+            - /opt/apache-doris/fe/bin/start_fe.sh --daemon && tail -f /opt/apache-doris/fe/log/fe.out
           ports:
             - name: rpc
               containerPort: 8030
