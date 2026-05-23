@@ -10,13 +10,13 @@ serviceAccount:
 nameOverride: ""
 fullnameOverride: ""
 
-podAnnotations: {}
+podAnnotations: { }
 
-imagePullSecrets: []
+imagePullSecrets: [ ]
 
-podSecurityContext: {}
+podSecurityContext: { fsGroup: 1001 }
 
-securityContext: {}
+securityContext: { }
 
 service:
   type: ClusterIP
@@ -44,7 +44,7 @@ resources:
 ingress:
   enabled: false
   className: "nginx"
-  annotations: {}
+  annotations: { }
   hosts:
     - host: postgresql.example.com
       paths:

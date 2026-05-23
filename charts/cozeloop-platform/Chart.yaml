@@ -1,7 +1,0 @@
-﻿apiVersion: v2
-name: cozeloop-platform
-version: 0.1.0
-icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/slack/slack-original.svg
-description: CozeLoop AI 可观测/提示词平台指引占位 — 参见 coze-dev/CozeLoop
-maintainers:
-  - name: rancher-cloud-charts

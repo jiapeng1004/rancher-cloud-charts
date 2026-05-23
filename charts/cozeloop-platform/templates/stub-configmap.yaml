@@ -1,8 +1,0 @@
-﻿{{- if .Values.stubConfigMap.enabled }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-cozeloop-readme
-data:
-  ref: https://github.com/coze-dev/CozeLoop
-{{- end }}

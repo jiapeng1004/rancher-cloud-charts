@@ -1,8 +1,0 @@
-﻿{{- if .Values.stubConfigMap.enabled }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-dify-readme
-data:
-  ref: https://github.com/langgenius/dify
-{{- end }}

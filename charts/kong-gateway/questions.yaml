@@ -1,0 +1,155 @@
+categories:
+  - kong
+  - gateway
+  - api-gateway
+questions:
+  - variable: enabled
+    type: boolean
+    default: true
+    required: true
+    label: 启用 Kong 工作负载
+    description: 关闭后不会在集群内创建 Deployment/Service。
+    group: 通用
+
+  - variable: image.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong/kong"
+    required: true
+    description: Kong 网关镜像仓库
+    label: 镜像仓库
+    group: 镜像
+
+  - variable: image.tag
+    type: string
+    default: "3.9.1"
+    required: true
+    description: Kong 网关镜像标签（与镜像仓库配套）
+    label: 镜像标签
+    group: 镜像
+
+  - variable: image.pullPolicy
+    type: enum
+    default: IfNotPresent
+    required: true
+    description: 镜像拉取策略
+    label: 拉取策略
+    options:
+      - Always
+      - IfNotPresent
+      - Never
+    group: 镜像
+
+  - variable: declarative.mountPath
+    type: string
+    default: "/kong-declarative"
+    required: false
+    label: 声明式挂载目录
+    description: Declarative 配置卷在 Pod 内的挂载路径
+    group: 声明式 DB-less
+
+  - variable: declarative.filename
+    type: string
+    default: "kong.yml"
+    required: false
+    label: 声明式配置文件名（ConfigMap 键名）
+    group: 声明式 DB-less
+
+  - variable: env.plugins
+    type: string
+    default: "bundled"
+    required: false
+    description: Kong 插件集合（写入 KONG_PLUGINS）
+    label: KONG_PLUGINS
+    group: Kong 环境变量
+
+  - variable: env.adminListen
+    type: string
+    default: "0.0.0.0:8001 reuseport backlog=16384"
+    required: false
+    description: Admin 监听参数（写入 KONG_ADMIN_LISTEN）
+    label: Admin 监听
+    group: Kong 环境变量
+
+  # --- Proxy ---
+  - variable: service.proxy.type
+    type: enum
+    default: ClusterIP
+    required: true
+    description: Kong Proxy Kubernetes Service 类型（对外转发入口）
+    label: Proxy Service 类型
+    options:
+      - ClusterIP
+      - NodePort
+      - LoadBalancer
+    group: Proxy 服务
+
+  - variable: service.proxy.port
+    type: int
+    default: 80
+    required: true
+    description: Service 监听端口（通常 80）
+    label: Proxy Service 端口
+    group: Proxy 服务
+
+  - variable: service.proxy.targetPort
+    type: int
+    default: 8000
+    required: true
+    description: Pod 内 Kong proxy 监听端口（默认 8000）
+    label: Proxy 容器目标端口
+    group: Proxy 服务
+
+  # --- Admin ---
+  - variable: service.admin.enabled
+    type: boolean
+    default: true
+    required: false
+    label: 暴露 Admin Service（建议在集群内需鉴权/IP 策略）
+    group: Admin Service
+
+  - variable: service.admin.type
+    type: enum
+    default: ClusterIP
+    required: false
+    description: Admin API Service 类型
+    label: Admin Service 类型
+    options:
+      - ClusterIP
+      - NodePort
+      - LoadBalancer
+    group: Admin Service
+    show_if: service.admin.enabled=true
+
+  - variable: service.admin.port
+    type: int
+    default: 8001
+    required: false
+    description: Admin Service 端口（集群内）
+    label: Admin Service 端口
+    group: Admin Service
+    show_if: service.admin.enabled=true
+
+  - variable: service.admin.targetPort
+    type: int
+    default: 8001
+    required: false
+    label: Admin 容器目标端口
+    group: Admin Service
+    show_if: service.admin.enabled=true
+
+  # --- Ingress ---
+  - variable: ingress.enabled
+    type: boolean
+    default: false
+    required: false
+    label: 启用 Ingress（转发到 Proxy Service）
+    description: hosts/path/tls 等复杂路由可在 Helm YAML 编辑器中按需补充。
+    group: Ingress
+
+  - variable: ingress.className
+    type: string
+    default: nginx
+    required: false
+    label: IngressClass 名称
+    group: Ingress
+    show_if: ingress.enabled=true

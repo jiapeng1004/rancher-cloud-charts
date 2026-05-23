@@ -53,10 +53,10 @@ spec:
             - name: POSTGRES_DB
               value: {{ .Values.postgresql.database | quote }}
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              value: /bitnami/postgresql
           volumeMounts:
             - name: data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /bitnami/postgresql
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -67,5 +67,5 @@ spec:
           persistentVolumeClaim:
             claimName: {{ $fullname }}
           {{- else }}
-          emptyDir: {}
+          emptyDir: { }
           {{- end }}
