@@ -1,0 +1,98 @@
+## 自动生成 / 或由 sync_rancher_questions.py 维护；与 values.yaml 常见字段对齐。高级项请直接在 Rancher 「编辑 YAML」中补充。
+categories:
+- postgresql
+questions:
+- variable: image.repository
+  type: string
+  label: 镜像仓库
+  description: 容器镜像仓库地址
+  group: 镜像
+  default: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/bitnami/postgresql
+  required: true
+- variable: image.tag
+  type: string
+  label: 镜像标签
+  description: 镜像 tag
+  group: 镜像
+  default: '16'
+  required: true
+- variable: image.pullPolicy
+  type: enum
+  label: 镜像拉取策略
+  description: Kubernetes imagePullPolicy
+  group: 镜像
+  default: IfNotPresent
+  required: true
+  options:
+  - IfNotPresent
+  - Always
+  - Never
+- variable: service.type
+  type: enum
+  label: Service 类型
+  description: Kubernetes Service.type
+  group: 服务
+  default: ClusterIP
+  required: true
+  options:
+  - ClusterIP
+  - NodePort
+  - LoadBalancer
+- variable: service.port
+  type: int
+  label: Service 端口 (port)
+  description: 读写 service.port
+  group: 服务
+  default: 5432
+  required: true
+- variable: ingress.enabled
+  type: boolean
+  label: 启用 Ingress
+  description: 若为 true，将渲染 Ingress（具体 hosts/tls 可在 YAML 中编辑）
+  group: Ingress
+  default: false
+  required: false
+- variable: ingress.className
+  type: string
+  label: IngressClass 名称
+  description: Ingress 使用的 ingressClassName
+  group: Ingress
+  default: nginx
+  required: false
+  show_if: ingress.enabled=true
+- variable: persistence.enabled
+  type: boolean
+  label: 启用持久卷
+  description: 若为 true，使用 PVC 持久化数据
+  group: 持久化
+  default: true
+  required: false
+- variable: persistence.size
+  type: string
+  label: PVC 容量
+  description: Kubernetes 请求的存储大小（如 10Gi）
+  group: 持久化
+  default: 10Gi
+  required: false
+  show_if: persistence.enabled=true
+- variable: postgresql.user
+  type: string
+  label: PostgreSQL 用户名（POSTGRES_USER）
+  description: 数据库初始化用户名
+  group: PostgreSQL
+  default: postgres
+  required: true
+- variable: postgresql.password
+  type: password
+  label: PostgreSQL 密码（POSTGRES_PASSWORD）
+  description: 与 POSTGRES_PASSWORD 对应的密码
+  group: PostgreSQL
+  default: postgres
+  required: true
+- variable: postgresql.database
+  type: string
+  label: PostgreSQL 默认库名（POSTGRES_DB）
+  description: 初始化数据库名称
+  group: PostgreSQL
+  default: postgres
+  required: true

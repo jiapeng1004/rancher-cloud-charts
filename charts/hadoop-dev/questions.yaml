@@ -1,6 +1,6 @@
 ## 自动生成 / 或由 sync_rancher_questions.py 维护；与 values.yaml 常见字段对齐。高级项请直接在 Rancher 「编辑 YAML」中补充。
 categories:
-- kafka
+- hadoop dev
 questions:
 - variable: rancherUiNote
   type: string

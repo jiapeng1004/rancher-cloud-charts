@@ -1,0 +1,29 @@
+## 自动生成 / 或由 sync_rancher_questions.py 维护；与 values.yaml 常见字段对齐。高级项请直接在 Rancher 「编辑 YAML」中补充。
+categories:
+- logstash oss
+questions:
+- variable: image.repository
+  type: string
+  label: 镜像仓库
+  description: 容器镜像仓库地址
+  group: 镜像
+  default: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.elastic.co/logstash/logstash
+  required: true
+- variable: image.tag
+  type: string
+  label: 镜像标签
+  description: 镜像 tag
+  group: 镜像
+  default: 8.11.4
+  required: true
+- variable: image.pullPolicy
+  type: enum
+  label: 镜像拉取策略
+  description: Kubernetes imagePullPolicy
+  group: 镜像
+  default: IfNotPresent
+  required: true
+  options:
+  - IfNotPresent
+  - Always
+  - Never

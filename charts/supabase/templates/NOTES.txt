@@ -22,7 +22,7 @@ Postgres：bundled.postgres={{ .Values.bundled.postgres }}
 {{- if .Values.bundled.postgres }}
 子 chart：**Release 名后缀 `-postgresql`** 的 ClusterIP。**开发向**：单用户 postgres 连接串自动生成；正式上线请导入 Supabase 官方迁移与数据库角色后再改 URLs。
 {{- else }}
-使用 **externalDatabase.***（外链实例）。
+使用 **externalDatabase.host / port / user / password / dbName**（模板拼 postgres URL）；Realtime 特例见 README。
 {{- end }}
 
 详见 **README.zh-CN.md**。

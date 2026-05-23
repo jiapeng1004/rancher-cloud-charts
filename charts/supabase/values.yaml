@@ -71,13 +71,22 @@ images:
     pullPolicy: IfNotPresent
 
 externalDatabase:
+  # 外链 RDS / 自建 PG：仅填「域名或 Service DNS」+「端口」（不要写 postgres://）。
+  host: ""
+  port: "5432"
+  dbName: "postgres"
+  user: ""
+  password: ""
+  # 进阶：若必须手写完整连接串（如密码中含特殊符号且不想走 urlquery 拼装），可为 GoTrue / PostgREST 分别覆盖；
+  # 留空则由模板用上方的 host/port/user/password/dbName 自动拼 postgres://
   gotrueDbUrl: ""
   restDbUri: ""
+  # Realtime：通常留空即为与上面共用同一 PG；仅当 Realtime 需独立连接时再填任一字段覆盖。
   realtime:
     host: ""
-    port: "5432"
-    dbName: "postgres"
-    user: "supabase_admin"
+    port: ""
+    dbName: ""
+    user: ""
     password: ""
     encryptionKeyDefault: supabaserealtime
 

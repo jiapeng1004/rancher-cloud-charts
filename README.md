@@ -26,6 +26,13 @@
 | `charts/kong-gateway/README.zh-CN.md` | Kong（DB-less 声明式网关） |
 | `charts/middleware-bundle/README.md` | 聚合中间件；子 chart 已内置，见该 README |
 
+## Rancher 自定义答案（questions.yaml）
+
+- **`type: library`（如 `charts/rancher-lib`）不生成表单**。
+- **其余 application Chart**：每个 Chart 目录下均有非空 `questions.yaml`（或由子 chart / 手写维护）；表单字段与常用 `values` 对齐，**复杂段落仍建议在 Rancher「编辑 YAML」中维护**。
+- **批量同步**：仓库根目录执行 **`py -3 scripts/sync_rancher_questions.py`**，可按 `values.yaml` 自动生成/补齐常见项（**跳过已有人工维护的非空文件**）。
+- **历史 `questions.yml`**：脚本会在缺少 `questions.yaml` 时用同名 `.yml` 复制补齐（便于 Rancher 读取）。
+
 ## 快速聚合安装
 
 ```bash

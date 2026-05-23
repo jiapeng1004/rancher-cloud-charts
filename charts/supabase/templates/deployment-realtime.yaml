@@ -1,7 +1,17 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 {{- $bund := .Values.bundled.postgres }}
-{{- $db := .Values.externalDatabase.realtime }}
+{{- $rtx := (.Values.externalDatabase.realtime | default dict) }}
+{{- $eRt := .Values.externalDatabase }}
+{{- $rRt := ($eRt.realtime | default dict) }}
+{{- $rh := trim (toString ($rRt.host | default "")) }}
+{{- $extRtHost := ternary $rh (trim (toString ($eRt.host | default ""))) (ne $rh "") }}
+{{- $rport := trim (toString ($rRt.port | default "")) }}
+{{- $extRtPort := ternary $rport (trim (toString ($eRt.port | default "5432"))) (ne $rport "") }}
+{{- $rdn := trim (toString ($rRt.dbName | default "")) }}
+{{- $extRtDbName := ternary $rdn (trim (toString ($eRt.dbName | default "postgres"))) (ne $rdn "") }}
+{{- $ru := trim (toString ($rRt.user | default "")) }}
+{{- $extRtUser := ternary $ru (trim (toString ($eRt.user | default ""))) (ne $ru "") }}
 {{- if and .Values.enabled .Values.components.realtime }}
 apiVersion: apps/v1
 kind: Deployment
@@ -55,13 +65,13 @@ spec:
               value: {{ .Values.postgresql.postgresql.database | quote }}
             {{- else }}
             - name: DB_HOST
-              value: {{ $db.host | quote }}
+              value: {{ $extRtHost | quote }}
             - name: DB_PORT
-              value: {{ $db.port | quote }}
+              value: {{ $extRtPort | quote }}
             - name: DB_USER
-              value: {{ $db.user | quote }}
+              value: {{ $extRtUser | quote }}
             - name: DB_NAME
-              value: {{ $db.dbName | quote }}
+              value: {{ $extRtDbName | quote }}
             {{- end }}
             - name: DB_PASSWORD
               valueFrom:
@@ -71,7 +81,7 @@ spec:
             - name: DB_AFTER_CONNECT_QUERY
               value: SET search_path TO _realtime
             - name: DB_ENC_KEY
-              value: {{ $db.encryptionKeyDefault | quote }}
+              value: {{ ($rtx.encryptionKeyDefault | default "supabaserealtime") | quote }}
             - name: API_JWT_SECRET
               valueFrom:
                 secretKeyRef:

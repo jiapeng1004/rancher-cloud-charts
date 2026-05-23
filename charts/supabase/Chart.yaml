@@ -5,7 +5,8 @@ icon: https://avatars.githubusercontent.com/u/54469796?s=280&v=4
 description: >-
   Supabase API：PostgreSQL/Kong/nginx 等均优先支持与推荐外链；
   可选内建子 chart Postgres 与内置 nginx/Kong。
-  无 _helpers.tpl。内建 Postgres 仅供联调占位，上线请迁移或使用外链 RDS。
+  外链库在 templates/secret.yaml 内拼 postgres://；Rancher 表单不写完整 URL。
+  内建 Postgres 仅供联调占位，上线请迁移或使用外链 RDS。
 keywords:
   - supabase
   - postgres
@@ -15,7 +16,7 @@ maintainers:
   - name: rancher-cloud-charts
 name: supabase
 type: application
-version: 1.1.0
+version: 1.1.2
 appVersion: "minimal"
 dependencies:
   - name: postgresql

@@ -17,8 +17,53 @@ questions:
     default: false
     required: true
     label: 启用内建 PostgreSQL 子 chart
-    description: 生产建议外链 RDS/自建 PG。为 true 时需配置下方「内建 Postgres」并可设置 persistence；为 false 时须填写外链连接（GoTrue / REST / Realtime）。
+    description: 生产建议外链 RDS/自建 PG。为 false 时只需填下方「外链库」域名+端口+账号（父 chart Secret 会自动拼 postgres://）；为 true 时配置内建 Postgres 子 chart。
     group: 数据库与 Secret
+
+  # --- 外链：一套字段共用 GoTrue / PostgREST / Realtime（不写 postgres://）；Realtime 特例见 README 的 realtime.* ---
+  - variable: externalDatabase.host
+    type: string
+    default: ""
+    required: false
+    label: 外链 Postgres 主机（域名或服务 DNS）
+    description: |-
+      bundled.postgres 为 false 时必填（除非你在 YAML 里只为 GoTrue/REST 手写 gotrueDbUrl/restDbUri）。
+      只填主机名或服务名（如 my-db.xxx.rds.amazonaws.com），不要写 postgres:// 或端口。
+    group: 外链 PostgreSQL（bundled=false）
+    show_if: bundled.postgres=false
+
+  - variable: externalDatabase.port
+    type: string
+    default: "5432"
+    required: false
+    label: Postgres 端口
+    group: 外链 PostgreSQL（bundled=false）
+    show_if: bundled.postgres=false
+
+  - variable: externalDatabase.dbName
+    type: string
+    default: "postgres"
+    required: false
+    label: 数据库名（dbName）
+    group: 外链 PostgreSQL（bundled=false）
+    show_if: bundled.postgres=false
+
+  - variable: externalDatabase.user
+    type: string
+    default: "supabase_admin"
+    required: false
+    label: Postgres 用户名
+    group: 外链 PostgreSQL（bundled=false）
+    show_if: bundled.postgres=false
+
+  - variable: externalDatabase.password
+    type: password
+    default: ""
+    required: false
+    label: Postgres 密码
+    description: bundled.postgres=false 且启用 auth/rest/realtime 时必填；模板对密码做 URI 百分比编码后放入 postgres://。
+    group: 外链 PostgreSQL（bundled=false）
+    show_if: bundled.postgres=false
 
   - variable: postgresql.postgresql.user
     type: string
@@ -78,65 +123,6 @@ questions:
     label: 内建 Postgres 启用 Ingress（一般关闭）
     group: 内建 PostgreSQL（子 chart）
     show_if: bundled.postgres=true
-
-  - variable: externalDatabase.gotrueDbUrl
-    type: string
-    default: ""
-    required: false
-    label: 外链 PostgreSQL——GoTrue 连接串 postgres://...
-    description: bundled.postgres 为 false 时必填。完整数据库 URL。
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.restDbUri
-    type: string
-    default: ""
-    required: false
-    label: 外链 PostgreSQL——PostgREST 连接串 postgres://...
-    description: bundled.postgres 为 false 时必填。
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.realtime.host
-    type: string
-    default: ""
-    required: false
-    label: Realtime——PG host
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.realtime.port
-    type: string
-    default: "5432"
-    required: false
-    label: Realtime——PG port
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.realtime.dbName
-    type: string
-    default: "postgres"
-    required: false
-    label: Realtime——数据库名
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.realtime.user
-    type: string
-    default: "supabase_admin"
-    required: false
-    label: Realtime——数据库用户
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.realtime.password
-    type: password
-    default: ""
-    required: false
-    label: Realtime——数据库密码
-    description: bundled.postgres 为 false 时必填。
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
 
   # --- Secrets & API URL ---
   - variable: jwt.secret

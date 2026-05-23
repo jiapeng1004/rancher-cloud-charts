@@ -1,0 +1,36 @@
+## 自动生成 / 或由 sync_rancher_questions.py 维护；与 values.yaml 常见字段对齐。高级项请直接在 Rancher 「编辑 YAML」中补充。
+categories:
+- elk-bundle
+- elasticsearch
+- logging
+questions:
+- variable: elasticsearch.enabled
+  type: boolean
+  label: 启用 Elasticsearch
+  description: 若为 true，安装嵌入式 Elasticsearch（见子 chart Elasticsearch 表单）
+  group: Elasticsearch
+  default: true
+  required: true
+- variable: elasticsearch.createIngress
+  type: boolean
+  label: 为 Elasticsearch 创建 Ingress
+  description: 子 chart elasticsearch 的值透传前缀 elasticsearch.*
+  group: Elasticsearch
+  default: false
+  required: false
+  show_if: elasticsearch.enabled=true
+- variable: elasticsearch.installKibana
+  type: boolean
+  label: 同时安装 Kibana（子 chart）
+  description: 与 elk-bundle/README 对齐；详情请查子 chart README
+  group: Elasticsearch
+  default: true
+  required: false
+  show_if: elasticsearch.enabled=true
+- variable: logstash-oss.enabled
+  type: boolean
+  label: 启用 Logstash OSS
+  description: 安装嵌入式 Logstash OSS 子 chart
+  group: Logstash
+  default: true
+  required: true

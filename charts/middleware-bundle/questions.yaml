@@ -1,0 +1,65 @@
+## 自动生成 / 或由 sync_rancher_questions.py 维护；与 values.yaml 常见字段对齐。高级项请直接在 Rancher 「编辑 YAML」中补充。
+categories:
+- middleware
+- umbrella
+questions:
+- variable: mysql.enabled
+  type: boolean
+  label: 启用 MySQL
+  description: 若为 true，安装嵌入式 MySQL 子 chart（另有独立表单）
+  group: 组件开关
+  default: true
+  required: true
+- variable: mysql.image.repository
+  type: string
+  label: MySQL 镜像仓库（覆盖前缀）
+  description: 可按镜像加速前缀调整嵌入式 MySQL 拉取仓库
+  group: 组件镜像前缀
+  default: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/mysql
+  required: false
+  show_if: mysql.enabled=true
+- variable: redis.enabled
+  type: boolean
+  label: 启用 Redis
+  description: 若为 true，安装嵌入式 Redis 子 chart
+  group: 组件开关
+  default: true
+  required: true
+- variable: redis.image.repository
+  type: string
+  label: Redis 镜像仓库（覆盖前缀）
+  description: 可按镜像加速前缀调整嵌入式 Redis 拉取仓库
+  group: 组件镜像前缀
+  default: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/redis
+  required: false
+  show_if: redis.enabled=true
+- variable: postgresql.enabled
+  type: boolean
+  label: 启用 PostgreSQL
+  description: 若为 true，安装嵌入式 PostgreSQL 子 chart（另有独立表单）
+  group: 组件开关
+  default: true
+  required: true
+- variable: postgresql.image.repository
+  type: string
+  label: PostgreSQL 镜像仓库（覆盖前缀）
+  description: 可按镜像加速前缀调整嵌入式 PostgreSQL 拉取仓库
+  group: 组件镜像前缀
+  default: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/postgres
+  required: false
+  show_if: postgresql.enabled=true
+- variable: minio.enabled
+  type: boolean
+  label: 启用 MinIO
+  description: 若为 true，安装嵌入式 MinIO 子 chart
+  group: 组件开关
+  default: false
+  required: true
+- variable: minio.image.repository
+  type: string
+  label: MinIO 镜像仓库（覆盖前缀）
+  description: 可按镜像加速前缀调整嵌入式 MinIO 拉取仓库
+  group: 组件镜像前缀
+  default: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio
+  required: false
+  show_if: minio.enabled=true
