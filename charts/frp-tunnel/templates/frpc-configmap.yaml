@@ -1,0 +1,37 @@
+{{- if .Values.frpc.enabled }}
+{{- if not .Values.frpc.serverAddr }}{{ fail "frpc.enabled 为 true 时必须设置 frpc.serverAddr（frps 可解析地址/DNS）" }}{{ end }}
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-frpc-config" $fullname }}
+  labels:
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "frpc" | toYaml | nindent 4 }}
+data:
+  frpc.toml: |
+    serverAddr = {{ .Values.frpc.serverAddr | quote }}
+    serverPort = {{ int .Values.frpc.serverPort }}
+    {{- with .Values.frpc.auth.token }}
+    auth.token = {{ . | quote }}
+    {{- end }}
+
+    {{- range .Values.frpc.tcpProxies }}
+    [[proxies]]
+    name = {{ .name | quote }}
+    type = "tcp"
+    localIP = {{ .localIP | default "127.0.0.1" | quote }}
+    localPort = {{ int .localPort }}
+    remotePort = {{ int .remotePort }}
+
+    {{- end }}
+    {{- range .Values.frpc.httpProxies }}
+    [[proxies]]
+    name = {{ .name | quote }}
+    type = "http"
+    localIP = {{ .localIP | default "127.0.0.1" | quote }}
+    localPort = {{ int .localPort }}
+    customDomains = [{{- range $i, $h := .customDomains }}{{ if ne $i 0 }}, {{ end }}"{{ $h }}"{{- end }}]
+
+    {{- end }}
+{{- end }}

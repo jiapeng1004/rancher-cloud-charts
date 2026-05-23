@@ -1,0 +1,49 @@
+{{- if and .Values.frps.enabled .Values.frps.dashboard.enabled .Values.frps.ingress.enabled }}
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $svc := printf "%s-frps" $fullname }}
+{{- $svcPort := int .Values.frps.service.ports.dashboard.port }}
+{{- $kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion }}
+{{- if semverCompare ">=1.19-0" $kv }}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" $kv }}
+apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ printf "%s-frps-dash" $fullname }}
+  labels:
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "frps-dashboard" | toYaml | nindent 4 }}
+  {{- with .Values.frps.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and .Values.frps.ingress.className (semverCompare ">=1.18-0" $kv) }}
+  ingressClassName: {{ .Values.frps.ingress.className }}
+  {{- end }}
+  rules:
+    {{- range .Values.frps.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          {{- if semverCompare ">=1.19-0" $kv }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ $svc }}
+                port:
+                  number: {{ $svcPort }}
+          {{- else }}
+          - path: {{ .path }}
+            backend:
+              serviceName: {{ $svc }}
+              servicePort: {{ $svcPort }}
+          {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}

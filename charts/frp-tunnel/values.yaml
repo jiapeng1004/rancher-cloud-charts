@@ -1,0 +1,94 @@
+# FRP：https://github.com/fatedier/frp
+# frps：入站中继；frpc：出站连接 frps（可暴露集群内 TCP/HTTP 到 frps 侧）。
+# ⚠️ 绑定公网或非受信网络时务必改 token/dashboard 密码并完成网络 ACL。
+
+global: {}
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/fatedier/frp
+  tag: v0.58.1
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+frps:
+  enabled: true
+  replicaCount: 1
+
+  bindPort: 7000
+
+  dashboard:
+    enabled: true
+    port: 7500
+    addr: "0.0.0.0"
+    user: admin
+    password: "changeme-dashboard"
+
+  # 与官方 conf 对齐：可与 frpc 共用 token 简单鉴权
+  authToken: "" # 若非空写入 frps：auth.token，需与 frpc.auth.token 相同
+
+  # 开启后 frps 会监听 bindPort「旁路」之外的 HTTP Host 分发（常与 frpc.httpProxies.customDomains 搭配）
+  vhostHTTPPort:  0   # 如 8080（0 表示不启用）
+  vhostHTTPSPort: 0
+
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  resources: {}
+  tolerations: []
+  affinity: {}
+
+  nodeSelector: {}
+
+  service:
+    type: ClusterIP # 首开环境可改成 NodePort / LoadBalancer 以便外网打 frps
+    annotations: {}
+    # 按需补充 peer/dashboard 的固定 NodePort（仅在 type=NodePort 时在 ports.peer.nodePort 填入）
+    # vhostHTTPNodePort 仅在 vhostHTTPPort>0 且 type=NodePort 时使用
+    ports:
+      peer:
+        port: 7000
+        # nodePort: 30700
+      dashboard:
+        port: 7500
+        # nodePort: 30750
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: frp-dash.example.local
+        paths:
+          - path: /
+            pathType: Prefix
+
+frpc:
+  enabled: false
+  replicaCount: 1
+
+  # frps 对 frpc 可见的地址：公网/IP、Ingress、NodePort，或集群内 svc DNS
+  # 例：<release>-frp-tunnel-frps.<ns>.svc.cluster.local
+  serverAddr: ""
+  serverPort: 7000
+
+  auth:
+    # 必须与 frps.authToken 同步；留空则 frpc.toml 不写 auth.token（仅建议在受信内网）
+    token: ""
+
+  # tcpProxies:
+  #   - name: redis-demo
+  #     localIP: redis-master.default.svc.cluster.local
+  #     localPort: 6379
+  #     remotePort: 26379
+  tcpProxies: []
+
+  # HTTP 映射：需在 frps 打开 vhostHTTPPort，并在 Ingress/DNS 将域名指到 frps 的 HTTP vhost 入口
+  # httpProxies:
+  #   - name: app-http
+  #     localIP: nginx-web.default.svc.cluster.local
+  #     localPort: 80
+  #     customDomains:
+  #       - dev-app.example.local
+  httpProxies: []

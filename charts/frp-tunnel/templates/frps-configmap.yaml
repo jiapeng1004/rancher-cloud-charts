@@ -1,0 +1,33 @@
+{{- if .Values.frps.enabled }}
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-frps-config" $fullname }}
+  labels:
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "frps" | toYaml | nindent 4 }}
+data:
+  frps.toml: |
+    bindAddr = "0.0.0.0"
+    bindPort = {{ int .Values.frps.bindPort }}
+    {{- $http := int .Values.frps.vhostHTTPPort }}
+    {{- if gt $http 0 }}
+    vhostHTTPPort = {{ $http }}
+    {{- end }}
+    {{- $https := int .Values.frps.vhostHTTPSPort }}
+    {{- if gt $https 0 }}
+    vhostHTTPSPort = {{ $https }}
+    {{- end }}
+    {{- with .Values.frps.authToken }}
+    auth.token = {{ . | quote }}
+    {{- end }}
+
+    {{- if .Values.frps.dashboard.enabled }}
+    [webServer]
+    addr = {{ .Values.frps.dashboard.addr | quote }}
+    port = {{ int .Values.frps.dashboard.port }}
+    user = {{ .Values.frps.dashboard.user | quote }}
+    password = {{ .Values.frps.dashboard.password | quote }}
+    {{- end }}
+{{- end }}

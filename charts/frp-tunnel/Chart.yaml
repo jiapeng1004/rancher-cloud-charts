@@ -1,0 +1,16 @@
+apiVersion: v2
+name: frp-tunnel
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/nginx/nginx-original.svg
+description: |
+  首开 / 演示环境可用的 FRP：集群内部署 frps（HTTP vhost / TCP bind + Dashboard），按需启用 frpc 将集群内 TCP/HTTP 暴露到 frps。
+type: application
+keywords:
+  - frp
+  - frpc
+  - frps
+  - tcp
+  - http
+  - proxy
+maintainers:
+  - name: rancher-cloud-charts

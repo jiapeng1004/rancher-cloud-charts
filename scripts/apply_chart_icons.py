@@ -65,6 +65,7 @@ BY_PATH_SUFFIX: dict[str, str] = {
     "gitea/Chart.yaml": GITEA_LOGO,
     "prometheus/Chart.yaml": dv("prometheus"),
     "grafana-dash/Chart.yaml": dv("grafana"),
+    "frp-tunnel/Chart.yaml": dv("nginx"),
 }
 
 BY_DIR: dict[str, str] = {

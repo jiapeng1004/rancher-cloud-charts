@@ -1,0 +1,36 @@
+{{- if .Values.frpc.enabled }}
+{{- if not .Values.frpc.serverAddr }}{{ fail "frpc.enabled 为 true 时必须设置 frpc.serverAddr" }}{{ end }}
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-frpc" $fullname }}
+  labels:
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "frpc" | toYaml | nindent 4 }}
+spec:
+  replicas: {{ int .Values.frpc.replicaCount }}
+  selector:
+    matchLabels:
+      {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "frpc" | toYaml | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "frpc" | toYaml | nindent 8 }}
+    spec:
+      containers:
+        - name: frpc
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "-c"
+            - "/etc/frp/frpc.toml"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/frp
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ printf "%s-frpc-config" $fullname }}
+{{- end }}

@@ -8,6 +8,7 @@
 - **直播 / WebRTC**：SRS、MediaMTX、OvenMediaEngine、Janus 等见 `charts/srs-live`、`charts/mediamtx-live`、`charts/ome-live`、`charts/janus-webrtc`（说明见 [`docs/HUAWEI_AND_INGRESS_zh.md`](./docs/HUAWEI_AND_INGRESS_zh.md) 中「直播协议与 Ingress」）。
 - **观测与压测**：`charts/grafana-dash`（可视化）、`charts/k6-cronjobs`（k6 / RPS 与阈值）、`charts/locust-live`（Locust Web UI + Worker），可与既有 `charts/prometheus` 组合使用。
 - **消息与 ELK**：`charts/kafka`、`charts/rabbitmq`（已有单体）、新增 **`rocketmq-k8s`、`kubemq-standalone`**；**ELK** 参见 **`charts/elk-bundle`**（依赖 `helm dependency update`）与 **`logstash-oss`**。
+- **Ingress / NAT 穿透**：**`charts/frp-tunnel`**（首开环境 FRP：`frps` TCP / 可选 HTTP + 可选 `frpc`，见 chart 内 README）
 - **平台类**：Harbor **`harbor-registry`（占位+官方 Helm 说明）**、Traefik **`traefik-gateway`（文件 Provider）**、WordPress **`wordpress-site`**、ONLYOFFICE **`onlyoffice-docs`**、OpenClaw **`openclaw-runner`**、Dify / CozeLoop **`dify-lite` / `cozeloop-platform`（Compose/源码说明占位）**、Hadoop **`hadoop-dev`（说明占位）**。
 
 ## Chart 图标

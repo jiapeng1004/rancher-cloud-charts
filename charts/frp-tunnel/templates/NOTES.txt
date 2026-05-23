@@ -1,0 +1,16 @@
+Helm Release：{{ .Release.Name }}。
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+
+{{- if .Values.frps.enabled }}
+frps Service：{{ printf "%s-frps" $fullname }}.{{ .Release.Namespace }}.svc.cluster.local
+  TCP 中继端口（ClusterIP.peer）：{{ .Values.frps.bindPort }}
+  Dashboard 端口（需 Service 可达）：{{ .Values.frps.dashboard.port }}
+{{- end }}
+
+{{- if .Values.frpc.enabled }}
+frpc Deployment：{{ printf "%s-frpc" $fullname }}；目标 frps={{ .Values.frpc.serverAddr }}:{{ .Values.frpc.serverPort }}
+{{- end }}
+
+安全提示：首开/演示请务必修改 dashboard 密码及 token，并仅在受控网络暴露 frps bind 端口。
+详见 charts/frp-tunnel/README.md。

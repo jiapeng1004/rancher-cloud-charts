@@ -22,6 +22,7 @@
 | 镜像/注册中心 | **`charts/harbor-registry`** | Harbor：**官方 Helm 指引占位** |
 | Ingress / 网关 | `charts/nginx-web`、`charts/openresty-web`、`charts/pingora-proxy`、`charts/nginx-ingress` | 常见网关/入口 |
 | | **`charts/traefik-gateway`** | Traefik：**文件 Provider 起步**，生产请看官方 Helm |
+| | **`charts/frp-tunnel`** | **FRP**：首开/Demo：`frps`（TCP / 可选 HTTP vhost）+ 可选 `frpc` 暴露集群内服务 |
 | **直播/WebRTC** | `charts/srs-live` | OSSRS SRS（RTMP/HLS/HTTP-FLV，可选极简 WebRTC 块） |
 | | `charts/mediamtx-live` | MediaMTX（RTSP/RTMP/HLS/WebRTC 网关） |
 | | `charts/ome-live` | OvenMediaEngine 占位 |
@@ -38,4 +39,4 @@
 | 大数据占位 | **`charts/hadoop-dev`** | Hadoop：**说明占位**（建议云上 MRS/EMR） |
 | 应用模板 | `charts/ruoyi-vue`、`charts/halo`、… | 其它业务模板按需替换镜像 |
 
-新增组件时优先：**单体 chart 可被 umbrella 引用**（`middleware-bundle` 模式），避免在多个目录复制同一份 `_helpers`。
+新增组件时优先：**单体 chart 可被 umbrella 引用**（`middleware-bundle` 模式）；模板避免再引入 `templates/_helpers.tpl`。

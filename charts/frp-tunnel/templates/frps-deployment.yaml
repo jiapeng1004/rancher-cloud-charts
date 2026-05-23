@@ -1,0 +1,75 @@
+{{- if .Values.frps.enabled }}
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-frps" $fullname }}
+  labels:
+{{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "frps" | toYaml | nindent 4 }}
+spec:
+  replicas: {{ int .Values.frps.replicaCount }}
+  selector:
+    matchLabels:
+      {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "frps" | toYaml | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.frps.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- dict "app.kubernetes.io/name" $name "app.kubernetes.io/instance" .Release.Name "app.kubernetes.io/component" "frps" | toYaml | nindent 8 }}
+    spec:
+      {{- with .Values.frps.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: frps
+          {{- with .Values.frps.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "-c"
+            - "/etc/frp/frps.toml"
+          ports:
+            - name: peer
+              containerPort: {{ int .Values.frps.bindPort }}
+            {{- $vhost := int .Values.frps.vhostHTTPPort }}
+            {{- if gt $vhost 0 }}
+            - name: vhost-http
+              containerPort: {{ $vhost }}
+            {{- end }}
+            {{- if .Values.frps.dashboard.enabled }}
+            - name: dashboard
+              containerPort: {{ int .Values.frps.dashboard.port }}
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/frp
+              readOnly: true
+          {{- with .Values.frps.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.frps.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frps.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frps.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ printf "%s-frps-config" $fullname }}
+{{- end }}
