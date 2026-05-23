@@ -1,6 +1,7 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 {{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- $sc := (.Values.supabase.composeMode | default true) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -41,10 +42,11 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: postgres
-              containerPort: 5432
-              protocol: TCP
+          {{- if $sc }}
+          envFrom:
+            - secretRef:
+                name: {{ printf "%s-postgresql-bootstrap" .Release.Name }}
+          {{- end }}
           env:
             - name: POSTGRES_USER
               value: {{ .Values.postgresql.user | quote }}
@@ -52,11 +54,96 @@ spec:
               value: {{ .Values.postgresql.password | quote }}
             - name: POSTGRES_DB
               value: {{ .Values.postgresql.database | quote }}
+            {{- if $sc }}
+            - name: POSTGRES_HOST
+              value: /var/run/postgresql
+            - name: PGPORT
+              value: "5432"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: PGPASSWORD
+              value: {{ .Values.postgresql.password | quote }}
+            - name: PGDATABASE
+              value: {{ .Values.postgresql.database | quote }}
+            {{- end }}
+            {{- $pgd := trim (.Values.postgresql.pgdata | default "") }}
+            {{- if ne $pgd "" }}
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              value: {{ $pgd | quote }}
+            {{- end }}
+          {{- if $sc }}
+          command:
+            - "postgres"
+          args:
+            - "-c"
+            - "config_file=/etc/postgresql/postgresql.conf"
+            - "-c"
+            - "log_min_messages=fatal"
+          {{- end }}
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+            {{- if $sc }}
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d/migrations/99-realtime.sql
+              subPath: migrations/99-realtime.sql
+              readOnly: true
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql
+              subPath: init-scripts/98-webhooks.sql
+              readOnly: true
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d/init-scripts/99-roles.sql
+              subPath: init-scripts/99-roles.sql
+              readOnly: true
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d/init-scripts/99-jwt.sql
+              subPath: init-scripts/99-jwt.sql
+              readOnly: true
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d/migrations/97-_supabase.sql
+              subPath: migrations/97-_supabase.sql
+              readOnly: true
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d/migrations/99-logs.sql
+              subPath: migrations/99-logs.sql
+              readOnly: true
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d/migrations/99-pooler.sql
+              subPath: migrations/99-pooler.sql
+              readOnly: true
+            - name: postgresql-custom
+              mountPath: /etc/postgresql-custom
+            {{- end }}
+          {{- if $sc }}
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+                - -h
+                - localhost
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+                - -h
+                - localhost
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+          {{- end }}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -69,3 +156,15 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        {{- if $sc }}
+        - name: initdb
+          configMap:
+            name: {{ $fullname }}-initdb
+        - name: postgresql-custom
+          {{- if .Values.supabase.postgresqlCustomPersistence }}
+          persistentVolumeClaim:
+            claimName: {{ $fullname }}-postgresql-custom
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}

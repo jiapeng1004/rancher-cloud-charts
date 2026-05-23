@@ -7,6 +7,7 @@
 {{- $pub = required "请在 api.publicUrl（或兼容字段 api.externalUrl）填写对外网关根 URL（Ingress 前端）" (.Values.api.publicUrl | default .Values.api.externalUrl) }}
 {{- end }}
 {{- if and .Values.enabled .Values.components.auth }}
+{{- $sb := .Values.supabase | default dict }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,13 +62,41 @@ spec:
             - name: API_EXTERNAL_URL
               value: {{ $pub | quote }}
             - name: GOTRUE_SITE_URL
-              value: {{ $pub | quote }}
+              value: {{ default $pub ($sb.siteUrl | default "") | quote }}
             - name: GOTRUE_URI_ALLOW_LIST
-              value: "*"
+              value: {{ default "" ($sb.additionalRedirectUrls | default "") | quote }}
+            - name: GOTRUE_DISABLE_SIGNUP
+              value: {{ default "false" ($sb.disableSignup | default "false") | quote }}
             - name: GOTRUE_EXTERNAL_EMAIL_ENABLED
-              value: "false"
+              value: {{ default "true" ($sb.enableEmailSignup | default "true") | quote }}
+            - name: GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED
+              value: {{ default "false" ($sb.enableAnonymousUsers | default "false") | quote }}
             - name: GOTRUE_MAILER_AUTOCONFIRM
-              value: "true"
+              value: {{ default "false" ($sb.enableEmailAutoconfirm | default "false") | quote }}
+            - name: GOTRUE_SMTP_ADMIN_EMAIL
+              value: {{ default "admin@example.com" ($sb.smtpAdminEmail | default "") | quote }}
+            - name: GOTRUE_SMTP_HOST
+              value: {{ default "supabase-mail" ($sb.smtpHost | default "") | quote }}
+            - name: GOTRUE_SMTP_PORT
+              value: {{ default "2500" ($sb.smtpPort | default "2500") | quote }}
+            - name: GOTRUE_SMTP_USER
+              value: {{ default "fake_mail_user" ($sb.smtpUser | default "") | quote }}
+            - name: GOTRUE_SMTP_PASS
+              value: {{ default "fake_mail_password" ($sb.smtpPass | default "") | quote }}
+            - name: GOTRUE_SMTP_SENDER_NAME
+              value: {{ default "fake_sender" ($sb.smtpSenderName | default "") | quote }}
+            - name: GOTRUE_MAILER_URLPATHS_INVITE
+              value: {{ ($sb.mailerUrlpathsInvite | default "/auth/v1/verify") | quote }}
+            - name: GOTRUE_MAILER_URLPATHS_CONFIRMATION
+              value: {{ ($sb.mailerUrlpathsConfirmation | default "/auth/v1/verify") | quote }}
+            - name: GOTRUE_MAILER_URLPATHS_RECOVERY
+              value: {{ ($sb.mailerUrlpathsRecovery | default "/auth/v1/verify") | quote }}
+            - name: GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE
+              value: {{ ($sb.mailerUrlpathsEmailChange | default "/auth/v1/verify") | quote }}
+            - name: GOTRUE_EXTERNAL_PHONE_ENABLED
+              value: {{ default "true" ($sb.enablePhoneSignup | default "true") | quote }}
+            - name: GOTRUE_SMS_AUTOCONFIRM
+              value: {{ default "true" ($sb.enablePhoneAutoconfirm | default "true") | quote }}
             - name: GOTRUE_DB_DRIVER
               value: postgres
             - name: GOTRUE_JWT_ADMIN_ROLES
@@ -78,8 +107,6 @@ spec:
               value: authenticated
             - name: GOTRUE_JWT_EXP
               value: {{ .Values.jwt.expirySeconds | quote }}
-            - name: GOTRUE_DISABLE_SIGNUP
-              value: "false"
             - name: GOTRUE_JWT_SECRET
               valueFrom:
                 secretKeyRef:

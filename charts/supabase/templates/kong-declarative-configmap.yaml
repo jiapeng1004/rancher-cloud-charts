@@ -1,7 +1,7 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 {{- $fn := .Values.gateway.kong.declarativeFilename }}
-{{- if and .Values.enabled (eq .Values.gateway.mode "kong") }}
+{{- if and .Values.enabled (eq .Values.gateway.mode "kong") (not (.Values.gateway.kong.useComposePrep | default true)) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

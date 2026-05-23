@@ -115,9 +115,21 @@ spec:
               value: "true"
             - name: DISABLE_HEALTHCHECK_LOGGING
               value: "true"
+            - name: ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-runtime
+                  key: ANON_KEY
           readinessProbe:
-            tcpSocket:
-              port: 4000
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - wget --no-verbose --tries=1 --server-response --spider --header="Authorization: Bearer ${ANON_KEY}" http://127.0.0.1:4000/api/tenants/realtime-dev/health
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
           livenessProbe:
             tcpSocket:
               port: 4000

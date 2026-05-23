@@ -2,6 +2,7 @@
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 {{- $g := .Values.gateway.kong }}
 {{- $deck := printf "%s/%s" $g.declarativeMountPath $g.declarativeFilename }}
+{{- $prep := $g.useComposePrep | default true }}
 {{- if and .Values.enabled (eq .Values.gateway.mode "kong") }}
 apiVersion: apps/v1
 kind: Deployment
@@ -38,6 +39,12 @@ spec:
         - name: kong
           image: "{{ $g.image.repository }}:{{ $g.image.tag }}"
           imagePullPolicy: {{ $g.image.pullPolicy }}
+          {{- if $prep }}
+          command: ["/bin/bash", "/entry/kong-entrypoint.sh"]
+          envFrom:
+            - secretRef:
+                name: {{ $fullname }}-kong-apikeys
+          {{- end }}
           ports:
             - name: proxy
               containerPort: 8000
@@ -46,8 +53,13 @@ spec:
           env:
             - name: KONG_DATABASE
               value: "off"
+            {{- if $prep }}
+            - name: KONG_DECLARATIVE_CONFIG
+              value: /kong-generated/kong.yml
+            {{- else }}
             - name: KONG_DECLARATIVE_CONFIG
               value: {{ $deck | quote }}
+            {{- end }}
             - name: KONG_PLUGINS
               value: {{ $g.env.plugins | quote }}
             {{- with $g.env.dnsOrder }}
@@ -62,8 +74,13 @@ spec:
               value: "0.0.0.0:8000 reuseport backlog=16384"
             - name: KONG_ADMIN_LISTEN
               value: {{ $g.env.adminListen | quote }}
+            {{- if $prep }}
+            - name: KONG_PROXY_ACCESS_LOG
+              value: "/dev/stdout combined"
+            {{- else }}
             - name: KONG_PROXY_ACCESS_LOG
               value: /dev/stdout
+            {{- end }}
             - name: KONG_PROXY_ERROR_LOG
               value: /dev/stderr
             - name: KONG_ADMIN_ACCESS_LOG
@@ -75,15 +92,29 @@ spec:
             - name: KONG_NGINX_PROXY_PROXY_BUFFERS
               value: "64 160k"
           volumeMounts:
+            {{- if $prep }}
+            - name: kong-temp
+              mountPath: /home/kong/temp.yml
+              subPath: temp.yml
+              readOnly: true
+            - name: kong-generated
+              mountPath: /kong-generated
+            - name: kong-entry
+              mountPath: /entry
+              readOnly: true
+            {{- else }}
             - name: deck
               mountPath: {{ $g.declarativeMountPath }}
               readOnly: true
+            {{- end }}
           readinessProbe:
             exec:
               command:
                 - kong
                 - health
-            initialDelaySeconds: 30
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 5
           livenessProbe:
             exec:
               command:
@@ -95,7 +126,19 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
       volumes:
+        {{- if $prep }}
+        - name: kong-temp
+          configMap:
+            name: {{ $fullname }}-kong-compose-temp
+        - name: kong-generated
+          emptyDir: {}
+        - name: kong-entry
+          configMap:
+            name: {{ $fullname }}-kong-entry
+            defaultMode: 0555
+        {{- else }}
         - name: deck
           configMap:
             name: {{ $fullname }}-kong-deck
+        {{- end }}
 {{- end }}

@@ -1,0 +1,27 @@
+{{- if .Values.supabase.composeMode }}
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-initdb
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ quote $name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  migrations/99-realtime.sql: |
+{{ $.Files.Get "files/docker-entrypoint-initdb.d/migrations/99-realtime.sql" | nindent 4 }}
+  init-scripts/98-webhooks.sql: |
+{{ $.Files.Get "files/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql" | nindent 4 }}
+  init-scripts/99-roles.sql: |
+{{ $.Files.Get "files/docker-entrypoint-initdb.d/init-scripts/99-roles.sql" | nindent 4 }}
+  init-scripts/99-jwt.sql: |
+{{ $.Files.Get "files/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql" | nindent 4 }}
+  migrations/97-_supabase.sql: |
+{{ $.Files.Get "files/docker-entrypoint-initdb.d/migrations/97-_supabase.sql" | nindent 4 }}
+  migrations/99-logs.sql: |
+{{ $.Files.Get "files/docker-entrypoint-initdb.d/migrations/99-logs.sql" | nindent 4 }}
+  migrations/99-pooler.sql: |
+{{ $.Files.Get "files/docker-entrypoint-initdb.d/migrations/99-pooler.sql" | nindent 4 }}
+{{- end }}

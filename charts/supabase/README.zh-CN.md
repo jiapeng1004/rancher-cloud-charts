@@ -33,6 +33,8 @@
 
 ### Postgres
 
+**安全上下文**：内嵌 PG 在 **`postgresql.podSecurityContext` / `postgresql.securityContext`** 中默认 **`runAsUser: 105`、`runAsGroup: 106`、`fsGroup: 106`**（按常见集群/PSA 指定；与你的 `supabase/postgres` 镜像内 **`postgres` 用户 UID/GID 不一致时**，会启动失败或卷权限报错，必须用 **`kubectl exec … id`** 对上后再改 YAML）。其余项含 `runAsNonRoot`、`capabilities.drop`、`seccomp` 等。
+
 | `bundled.postgres` | 说明 |
 |--------------------|------|
 | **`true`（默认）** | Helm dependency `postgresql`，设置 **`postgresql.postgresql.password`**（及按需持久化）；`composeDbRoles` 时对角色名见上文 |

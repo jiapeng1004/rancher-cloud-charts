@@ -3,6 +3,11 @@ image:
   tag: "15.8.1.085"
   pullPolicy: IfNotPresent
 
+# 对齐官方 docker-compose 的 db 服务（command/init 卷挂载/JWT）；换 library postgres 时请设 composeMode: false
+supabase:
+  composeMode: true
+  postgresqlCustomPersistence: false
+
 serviceAccount:
   create: false
   name: ""
@@ -14,9 +19,23 @@ podAnnotations: {}
 
 imagePullSecrets: []
 
-podSecurityContext: {}
+# Pod 级 security（与 restricted / PSA 常见要求对齐）。
+# 默认与 umbrella 对齐：runAsUser=105、runAsGroup=106、fsGroup=106；换镜像时请 kubectl exec … id postgres 核对。
+podSecurityContext:
+  fsGroup: 106
+  seccompProfile:
+    type: RuntimeDefault
 
-securityContext: {}
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  privileged: false
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 105
+  runAsGroup: 106
 
 service:
   type: ClusterIP
@@ -26,6 +45,9 @@ postgresql:
   user: "postgres"
   password: "your-super-secret-and-long-postgres-password"
   database: "postgres"
+  # 默认不写 PGDATA，与官方 postgres/supabase postgres 镜像及 compose 卷挂载一致；
+  # 仅当你必须用非默认数据子目录时再填绝对路径。
+  pgdata: ""
 
 persistence:
   enabled: true

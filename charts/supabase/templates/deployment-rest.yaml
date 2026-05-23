@@ -1,6 +1,7 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 {{- if and .Values.enabled .Values.components.rest }}
+{{- $sb := .Values.supabase | default dict }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,14 +47,18 @@ spec:
                   name: {{ $fullname }}-runtime
                   key: PGRST_DB_URI
             - name: PGRST_DB_SCHEMAS
-              value: public,graphql_public
+              value: {{ $sb.restDbSchemas | default "public,storage,graphql_public" | quote }}
+            - name: PGRST_DB_MAX_ROWS
+              value: {{ $sb.restDbMaxRows | default "1000" | quote }}
+            - name: PGRST_DB_EXTRA_SEARCH_PATH
+              value: {{ $sb.restDbExtraSearchPath | default "public" | quote }}
             - name: PGRST_DB_ANON_ROLE
               value: anon
             - name: PGRST_JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ $fullname }}-runtime
-                  key: JWT_SECRET
+                  key: PGRST_JWT_SECRET
             - name: PGRST_APP_SETTINGS_JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -63,6 +68,8 @@ spec:
               value: {{ .Values.jwt.expirySeconds | quote }}
             - name: PGRST_DB_USE_LEGACY_GUCS
               value: "false"
+          command:
+            - "postgrest"
           readinessProbe:
             tcpSocket:
               port: 3000

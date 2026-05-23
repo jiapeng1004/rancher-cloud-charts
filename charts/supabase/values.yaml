@@ -25,6 +25,22 @@ postgresql:
     repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres
     tag: "15.8.1.085"
     pullPolicy: IfNotPresent
+  # 内嵌 PG Deployment：Pod/容器 securityContext（子 chart deployment 模板已接线）
+  # UID/GID 按集群 PSA/存储要求可自行改；以下为常用：runAsUser=105、组=106、卷 fsGroup=106
+  podSecurityContext:
+    fsGroup: 106
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    privileged: false
+    readOnlyRootFilesystem: false
+    runAsNonRoot: true
+    runAsUser: 105
+    runAsGroup: 106
   ingress:
     enabled: false
   postgresql:
@@ -33,6 +49,12 @@ postgresql:
     password: your-super-secret-and-long-postgres-password
     database: postgres
     postgresPassword: ""
+    # 默认留空不写 PGDATA，与 upstream compose/db 挂载 /var/lib/postgresql/data 行为一致。
+    pgdata: ""
+  supabase:
+    # 对齐 docker-compose services.db（command / init SQL / JWT 注入）；换非 supabase/postgres 镜像时请 false
+    composeMode: true
+    postgresqlCustomPersistence: false
   persistence:
     enabled: true
     size: 10Gi
@@ -40,12 +62,42 @@ postgresql:
 jwt:
   expirySeconds: "3600"
   # PostgREST 要求至少 32 字符；不要使用更短的占位串或留空
-  secret: "rancher-supabase-postgrest-jwt-min32chars-xx"
+  secret: "your-super-secret-jwt-token-with-at-least-32-characters-long"
+  # 对齐 compose 的 JWT_JWKS（留空则用 JWT_SECRET）；Podman/JWKS 场景再填 JSON
+  jwks: ""
 
 realtimeSecretKeyBase: >-
-  REPLACE_REALTIME_SECRET_KEY_BASE_64PLUS_CHARS_HEX_OR_RANDOM_STRING
+  UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
 
-# 与 compose 中 API_EXTERNAL_URL / SUPABASE_PUBLIC_URL 类似：面向客户端的 API 根（常指向 Kong 8000）
+# 对齐 docker/.env.example：Kong / Realtime health / 可选 opaque keys
+supabase:
+  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE"
+  serviceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q"
+  publishableKey: ""
+  secretApiKey: ""
+  anonKeyAsymmetric: ""
+  serviceRoleKeyAsymmetric: ""
+  siteUrl: "http://localhost:3000"
+  additionalRedirectUrls: ""
+  disableSignup: "false"
+  enableEmailSignup: "true"
+  enableEmailAutoconfirm: "false"
+  enableAnonymousUsers: "false"
+  enablePhoneSignup: "true"
+  enablePhoneAutoconfirm: "true"
+  smtpAdminEmail: "admin@example.com"
+  smtpHost: "supabase-mail"
+  smtpPort: "2500"
+  smtpUser: "fake_mail_user"
+  smtpPass: "fake_mail_password"
+  smtpSenderName: "fake_sender"
+  mailerUrlpathsInvite: "/auth/v1/verify"
+  mailerUrlpathsConfirmation: "/auth/v1/verify"
+  mailerUrlpathsRecovery: "/auth/v1/verify"
+  mailerUrlpathsEmailChange: "/auth/v1/verify"
+  restDbSchemas: "public,storage,graphql_public"
+  restDbMaxRows: "1000"
+  restDbExtraSearchPath: "public"
 api:
   publicUrl: "http://127.0.0.1:8000"
   externalUrl: ""
@@ -57,6 +109,10 @@ gateway:
   externalPublicUrl: ""
 
   kong:
+    useComposePrep: true
+    dashboard:
+      username: supabase
+      password: this_password_is_insecure_and_should_be_updated
     image:
       repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong/kong
       tag: "3.9.1"
