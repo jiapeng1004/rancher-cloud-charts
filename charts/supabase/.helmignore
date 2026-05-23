@@ -1,0 +1,4 @@
+# Patterns commonly ignored when packaging Helm charts — keep minimal.
+
+.DS_Store
+.git

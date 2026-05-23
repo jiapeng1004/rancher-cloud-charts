@@ -3,7 +3,7 @@ annotations:
 apiVersion: v2
 name: mysql
 version: 8.0.0
-icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/mysql/mysql-original.svg
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/helm/helm-original.svg
 appVersion: "8.0"
 description: A Helm chart for MySQL Database
 keywords:

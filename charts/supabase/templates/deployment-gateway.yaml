@@ -1,0 +1,62 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- if and .Values.enabled .Values.components.gateway }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-gateway
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ quote $name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ quote $name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: gateway
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ quote $name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: gateway
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nginx
+          image: "{{ .Values.images.gateway.repository }}:{{ .Values.images.gateway.tag }}"
+          imagePullPolicy: {{ .Values.images.gateway.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.gateway.listenPort }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.gateway.listenPort }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.gateway.listenPort }}
+          volumeMounts:
+            - name: cfg
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: cfg
+          configMap:
+            name: {{ $fullname }}-gateway-nginx
+{{- end }}

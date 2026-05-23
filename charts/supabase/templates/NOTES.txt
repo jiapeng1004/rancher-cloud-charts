@@ -1,0 +1,17 @@
+========================================
+charts/supabase（极简 · 外链 Postgres）
+========================================
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+
+Release : {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+必读：
+  1）Postgres **必须已是 Supabase 自助主机初始化后的库**（角色、schema 参见官方 Docker 脚手架与文档）。
+  2）填入 values：gotrue/rest 连接串、realtime 主机口令、jwt.secret、api.externalUrl、realtimeSecretKeyBase。
+
+网关 Service : {{ $fullname }}-gateway
+机密        : {{ $fullname }}-runtime
+
+本 chart **不含** Studio / Storage / Functions / Analytics，也**不部署**自建 Postgres 或 Redis。

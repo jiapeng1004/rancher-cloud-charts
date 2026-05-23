@@ -3,7 +3,7 @@ annotations:
 apiVersion: v2
 name: mysql
 version: 1.0.15
-icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/mysql/mysql-original.svg
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/kubernetes/kubernetes-original.svg
 description: A Helm chart for deploying the mysql application
 type: application
 keywords:

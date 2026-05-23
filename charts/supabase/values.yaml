@@ -1,0 +1,87 @@
+# 仅部署：nginx 网关 + gotrue + postgREST + realtime
+# Postgres / Redis **不自带**：必须使用已有实例（云上 RDS、本仓库 postgresql-new 等）。
+#
+# Postgres 必须符合 Supabase 自助主机要求：已为 gotrue/rest/realtime 等建好用户与迁移。
+# 参考：https://supabase.com/docs/guides/self-hosted/docker （SQL 结构与角色名与官方 docker 对齐）
+
+enabled: true
+nameOverride: ""
+fullnameOverride: ""
+
+images:
+  gateway:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/nginx
+    tag: "1.27-alpine"
+    pullPolicy: IfNotPresent
+  auth:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/gotrue
+    tag: "v2.186.0"
+    pullPolicy: IfNotPresent
+  rest:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgrest/postgrest
+    tag: "v14.8"
+    pullPolicy: IfNotPresent
+  realtime:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/realtime
+    tag: "v2.76.5"
+    pullPolicy: IfNotPresent
+
+# 对外公开的 API 地址（形如 https://api.example.com 或 ingress 的根 URL）。
+# GOTRUE_JWT_ISSUER 会使用 {{ api.externalUrl }}/auth/v1 。
+api:
+  externalUrl: "http://CHANGE.ME.example.com"
+
+# JWT HS256 secret（与各服务环境变量对齐）
+jwt:
+  expirySeconds: "3600"
+  secret: "CHANGE-me-min-32-chars-supabase-jwt-secret"
+
+# Realtime Erlang Cookie
+realtimeSecretKeyBase: >-
+  REPLACE_REALTIME_SECRET_KEY_BASE_64PLUS_CHARS_HEX_OR_RANDOM_STRING
+
+externalDatabase:
+  # GoTrue：`postgres://supabase_auth_admin:...@host:5432/db`
+  gotrueDbUrl: ""
+  # PostgREST：`postgres://authenticator:...@host:5432/db`
+  restDbUri: ""
+  realtime:
+    host: ""
+    port: "5432"
+    dbName: "postgres"
+    # 官方默认为 supabase_admin
+    user: "supabase_admin"
+    password: ""
+    encryptionKeyDefault: supabaserealtime
+
+components:
+  gateway: true
+  auth: true
+  rest: true
+  realtime: true
+
+service:
+  gateway:
+    type: ClusterIP
+    port: 80
+
+gateway:
+  # nginx 网关容器端口（与监听一致）
+  listenPort: 8080
+
+resources: {}
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: supabase.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+imagePullSecrets: []
+
+podAnnotations: {}

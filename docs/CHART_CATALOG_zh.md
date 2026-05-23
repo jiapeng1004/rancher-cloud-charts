@@ -10,6 +10,7 @@
 | | `charts/postgresql-new/16` | PostgreSQL 16 |
 | | `charts/mongodb` | MongoDB |
 | | `charts/oracle-free-db` | gvenzl Oracle Free（占位/测试） |
+| **BaaS** | **`charts/supabase`** | **极简**：**外链 Postgres**，nginx + gotrue/postgREST/realtime；**无** `_helpers.tpl` / 自建 PG；全量组件见上游 Helm |
 | 缓存/消息 | `charts/redis-new/6.2`、`7.0`、`7.2` | Redis |
 | | `charts/kafka`、`charts/rabbitmq`（已有单体） | 消息队列（Kafka / AMQP） |
 | | **`charts/rocketmq-k8s`** | RocketMQ Namesrv + Broker（试跑占位） |

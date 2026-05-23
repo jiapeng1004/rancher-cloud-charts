@@ -1,7 +1,7 @@
 ﻿apiVersion: v2
 name: dify
 version: 0.1.0
-icon: https://assets-docs.dify.ai/2025/05/d05cfc6ebe48f725d171dc71c64a5d16.svg
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/helm/helm-original.svg
 description: Dify 部署指引占位（见 README）
 maintainers:
   - name: rancher-cloud-charts

@@ -1,0 +1,98 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- $db := .Values.externalDatabase.realtime }}
+{{- if and .Values.enabled .Values.components.realtime }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-realtime
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ quote $name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: realtime
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ quote $name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: realtime
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ quote $name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: realtime
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: realtime
+          image: "{{ .Values.images.realtime.repository }}:{{ .Values.images.realtime.tag }}"
+          imagePullPolicy: {{ .Values.images.realtime.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 4000
+          env:
+            - name: PORT
+              value: "4000"
+            - name: DB_HOST
+              value: {{ $db.host | quote }}
+            - name: DB_PORT
+              value: {{ $db.port | quote }}
+            - name: DB_USER
+              value: {{ $db.user | quote }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-runtime
+                  key: REALTIME_DB_PASSWORD
+            - name: DB_NAME
+              value: {{ $db.dbName | quote }}
+            - name: DB_AFTER_CONNECT_QUERY
+              value: SET search_path TO _realtime
+            - name: DB_ENC_KEY
+              value: {{ $db.encryptionKeyDefault | quote }}
+            - name: API_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-runtime
+                  key: JWT_SECRET
+            - name: METRICS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-runtime
+                  key: JWT_SECRET
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-runtime
+                  key: SECRET_KEY_BASE
+            - name: ERL_AFLAGS
+              value: "-proto_dist inet_tcp"
+            - name: DNS_NODES
+              value: "''"
+            - name: RLIMIT_NOFILE
+              value: "10000"
+            - name: APP_NAME
+              value: realtime
+            - name: SEED_SELF_HOST
+              value: "true"
+            - name: RUN_JANITOR
+              value: "true"
+            - name: DISABLE_HEALTHCHECK_LOGGING
+              value: "true"
+          readinessProbe:
+            tcpSocket:
+              port: 4000
+          livenessProbe:
+            tcpSocket:
+              port: 4000
+{{- end }}

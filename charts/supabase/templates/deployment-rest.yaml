@@ -1,0 +1,72 @@
+{{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
+{{- if and .Values.enabled .Values.components.rest }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-rest
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ quote $name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: rest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ quote $name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: rest
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ quote $name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: rest
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: postgrest
+          image: "{{ .Values.images.rest.repository }}:{{ .Values.images.rest.tag }}"
+          imagePullPolicy: {{ .Values.images.rest.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: PGRST_DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-runtime
+                  key: PGRST_DB_URI
+            - name: PGRST_DB_SCHEMAS
+              value: public,graphql_public
+            - name: PGRST_DB_ANON_ROLE
+              value: anon
+            - name: PGRST_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-runtime
+                  key: JWT_SECRET
+            - name: PGRST_APP_SETTINGS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-runtime
+                  key: JWT_SECRET
+            - name: PGRST_APP_SETTINGS_JWT_EXP
+              value: {{ .Values.jwt.expirySeconds | quote }}
+            - name: PGRST_DB_USE_LEGACY_GUCS
+              value: "false"
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+{{- end }}
