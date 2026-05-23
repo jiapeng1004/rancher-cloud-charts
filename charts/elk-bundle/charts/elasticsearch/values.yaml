@@ -1,0 +1,7 @@
+createIngress: false
+installKibana: true
+password: 123456
+
+elasticsearchIngress:
+  host: ""
+  className: nginx

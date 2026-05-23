@@ -22,9 +22,6 @@ spec:
   {{- else }}
   storageClassName: {{ .Values.persistence.storageClass }}
   {{- end }}
-  {{- else }}
-  # Use default storageClass if not specified
-  storageClassName: {{ .Values.persistence.defaultStorageClass | default "" }}
   {{- end }}
   resources:
     requests:

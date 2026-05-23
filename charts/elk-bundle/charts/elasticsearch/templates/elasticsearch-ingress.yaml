@@ -1,0 +1,43 @@
+{{- if .Values.createIngress }}
+{{- $svcName := "elasticsearch" }}
+{{- $svcPort := 9200 }}
+{{- $kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion }}
+{{- $host := default (printf "%s.jiapeng.icu" .Release.Namespace) .Values.elasticsearchIngress.host }}
+{{- if semverCompare ">=1.19-0" $kv }}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" $kv }}
+apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ .Chart.Name }}-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: $1$2
+spec:
+{{- if and .Values.elasticsearchIngress.className (semverCompare ">=1.18-0" $kv) }}
+  ingressClassName: {{ .Values.elasticsearchIngress.className }}
+{{- else if semverCompare ">=1.18-0" $kv }}
+  ingressClassName: nginx
+{{- end }}
+  rules:
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          {{- if semverCompare ">=1.19-0" $kv }}
+          - path: /es($|/)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $svcName }}
+                port:
+                  number: {{ $svcPort }}
+          {{- else }}
+          - path: /es($|/)(.*)
+            backend:
+              serviceName: {{ $svcName }}
+              servicePort: {{ $svcPort }}
+          {{- end }}
+{{- end }}

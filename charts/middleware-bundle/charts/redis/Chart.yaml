@@ -1,0 +1,18 @@
+annotations:
+  catalog.cattle.io/release-name: redis
+apiVersion: v2
+name: redis
+version: 7.2.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/redis/redis-original.svg
+appVersion: "7.2"
+description: A Helm chart for Redis in-memory data store
+keywords:
+  - redis
+  - database
+  - cache
+home: https://redis.io/
+sources:
+  - https://github.com/redis/redis
+maintainers:
+  - name: 贾鹏
+    email: jiapeng_aoa@163.com

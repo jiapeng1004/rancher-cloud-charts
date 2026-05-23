@@ -1,17 +1,11 @@
 ## middleware-bundle
 
-聚合安装 MySQL / Redis / PostgreSQL / MinIO。各组件完整模板分别在 `charts/mysql-new`、`charts/redis-new` 等目录，可同时维护「单体」与「组合」两套入口。
+聚合安装 MySQL / Redis / PostgreSQL / MinIO。各组件「权威」源码仍在 **`charts/mysql-new`、`charts/redis-new` 等**；本聚合包内 **`charts/`** 为副本，便于 **Rancher / helm-git 直接 `helm template`**，无需在安装机执行 `helm dependency update`。更新单体后可从对应目录手工同步并重打 Umbrella **version**。
 
-### 准备依赖
+### 安装示例（无需前置 dependency）
 
 ```bash
 cd charts/middleware-bundle
-helm dependency update
-```
-
-### 安装示例
-
-```bash
 helm upgrade --install data-stack . -n default --create-namespace \
   --set mysql.enabled=true,redis.enabled=true,postgresql.enabled=true,minio.enabled=true
 ```

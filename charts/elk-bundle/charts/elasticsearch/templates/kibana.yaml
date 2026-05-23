@@ -1,0 +1,46 @@
+{{- if .Values.installKibana }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: &name kibana
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app:
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: *name
+  template:
+    metadata:
+      name: *name
+      labels:
+        app: *name
+    spec:
+      containers:
+        - name: *name
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kibana:8.17.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5601
+              protocol: TCP
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              value: http://elasticsearch:9200
+            - name: SERVER_HOST
+              value: 0.0.0.0
+            - name: I18N_LOCALE
+              value: zh-CN
+            - name: SERVER_BASEPATH
+              value: /kibana
+            - name: ELASTICSEARCH_SERVICEACCOUNTTOKEN
+              value: ELASTICSEARCH_SERVICEACCOUNTTOKEN
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "1"
+            limits:
+              memory: "1024Mi"
+              cpu: "2"
+      restartPolicy: Always
+{{- end }}

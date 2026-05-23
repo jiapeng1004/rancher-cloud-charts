@@ -1,0 +1,13 @@
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.elastic.co/logstash/logstash
+  tag: "8.11.4"
+  pullPolicy: IfNotPresent
+
+elasticsearch:
+  hosts:
+    - "http://elasticsearch:9200"
+
+service:
+  beatsPort: 5044
+
+resources: {}

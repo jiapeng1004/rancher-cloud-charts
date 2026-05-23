@@ -1,5 +1,5 @@
 ========================================
- elk-bundle — 请先 helm dependency update
+ elk-bundle — 依赖已嵌入 charts/
 ========================================
 
 Elasticsearch +（可选）Kibana：见子 chart elasticsearch

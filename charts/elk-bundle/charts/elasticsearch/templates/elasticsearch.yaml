@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Chart.Name}}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{.Chart.Name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Chart.Name}}
+  template:
+    metadata:
+      name: {{.Chart.Name}}
+      labels:
+        app: {{.Chart.Name}}
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/elasticsearch:8.17.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9200
+              protocol: TCP
+            - containerPort: 9300
+              protocol: TCP
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: ELASTICSEARCH_USERNAME
+              value: "elastic"
+            - name: ELASTIC_PASSWORD
+              value: "{{.Values.password}}"
+            - name: xpack.security.http.ssl.enabled
+              value: "false"
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx1536m"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "1"
+            limits:
+              memory: "2048Mi"
+              cpu: "2"
+      restartPolicy: Always

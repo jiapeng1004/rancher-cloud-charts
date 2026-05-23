@@ -1,4 +1,4 @@
-在 `charts/elk-bundle` 目录执行：`helm dependency update`
+子 chart **`elasticsearch`**、**`logstash-oss`** 已拷贝到 **`charts/`**（适配 Rancher / helm-git：`helm dependency update` **不必**，除非你要改 Chart.yaml 并重新打成 `.tgz`）。
 
 然后：`helm upgrade --install my-elk . -n logging --create-namespace`
 

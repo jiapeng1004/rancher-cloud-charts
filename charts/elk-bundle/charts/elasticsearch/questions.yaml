@@ -1,0 +1,13 @@
+categories:
+  - elasticsearch
+questions:
+  - variable: createIngress
+    default: "true"
+    type: boolean
+    description: "是否创建ingress"
+    label: "是否创建ingress"
+  - variable: password
+    default: "123456"
+    type: string
+    required: false
+    description: "es密码"

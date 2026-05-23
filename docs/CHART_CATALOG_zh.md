@@ -4,8 +4,8 @@
 
 | 类目 | Chart 路径 | 说明 |
 |------|-------------|------|
-| 聚合一键装 | `charts/middleware-bundle` | MySQL / Redis / PostgreSQL / MinIO，`helm dependency update` 后安装 |
-| 组合（历史） | `charts/server-new` | 嵌入式子 chart，建议使用 `middleware-bundle` + 单体 chart 的组合方式 |
+| 聚合一键装 | `charts/middleware-bundle` | MySQL / Redis / PostgreSQL / MinIO，子 chart 已嵌入 **`charts/`**，Rancher 可直接安装 |
+| 组合（历史） | `charts/server-new` | 嵌入式子 chart；**单体权威**仍为 `charts/mysql-new/5.7`、`redis-new/7.0`、`minio-new/2024-01` |
 | 数据库 | `charts/mysql-new/5.7`、`8.0` | MySQL |
 | | `charts/postgresql-new/16` | PostgreSQL 16 |
 | | `charts/mongodb` | MongoDB |
@@ -14,9 +14,9 @@
 | | `charts/kafka`、`charts/rabbitmq`（已有单体） | 消息队列（Kafka / AMQP） |
 | | **`charts/rocketmq-k8s`** | RocketMQ Namesrv + Broker（试跑占位） |
 | | **`charts/kubemq-standalone`** | KubeMQ 单机占位 |
-| OLAP / 向量 / 检索 | `charts/doris-new` | Doris |
+| OLAP / 向量 / 检索 | `charts/server-new/charts/doris`（随 **server-new**） | Doris 分析库当前仅内嵌于此 |
 | | `charts/elasticsearch/7.17.6`、`8.17.3` | ES |
-| | **`charts/elk-bundle`** | **ELK**：本仓库 ES chart + **`logstash-oss`**，`helm dependency update` |
+| | **`charts/elk-bundle`** | **ELK**：ES chart + **`logstash-oss`**（子 chart 已嵌入 **`charts/elk-bundle/charts/`**） |
 | | **`charts/logstash-oss`**（亦被 elk-bundle 引用） | Logstash → Elasticsearch |
 | | `charts/milvus` | Milvus |
 | 镜像/注册中心 | **`charts/harbor-registry`** | Harbor：**官方 Helm 指引占位** |

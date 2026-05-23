@@ -2,7 +2,7 @@ annotations:
   catalog.cattle.io/release-name: server
 apiVersion: v2
 name: server
-version: 1.0.6
+version: 1.0.7
 icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/kubernetes/kubernetes-original.svg
 description: A Helm chart for deploying the server application
 type: application
@@ -18,9 +18,9 @@ appVersion: "1.0.1"
 dependencies:
   - name: redis
     version: 1.0.1
-    repository: file://../redis
+    repository: file://charts/redis
     condition: redis.enabled
   - name: mysql
     version: 1.0.15
-    repository: file://../mysql
+    repository: file://charts/mysql
     condition: mysql.enabled

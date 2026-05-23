@@ -1,0 +1,10 @@
+apiVersion: v2
+name: logstash-oss
+version: 0.1.0
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/elasticsearch/elasticsearch-original.svg
+description: Logstash OSS（单副本）占位；beats/tcp → Elasticsearch HTTP
+keywords:
+  - logstash
+  - elk
+maintainers:
+  - name: rancher-cloud-charts

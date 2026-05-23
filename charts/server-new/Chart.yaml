@@ -2,7 +2,7 @@ annotations:
   catalog.cattle.io/release-name: server
 apiVersion: v2
 name: server
-version: 1.0.10
+version: 1.0.11
 icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/docker/docker-original.svg
 appVersion: "1.0"
 description: A composite Helm chart for common server components (MySQL, Redis, MinIO)

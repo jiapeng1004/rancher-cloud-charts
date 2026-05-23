@@ -3,8 +3,8 @@ name: middleware-bundle
 icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/helm/helm-original.svg
 description: |
   Umbrella chart：一键拉起常用中间件（各组件仍有独立 Helm，可单独安装）。
-  在 charts/middleware-bundle 目录执行: helm dependency update
-version: 0.1.0
+  子 chart 已嵌入 charts/（Rancher / helm-git 可直接 template）；更新单体后请按需同步并重打版本。
+version: 0.1.1
 appVersion: "1.0"
 type: application
 keywords:
@@ -19,17 +19,17 @@ maintainers:
 dependencies:
   - name: mysql
     version: "8.0.0"
-    repository: file://../mysql-new/8.0
+    repository: file://charts/mysql
     condition: mysql.enabled
   - name: redis
     version: "7.2.0"
-    repository: file://../redis-new/7.2
+    repository: file://charts/redis
     condition: redis.enabled
   - name: postgresql
     version: "16.0.0"
-    repository: file://../postgresql-new/16
+    repository: file://charts/postgresql
     condition: postgresql.enabled
   - name: minio
     version: "2024.01.10"
-    repository: file://../minio-new/2024-01
+    repository: file://charts/minio
     condition: minio.enabled
