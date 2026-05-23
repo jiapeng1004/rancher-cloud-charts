@@ -1,33 +1,58 @@
-## 选型原则（本仓库对相关 chart 的约定）
-## - **优先、完整支持外链**：Postgres→RDS/PolarDB/自建 PG；网关→云上 Kong/Nginx/SLB/全局 Ingress Controller。生产与中长期维护建议沿用现网中间件。
-## - **同时支持可选内建**：`bundled` / `gateway.mode=kong|nginx` 仅作 PoC、离线或无人群托管控环境；内建 Postgres 仍为社区镜像，≠ Supabase 官方发行库。
+## 默认与官方 docker/docker-compose.yml 对齐：内嵌 Postgres + Kong，可选关闭后改外链。
+## 参考：本地仓库 docker-compose 中 services.db（supabase/postgres）、kong、auth、rest、realtime。
 ##
-## gateway.mode：nginx | kong | external（外链入口时设为 external）
+## gateway.mode：kong（与 compose 一致）| nginx | external
 
 enabled: true
 nameOverride: ""
 fullnameOverride: ""
 
 bundled:
-  postgres: false
+  # 与 compose 一致：默认内嵌 PostgreSQL 子 chart（非外链 RDS）
+  postgres: true
+
+# 内嵌库且使用 supabase/postgres 镜像初始化角色后，连接串用户与 compose 一致；
+# 若仍用 library/postgres 单用户，请设 composeDbRoles: false。
+bundledDb:
+  composeDbRoles: true
+  gotrueDbUser: supabase_auth_admin
+  restDbUser: authenticator
+  realtimeDbUser: supabase_admin
 
 postgresql:
+  # 子 chart 合并键：与官方 compose 的 db 服务镜像一致（可自行换 tag）
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres
+    tag: "15.8.1.085"
+    pullPolicy: IfNotPresent
   ingress:
     enabled: false
+  postgresql:
+    user: postgres
+    # 与 compose .env 中 POSTGRES_PASSWORD 同类：请安装后替换
+    password: your-super-secret-and-long-postgres-password
+    database: postgres
+    postgresPassword: ""
+  persistence:
+    enabled: true
+    size: 10Gi
 
 jwt:
   expirySeconds: "3600"
-  secret: "CHANGE-me-min-32-chars-supabase-jwt-secret"
+  # PostgREST 要求至少 32 字符；不要使用更短的占位串或留空
+  secret: "rancher-supabase-postgrest-jwt-min32chars-xx"
 
 realtimeSecretKeyBase: >-
   REPLACE_REALTIME_SECRET_KEY_BASE_64PLUS_CHARS_HEX_OR_RANDOM_STRING
 
+# 与 compose 中 API_EXTERNAL_URL / SUPABASE_PUBLIC_URL 类似：面向客户端的 API 根（常指向 Kong 8000）
 api:
-  publicUrl: "http://CHANGE.ME.example.com"
+  publicUrl: "http://127.0.0.1:8000"
   externalUrl: ""
 
 gateway:
-  mode: nginx   # nginx | kong | external
+  # 与 compose 的 kong 服务一致（8000 代理）
+  mode: kong
   listenPort: 8080
   externalPublicUrl: ""
 
@@ -37,8 +62,10 @@ gateway:
       tag: "3.9.1"
       pullPolicy: IfNotPresent
     env:
-      plugins: "bundled"
+      plugins: "request-transformer,cors,key-auth,acl,basic-auth,request-termination,ip-restriction,post-function"
       adminListen: "0.0.0.0:8001 reuseport backlog=16384"
+      dnsOrder: "LAST,A,CNAME"
+      dnsNotFoundTtl: "1"
     service:
       proxy:
         type: ClusterIP
@@ -70,18 +97,15 @@ images:
     tag: "v2.76.5"
     pullPolicy: IfNotPresent
 
+# bundled.postgres=false 时使用（外链 RDS 等）
 externalDatabase:
-  # 外链 RDS / 自建 PG：仅填「域名或 Service DNS」+「端口」（不要写 postgres://）。
   host: ""
   port: "5432"
   dbName: "postgres"
   user: ""
   password: ""
-  # 进阶：若必须手写完整连接串（如密码中含特殊符号且不想走 urlquery 拼装），可为 GoTrue / PostgREST 分别覆盖；
-  # 留空则由模板用上方的 host/port/user/password/dbName 自动拼 postgres://
   gotrueDbUrl: ""
   restDbUri: ""
-  # Realtime：通常留空即为与上面共用同一 PG；仅当 Realtime 需独立连接时再填任一字段覆盖。
   realtime:
     host: ""
     port: ""

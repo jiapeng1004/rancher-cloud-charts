@@ -1,6 +1,10 @@
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 {{- $bund := .Values.bundled.postgres }}
+{{- $bud := .Values.bundledDb | default dict }}
+{{- $useComposeRoles := $bud.composeDbRoles | default false }}
+{{- $usrSingle := (.Values.postgresql.postgresql.user | default "postgres") }}
+{{- $bundledRealtimeU := ternary ($bud.realtimeDbUser | default "supabase_admin") $usrSingle $useComposeRoles }}
 {{- $rtx := (.Values.externalDatabase.realtime | default dict) }}
 {{- $eRt := .Values.externalDatabase }}
 {{- $rRt := ($eRt.realtime | default dict) }}
@@ -60,7 +64,7 @@ spec:
             - name: DB_PORT
               value: "5432"
             - name: DB_USER
-              value: {{ .Values.postgresql.postgresql.user | quote }}
+              value: {{ $bundledRealtimeU | quote }}
             - name: DB_NAME
               value: {{ .Values.postgresql.postgresql.database | quote }}
             {{- else }}

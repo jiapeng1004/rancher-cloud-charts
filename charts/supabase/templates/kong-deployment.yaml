@@ -50,6 +50,14 @@ spec:
               value: {{ $deck | quote }}
             - name: KONG_PLUGINS
               value: {{ $g.env.plugins | quote }}
+            {{- with $g.env.dnsOrder }}
+            - name: KONG_DNS_ORDER
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with $g.env.dnsNotFoundTtl }}
+            - name: KONG_DNS_NOT_FOUND_TTL
+              value: {{ . | quote }}
+            {{- end }}
             - name: KONG_PROXY_LISTEN
               value: "0.0.0.0:8000 reuseport backlog=16384"
             - name: KONG_ADMIN_LISTEN

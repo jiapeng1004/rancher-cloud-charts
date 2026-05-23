@@ -1,6 +1,6 @@
 image:
-  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/postgres
-  tag: "16"
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres
+  tag: "15.8.1.085"
   pullPolicy: IfNotPresent
 
 serviceAccount:
@@ -24,7 +24,7 @@ service:
 
 postgresql:
   user: "postgres"
-  password: "postgres"
+  password: "your-super-secret-and-long-postgres-password"
   database: "postgres"
 
 persistence:

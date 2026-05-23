@@ -3,10 +3,10 @@ annotations:
 apiVersion: v2
 icon: https://avatars.githubusercontent.com/u/54469796?s=280&v=4
 description: >-
-  Supabase API：PostgreSQL/Kong/nginx 等均优先支持与推荐外链；
-  可选内建子 chart Postgres 与内置 nginx/Kong。
-  外链库在 templates/secret.yaml 内拼 postgres://；Rancher 表单不写完整 URL。
-  内建 Postgres 仅供联调占位，上线请迁移或使用外链 RDS。
+  Supabase API（gotrue / PostgREST / realtime）：默认与上游 docker-compose 一致，
+  内嵌 PostgreSQL（建议 supabase/postgres）与 Kong；可按需关掉 bundled 或网关改为 external 外链 RDS/托管 Kong。
+  外链库的 postgres URL 在 templates/secret.yaml 拼装；Rancher 表单为拆分字段。
+  内嵌多角色依赖镜像初始化，生产亦可迁移后改外链。
 keywords:
   - supabase
   - postgres
@@ -16,7 +16,7 @@ maintainers:
   - name: rancher-cloud-charts
 name: supabase
 type: application
-version: 1.1.2
+version: 1.2.1
 appVersion: "minimal"
 dependencies:
   - name: postgresql

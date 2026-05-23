@@ -14,11 +14,23 @@ questions:
   # --- Database: bundled vs external ---
   - variable: bundled.postgres
     type: boolean
-    default: false
+    default: true
     required: true
     label: 启用内建 PostgreSQL 子 chart
-    description: 生产建议外链 RDS/自建 PG。为 false 时只需填下方「外链库」域名+端口+账号（父 chart Secret 会自动拼 postgres://）；为 true 时配置内建 Postgres 子 chart。
+    description: |-
+      默认开启，与上游 docker-compose 一致（内嵌 db）。生产可设为 false，仅填下方「外链库」主机+端口等（模板拼 postgres://）。
     group: 数据库与 Secret
+
+  - variable: bundledDb.composeDbRoles
+    type: boolean
+    default: true
+    required: false
+    label: 「内建 PG」GoTrue/PGRST/Realtime 数据库用户对齐 compose（多角色）
+    description: |-
+      为 true 时：Secret 使用 supabase_auth_admin / authenticator；Realtime 使用 supabase_admin。需镜像为 supabase/postgres 并已初始化对应角色；
+      若改用单用户 Postgres，请关闭此项并用 postgresql.postgresql.user 作为通用连接用户。
+    group: 数据库与 Secret
+    show_if: bundled.postgres=true
 
   # --- 外链：一套字段共用 GoTrue / PostgREST / Realtime（不写 postgres://）；Realtime 特例见 README 的 realtime.* ---
   - variable: externalDatabase.host
@@ -76,7 +88,7 @@ questions:
 
   - variable: postgresql.postgresql.password
     type: password
-    default: "postgres"
+    default: "your-super-secret-and-long-postgres-password"
     required: false
     label: 内建 PG 用户密码（POSTGRES_PASSWORD）
     description: bundled.postgres 为 true 时模板会校验该字段必填；安装后请务必改为强口令。
@@ -127,18 +139,24 @@ questions:
   # --- Secrets & API URL ---
   - variable: jwt.secret
     type: password
-    default: "CHANGE-me-min-32-chars-supabase-jwt-secret"
+    min_length: 32
+    max_length: 256
+    default: "rancher-supabase-postgrest-jwt-min32chars-xx"
     required: true
-    label: JWT_SECRET（≥32 字符随机串）
-    description: GoTrue/JWT 使用；请将默认值替换为随机串后再上线。
+    label: JWT_SECRET（PostgREST 至少 32 字符）
+    description: |-
+      Rancher「生成」若不足 32 字符，helm 会为同一 release 拼上 sha256 派生后缀补足（仍建议在此处直接生成 ≥32 位）。
     group: 密钥与令牌
 
   - variable: realtimeSecretKeyBase
     type: password
+    min_length: 43
+    max_length: 256
     default: "REPLACE_REALTIME_SECRET_KEY_BASE_64PLUS_CHARS"
     required: true
-    label: Realtime SECRET_KEY_BASE（随机长字符串）
-    description: 用于 Realtime 组件；请将默认值替换为足够长的随机串后再上线。
+    label: Realtime SECRET_KEY_BASE（建议 ≥43 字符）
+    description: |-
+      Phoenix/Realtime 需要足够长的 SECRET_KEY_BASE；Rancher 生成不足 43 时会由模板补齐（仍可在此填 ≥43 随机串）。
     group: 密钥与令牌
 
   - variable: jwt.expirySeconds
@@ -150,7 +168,7 @@ questions:
 
   - variable: api.publicUrl
     type: string
-    default: "http://CHANGE.ME.example.com"
+    default: "http://127.0.0.1:8000"
     required: true
     label: 对外 API/网关访问根 URL
     description: 如 https://api.example.com 或 Ingress 前缀；网关为 external 时通常填同一公网 Kong/代理地址。
@@ -158,7 +176,7 @@ questions:
 
   - variable: gateway.mode
     type: enum
-    default: nginx
+    default: kong
     required: true
     label: 集群内网关模式
     description: nginx=内嵌 Nginx；kong=内嵌 Kong；external=仅用外链 Kong/Ingress Controller。
@@ -254,7 +272,7 @@ questions:
 
   - variable: gateway.kong.env.plugins
     type: string
-    default: "bundled"
+    default: "request-transformer,cors,key-auth,acl,basic-auth,request-termination,ip-restriction,post-function"
     required: false
     label: KONG_PLUGINS
     group: Kong 环境与代理（mode=kong）

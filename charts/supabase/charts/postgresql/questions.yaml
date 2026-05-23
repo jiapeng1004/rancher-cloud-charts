@@ -7,14 +7,14 @@ questions:
   label: 镜像仓库
   description: 容器镜像仓库地址
   group: 镜像
-  default: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/postgres
+  default: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres
   required: true
 - variable: image.tag
   type: string
   label: 镜像标签
   description: 镜像 tag
   group: 镜像
-  default: '16'
+  default: '15.8.1.085'
   required: true
 - variable: image.pullPolicy
   type: enum
@@ -87,7 +87,7 @@ questions:
   label: PostgreSQL 密码（POSTGRES_PASSWORD）
   description: 与 POSTGRES_PASSWORD 对应的密码
   group: PostgreSQL
-  default: postgres
+  default: your-super-secret-and-long-postgres-password
   required: true
 - variable: postgresql.database
   type: string

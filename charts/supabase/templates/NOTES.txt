@@ -1,10 +1,11 @@
 ========================================
- charts/supabase（外链优先 · 内建可选）
+ charts/supabase（默认内嵌 Postgres · Kong）
 ========================================
 {{- $name := default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- $fullname := .Values.fullnameOverride | default (printf "%s-%s" .Release.Name $name) | trunc 63 | trimSuffix "-" }}
 
-推荐：Postgres / 网关尽量 **外链**（RDS、托管 Kong、SLB）；内建仅兜底或开发。
+与上游 docker-compose 取向一致：默认 **内嵌 PostgreSQL 子 chart**（`postgresql.image` 宜为 **supabase/postgres**）
+与 **Kong**（`gateway.mode=kong`）。生产可走 **RDS/托管 Kong**：将 `bundled.postgres=false` 或 `gateway.mode=external` 并按要求填外链字段。
 
 网关模式 gateway.mode：**{{ .Values.gateway.mode }}**（nginx | kong | external）
 
@@ -20,7 +21,7 @@
 
 Postgres：bundled.postgres={{ .Values.bundled.postgres }}
 {{- if .Values.bundled.postgres }}
-子 chart：**Release 名后缀 `-postgresql`** 的 ClusterIP。**开发向**：单用户 postgres 连接串自动生成；正式上线请导入 Supabase 官方迁移与数据库角色后再改 URLs。
+子 chart：**Release 名后缀 `-postgresql`**。`bundledDb.composeDbRoles=true` 时连接用户对齐 compose（auth/supabase_auth_admin、rest/authenticator、realtime/supabase_admin），依赖 **supabase/postgres** 镜像已初始化角色；若仅用单用户库请关掉 composeDbRoles。
 {{- else }}
 使用 **externalDatabase.host / port / user / password / dbName**（模板拼 postgres URL）；Realtime 特例见 README。
 {{- end }}
