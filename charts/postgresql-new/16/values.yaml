@@ -1,5 +1,5 @@
 image:
-  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/postgres
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/bitnami/postgresql
   tag: "16"
   pullPolicy: IfNotPresent
 
