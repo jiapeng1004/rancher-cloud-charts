@@ -9,12 +9,19 @@ questions:
     description: "镜像仓库"
     label: "镜像仓库"
     group: "镜像配置"
-  - variable: image.tag
+  - variable: image.be_tag
     type: string
-    default: "1.2.8"
+    default: "be-4.1.0"
     required: true
-    description: "镜像标签"
-    label: "镜像标签"
+    description: "前端镜像标签"
+    label: "前端镜像标签"
+    group: "镜像配置"
+  - variable: image.fe_tag
+    type: string
+    default: "fe-4.1.0"
+    required: true
+    description: "前端镜像标签"
+    label: "前端镜像标签"
     group: "镜像配置"
   - variable: image.pullPolicy
     type: enum
