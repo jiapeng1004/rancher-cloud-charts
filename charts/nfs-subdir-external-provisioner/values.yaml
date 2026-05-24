@@ -1,0 +1,66 @@
+replicaCount: 1
+strategyType: Recreate
+
+# 国内默认：华为云 SWR 「第三方镜像」前缀 + registry.k8s.io 路径（可按控制台说明换 Region）。
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/registry.k8s.io/sig-storage/nfs-subdir-external-provisioner
+  tag: v4.0.2
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+# 必选：填入已有 NFS Server 主机名或 IP；导出路径与 nfs.path 对齐。
+nfs:
+  server: ""
+  path: /nfs-storage
+  volumeName: nfs-subdir-external-provisioner-root
+  defaultMode: "777"
+  defaultUid: "0"
+  defaultGid: "0"
+  reclaimPolicy: Retain
+
+storageClass:
+  create: true
+  defaultClass: false
+  name: nfs-client
+  allowVolumeExpansion: true
+  reclaimPolicy: Delete
+  archiveOnDelete: true
+  onDelete:
+  pathPattern:
+  accessModes: ReadWriteOnce
+  volumeBindingMode: Immediate
+  annotations: {}
+
+leaderElection:
+  enabled: true
+
+rbac:
+  create: true
+
+podSecurityPolicy:
+  enabled: false
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name:
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+labels: {}
+
+podDisruptionBudget:
+  enabled: false
+  maxUnavailable: 1

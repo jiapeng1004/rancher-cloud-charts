@@ -1,0 +1,65 @@
+## Rancher Catalog / 表单与 values 对齐（参见 values.yaml）。
+categories:
+  - storage
+  - nfs
+questions:
+  - variable: nfs.server
+    type: string
+    label: NFS 服务器地址
+    description: NFS 导出端的主机名或 IP（必须与集群网络可达）。
+    group: NFS
+    default: ""
+    required: true
+  - variable: nfs.path
+    type: string
+    label: NFS 导出路径
+    description: 服务器上导出目录的根路径（子目录按需由 Provisioner 自动创建）。
+    group: NFS
+    default: /nfs-storage
+    required: true
+  - variable: image.repository
+    type: string
+    label: 镜像仓库
+    description: >-
+      国内默认使用华为云 SWR 三方同步前缀；可自行改为其它加速器或私服。
+    group: 镜像
+    default: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/registry.k8s.io/sig-storage/nfs-subdir-external-provisioner
+    required: true
+  - variable: image.tag
+    type: string
+    label: 镜像标签
+    group: 镜像
+    default: v4.0.2
+    required: true
+  - variable: image.pullPolicy
+    type: enum
+    label: 镜像拉取策略
+    group: 镜像
+    default: IfNotPresent
+    required: true
+    options:
+      - IfNotPresent
+      - Always
+      - Never
+  - variable: storageClass.create
+    type: boolean
+    label: 创建 StorageClass
+    description: 若为 true，将安装 NFS Client StorageClass。
+    group: StorageClass
+    default: true
+    required: false
+  - variable: storageClass.name
+    type: string
+    label: StorageClass 名称
+    group: StorageClass
+    default: nfs-client
+    required: false
+    show_if: storageClass.create=true
+  - variable: storageClass.defaultClass
+    type: boolean
+    label: 设为默认 StorageClass
+    description: 谨慎开启：会影响集群默认动态供给行为。
+    group: StorageClass
+    default: false
+    required: false
+    show_if: storageClass.create=true

@@ -1,0 +1,134 @@
+{{- if and .Values.deployment.studio.enabled .Values.ingress.studio.enabled -}}
+{{- /* Studio 单独 Ingress（Kong Ingress 不负责 Studio UI）。TLS：显式 ingress.studio.tls，或 tlsAuto + 自动生成 hosts 列表。*/}}
+{{- $structHosts := $.Values.ingress.studio.hosts | default list -}}
+{{- $csv := $.Values.ingress.studio.hostNames | default "" | trim -}}
+{{- if and (eq (len $structHosts) 0) (eq $csv "") -}}
+{{- fail "[supabase chart] ingress.studio.enabled=true 时请设置 ingress.studio.hostNames（逗号分隔域名）或在 values 中填写 ingress.studio.hosts" -}}
+{{- end -}}
+{{- $fullName := include "supabase.studio.fullname" . -}}
+{{- $ingName := printf "%s-ingress" $fullName | trunc 63 | trimSuffix "-" -}}
+{{- $svcPort := .Values.service.studio.port -}}
+{{- $kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion -}}
+{{- $ingressV1 := semverCompare ">=1.19-0" $kv -}}
+{{- $className := .Values.ingress.studio.className | default .Values.ingress.className -}}
+{{- $path := $.Values.ingress.studio.path | default "/" -}}
+{{- $pathType := $.Values.ingress.studio.pathType | default "Prefix" -}}
+{{- $tlsExplicit := $.Values.ingress.studio.tls | default list -}}
+{{- $tlsAutoEnabled := $.Values.ingress.studio.tlsAuto.enabled -}}
+{{- $tlsAutoSecret := $.Values.ingress.studio.tlsAuto.secretName | default "" | trim -}}
+{{- if $ingressV1 -}}
+apiVersion: networking.k8s.io/v1
+{{- else -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $ingName }}
+  labels:
+    {{- include "supabase.labels" . | nindent 4 }}
+    app.kubernetes.io/component: studio
+  {{- with $.Values.ingress.studio.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and $className (semverCompare ">=1.18-0" $kv) }}
+  ingressClassName: {{ $className }}
+  {{- end }}
+  {{- /* ① 手写 tls 块（可多组：多域名、多证书）；非空优先生效 */}}
+  {{- if gt (len $tlsExplicit) 0 }}
+  tls:
+    {{- range $tlsExplicit }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- /* ② 一键 HTTPS：与各 rule 域名对齐，共用同一 TLS Secret */}}
+  {{- else if and $tlsAutoEnabled (ne $tlsAutoSecret "") }}
+  tls:
+    - hosts:
+      {{- if gt (len $structHosts) 0 }}
+        {{- range $structHosts }}
+        {{- if .host }}
+        - {{ .host | quote }}
+        {{- end }}
+        {{- end }}
+      {{- else }}
+        {{- range $_ := splitList "," $csv }}
+        {{- $hn := trim . }}
+        {{- if ne $hn "" }}
+        - {{ $hn | quote }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      secretName: {{ $tlsAutoSecret }}
+  {{- end }}
+  rules:
+  {{- /* 结构化 hosts（可每 host 自定义 paths） */}}
+  {{- if gt (len $structHosts) 0 }}
+    {{- range $structHosts }}
+    {{- if .host }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          {{- if $ingressV1 }}
+          - path: {{ .path }}
+            pathType: {{ default $pathType .pathType }}
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+          {{- else }}
+          - path: {{ .path }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+          {{- end }}
+          {{- else }}
+          {{- if $ingressV1 }}
+          - path: {{ $path }}
+            pathType: {{ $pathType }}
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+          {{- else }}
+          - path: {{ $path }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+          {{- end }}
+          {{- end }}
+    {{- end }}
+    {{- end }}
+  {{- /* 逗号分隔多域名 → 同源路径 */}}
+  {{- else }}
+    {{- range $_ := splitList "," $csv }}
+    {{- $hn := trim . }}
+    {{- if ne $hn "" }}
+    - host: {{ $hn | quote }}
+      http:
+        paths:
+          {{- if $ingressV1 }}
+          - path: {{ $path }}
+            pathType: {{ $pathType }}
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+          {{- else }}
+          - path: {{ $path }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+          {{- end }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end -}}

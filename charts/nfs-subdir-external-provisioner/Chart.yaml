@@ -1,0 +1,23 @@
+annotations:
+  catalog.cattle.io/release-name: nfs-subdir-external-provisioner
+apiVersion: v2
+name: nfs-subdir-external-provisioner
+version: 4.0.18
+appVersion: "4.0.2"
+description: |
+  NFS 子目录 External Provisioner（沿用 kubernetes-sigs 官方 Chart 模板）。
+  默认镜像经华为云 SWR 三方同步（可按 Region 改写）；安装前须在表单中填写 NFS 服务器与导出路径。
+type: application
+keywords:
+  - nfs
+  - storage
+  - provisioner
+  - sig-storage
+home: https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner
+sources:
+  - https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner
+  - https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/kubernetes/kubernetes-original.svg
+kubeVersion: ">=1.14.0-0"
+maintainers:
+  - name: rancher-cloud-charts
