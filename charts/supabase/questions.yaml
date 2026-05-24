@@ -1,345 +1,161 @@
 categories:
   - supabase
   - postgres
-  - kong
+  - database
+
 questions:
-  - variable: enabled
-    type: boolean
-    default: true
-    required: true
-    label: 启用应用工作负载
-    description: 关闭后不会在集群内创建 Supabase 相关 Deployment/Service/Ingress。
-    group: 通用
-
-  # --- Database: bundled vs external ---
-  - variable: bundled.postgres
-    type: boolean
-    default: true
-    required: true
-    label: 启用内建 PostgreSQL 子 chart
-    description: |-
-      默认开启，与上游 docker-compose 一致（内嵌 db）。生产可设为 false，仅填下方「外链库」主机+端口等（模板拼 postgres://）。
-    group: 数据库与 Secret
-
-  - variable: bundledDb.composeDbRoles
-    type: boolean
-    default: true
-    required: false
-    label: 「内建 PG」GoTrue/PGRST/Realtime 数据库用户对齐 compose（多角色）
-    description: |-
-      为 true 时：Secret 使用 supabase_auth_admin / authenticator；Realtime 使用 supabase_admin。需镜像为 supabase/postgres 并已初始化对应角色；
-      若改用单用户 Postgres，请关闭此项并用 postgresql.postgresql.user 作为通用连接用户。
-    group: 数据库与 Secret
-    show_if: bundled.postgres=true
-
-  # --- 外链：一套字段共用 GoTrue / PostgREST / Realtime（不写 postgres://）；Realtime 特例见 README 的 realtime.* ---
-  - variable: externalDatabase.host
-    type: string
-    default: ""
-    required: false
-    label: 外链 Postgres 主机（域名或服务 DNS）
-    description: |-
-      bundled.postgres 为 false 时必填（除非你在 YAML 里只为 GoTrue/REST 手写 gotrueDbUrl/restDbUri）。
-      只填主机名或服务名（如 my-db.xxx.rds.amazonaws.com），不要写 postgres:// 或端口。
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.port
-    type: string
-    default: "5432"
-    required: false
-    label: Postgres 端口
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.dbName
-    type: string
-    default: "postgres"
-    required: false
-    label: 数据库名（dbName）
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.user
-    type: string
-    default: "supabase_admin"
-    required: false
-    label: Postgres 用户名
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: externalDatabase.password
-    type: password
-    default: ""
-    required: false
-    label: Postgres 密码
-    description: bundled.postgres=false 且启用 auth/rest/realtime 时必填；模板对密码做 URI 百分比编码后放入 postgres://。
-    group: 外链 PostgreSQL（bundled=false）
-    show_if: bundled.postgres=false
-
-  - variable: postgresql.postgresql.user
-    type: string
-    default: "postgres"
-    required: false
-    label: 内建 PG 用户名
-    description: 仅当 bundled.postgres 为 true 时生效。
-    group: 内建 PostgreSQL（子 chart）
-    show_if: bundled.postgres=true
-
-  - variable: postgresql.postgresql.password
-    type: password
-    default: "your-super-secret-and-long-postgres-password"
-    required: false
-    label: 内建 PG 用户密码（POSTGRES_PASSWORD）
-    description: bundled.postgres 为 true 时模板会校验该字段必填；安装后请务必改为强口令。
-    group: 内建 PostgreSQL（子 chart）
-    show_if: bundled.postgres=true
-
-  - variable: postgresql.postgresql.postgresPassword
-    type: password
-    default: ""
-    required: false
-    label: 「可选」postgres 超级用户密码（POSTGRESQL_POSTGRES_PASSWORD）
-    description: 留空则与上一项密码一致；适配 Bitnami 风格镜像时需单独设置时使用。
-    group: 内建 PostgreSQL（子 chart）
-    show_if: bundled.postgres=true
-
-  - variable: postgresql.postgresql.database
-    type: string
-    default: "postgres"
-    required: false
-    label: 内建初始数据库名
-    group: 内建 PostgreSQL（子 chart）
-    show_if: bundled.postgres=true
-
-  - variable: postgresql.persistence.enabled
-    type: boolean
-    default: true
-    required: false
-    label: 内建 PG 启用持久卷
-    group: 内建 PostgreSQL（子 chart）
-    show_if: bundled.postgres=true
-
-  - variable: postgresql.persistence.size
-    type: string
-    default: "10Gi"
-    required: false
-    label: 内建 PG 持久卷大小
-    group: 内建 PostgreSQL（子 chart）
-    show_if: bundled.postgres=true
-
-  - variable: postgresql.ingress.enabled
-    type: boolean
-    default: false
-    required: false
-    label: 内建 Postgres 启用 Ingress（一般关闭）
-    group: 内建 PostgreSQL（子 chart）
-    show_if: bundled.postgres=true
-
-  # --- Secrets & API URL ---
-  - variable: jwt.secret
-    type: password
-    min_length: 32
-    max_length: 256
-    default: "rancher-supabase-postgrest-jwt-min32chars-xx"
-    required: true
-    label: JWT_SECRET（PostgREST 至少 32 字符）
-    description: |-
-      Rancher「生成」若不足 32 字符，helm 会为同一 release 拼上 sha256 派生后缀补足（仍建议在此处直接生成 ≥32 位）。
-    group: 密钥与令牌
-
-  - variable: realtimeSecretKeyBase
-    type: password
-    min_length: 43
-    max_length: 256
-    default: "REPLACE_REALTIME_SECRET_KEY_BASE_64PLUS_CHARS"
-    required: true
-    label: Realtime SECRET_KEY_BASE（建议 ≥43 字符）
-    description: |-
-      Phoenix/Realtime 需要足够长的 SECRET_KEY_BASE；Rancher 生成不足 43 时会由模板补齐（仍可在此填 ≥43 随机串）。
-    group: 密钥与令牌
-
-  - variable: jwt.expirySeconds
-    type: string
-    default: "3600"
-    required: false
-    label: JWT 过期秒数
-    group: 密钥与令牌
-
-  - variable: api.publicUrl
-    type: string
-    default: "http://127.0.0.1:8000"
-    required: true
-    label: 对外 API/网关访问根 URL
-    description: 如 https://api.example.com 或 Ingress 前缀；网关为 external 时通常填同一公网 Kong/代理地址。
-    group: API 与网关
-
-  - variable: gateway.mode
-    type: enum
-    default: kong
-    required: true
-    label: 集群内网关模式
-    description: nginx=内嵌 Nginx；kong=内嵌 Kong；external=仅用外链 Kong/Ingress Controller。
-    options:
-      - nginx
-      - kong
-      - external
-    group: API 与网关
-
-  - variable: gateway.externalPublicUrl
-    type: string
-    default: ""
-    required: false
-    label: 外链网关公网根 URL（仅 external）
-    description: gateway.mode 为 external 时必填。
-    group: API 与网关
-    show_if: gateway.mode=external
-
-  - variable: gateway.listenPort
-    type: int
-    default: 8080
-    required: true
-    label: 集群内网关容器监听端口
-    description: nginx / kong 内建模式时使用；外链模式可忽略。
-    group: API 与网关
-    show_if: gateway.mode not in ["external"]
-
-  # --- Ingress for Supabase frontend (nginx/kong) ---
+  # --- Ingress / Kong ---
   - variable: ingress.enabled
     type: boolean
-    default: false
-    required: false
-    label: 为 Supabase 入口创建 Ingress
-    description: gateway.mode 为 external 时 Ingress 不会产生；复杂 hosts/tls 可在「YAML 编辑器」微调。
-    group: Ingress（Supabase）
+    default: true
+    label: 启用 Ingress（指向 Kong Gateway）
+    description: Kong 网关对外的 HTTP Ingress；关闭时需自行暴露 Service。
+    group: Ingress
 
   - variable: ingress.className
     type: string
     default: nginx
-    required: false
-    label: IngressClass 名称
-    group: Ingress（Supabase）
-    show_if: ingress.enabled=true
+    label: IngressClass（K8s 1.18+）
+    description: 例如 nginx、alb、traefik。
+    group: Ingress
 
-  # --- Nginx / Kong service ports ---
-  - variable: service.nginx.type
-    type: enum
-    default: ClusterIP
-    required: false
-    label: Nginx Gateway Service 类型
-    options:
-      - ClusterIP
-      - NodePort
-      - LoadBalancer
-    group: Nginx Gateway 服务（mode=nginx）
-    show_if: gateway.mode=nginx
+  # --- 密钥与数据库 ---
+  - variable: secret.jwt.secret
+    type: password
+    default: "your-super-secret-jwt-token-with-at-least-32-characters-long"
+    label: JWT 密钥（≥32 字符）
+    description: >-
+      Supabase / PostgREST / Realtime 等共用；请务必在生产改为随机串（默认仅为满足长度演示）。
+    min_length: 32
+    required: true
+    group: 密钥与安全
 
-  - variable: service.nginx.port
-    type: int
-    default: 80
-    required: false
-    label: Nginx Gateway Service 端口
-    group: Nginx Gateway 服务（mode=nginx）
-    show_if: gateway.mode=nginx
+  - variable: deployment.db.enabled
+    type: boolean
+    default: true
+    label: 部署内置 Postgres（StatefulSet）
+    description: >-
+      「关」时使用外链库，需填写主机与端口。**关**时必须确保库已就绪并完成扩展/迁移。
+    group: Postgres
 
-  - variable: gateway.kong.image.repository
+  - variable: secret.db.host
+    type: string
+    default: ""
+    label: 外链 Postgres 主机名
+    description: 仅在 **关闭内置库**（deployment.db.enabled=false）时必填；不写协议前缀。
+    group: Postgres
+
+  - variable: secret.db.port
+    type: string
+    default: "5432"
+    label: 外链 Postgres 端口
+    group: Postgres
+
+  - variable: secret.db.password
+    type: password
+    default: "your-super-secret-and-long-postgres-password"
+    label: Postgres 密码
+    description: >-
+      内置库或外链库的 postgres 口令；表单安装后请务必更换。
+    required: true
+    group: Postgres
+
+  - variable: secret.db.database
+    type: string
+    default: postgres
+    label: 数据库库名（默认 postgres）
+    group: Postgres
+
+  - variable: secret.realtime.secretKeyBase
+    type: password
+    default: "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq"
+    label: Realtime SECRET_KEY_BASE（≥43 字符）
+    description: >-
+      Phoenix 等价机密；占位符时请改为 openssl rand -base64 64 等形式。**不少于 43 字符**可避免常见自检失败。
+    min_length: 43
+    required: true
+    group: 密钥与安全
+
+  # --- Auth 外部 URL ---
+  - variable: environment.auth.API_EXTERNAL_URL
+    type: string
+    default: "http://supabase.local"
+    label: Auth 外部 API 根 URL（必填）
+    description: >-
+      用户浏览器/客户端访问的网关根地址，形如 https://supabase.example.com（与 Ingress/反代入口一致）。
+    required: true
+    group: 对外 URL（Auth）
+
+  - variable: environment.auth.GOTRUE_SITE_URL
+    type: string
+    default: "http://supabase.local"
+    label: GOTRUE_SITE_URL（可留空与 API_EXTERNAL_URL 相同）
+    description: >-
+      留空时可在 Helm 中用其它逻辑回填；表单建议与 **API_EXTERNAL_URL** 同源。
+    group: 对外 URL（Auth）
+
+  # --- 组件开关 ---
+  - variable: deployment.studio.enabled
+    type: boolean
+    default: true
+    label: 部署 Studio 管理控制台
+    group: 组件
+
+  - variable: deployment.minio.enabled
+    type: boolean
+    default: false
+    label: 部署内置 MinIO（对象存储）
+    description: >-
+      Compose 常与 Storage 联用；无对象存储时请改 **true** 或接云厂商 S3 并在 YAML 配置。
+    group: 组件
+
+  - variable: deployment.analytics.enabled
+    type: boolean
+    default: true
+    label: 部署 Logflare / Analytics（分析）
+    group: 组件
+
+  - variable: deployment.vector.enabled
+    type: boolean
+    default: true
+    label: 部署 Vector（日志管线）
+    group: 组件
+
+  # --- 镜像（常用） ---
+  - variable: image.db.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres"
+    label: 数据库镜像仓库（supabase/postgres）
+    group: 镜像（默认国内前缀）
+
+  - variable: image.db.tag
+    type: string
+    default: "15.8.1.085"
+    label: 数据库镜像标签
+    group: 镜像（默认国内前缀）
+
+  - variable: image.kong.repository
     type: string
     default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong/kong"
-    required: false
     label: Kong 镜像仓库
-    group: Kong 内建镜像（mode=kong）
-    show_if: gateway.mode=kong
+    group: 镜像（默认国内前缀）
 
-  - variable: gateway.kong.image.tag
+  - variable: image.kong.tag
     type: string
     default: "3.9.1"
-    required: false
     label: Kong 镜像标签
-    group: Kong 内建镜像（mode=kong）
-    show_if: gateway.mode=kong
+    group: 镜像（默认国内前缀）
 
-  - variable: gateway.kong.image.pullPolicy
-    type: enum
-    default: IfNotPresent
-    required: false
-    label: Kong 镜像拉取策略
-    options:
-      - Always
-      - IfNotPresent
-      - Never
-    group: Kong 内建镜像（mode=kong）
-    show_if: gateway.mode=kong
-
-  - variable: gateway.kong.env.plugins
+  - variable: image.minio.repository
     type: string
-    default: "request-transformer,cors,key-auth,acl,basic-auth,request-termination,ip-restriction,post-function"
-    required: false
-    label: KONG_PLUGINS
-    group: Kong 环境与代理（mode=kong）
-    show_if: gateway.mode=kong
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio"
+    label: MinIO 服务端镜像仓库（Docker Hub minio/minio）
+    description: >-
+      MinIO/MC 为国内拉取已从 Chainguard 改为 **`minio/minio`、`minio/mc`**。
+    group: 镜像（默认国内前缀）
 
-  - variable: gateway.kong.service.proxy.type
-    type: enum
-    default: ClusterIP
-    required: false
-    label: Kong Proxy Service 类型
-    options:
-      - ClusterIP
-      - NodePort
-      - LoadBalancer
-    group: Kong 环境与代理（mode=kong）
-    show_if: gateway.mode=kong
-
-  - variable: gateway.kong.service.proxy.port
-    type: int
-    default: 80
-    required: false
-    label: Kong Proxy Service 端口
-    group: Kong 环境与代理（mode=kong）
-    show_if: gateway.mode=kong
-
-  - variable: gateway.kong.service.admin.enabled
-    type: boolean
-    default: true
-    required: false
-    label: 暴露 Kong Admin API Service（集群内需自行限制）
-    group: Kong 环境与代理（mode=kong）
-    show_if: gateway.mode=kong
-
-  - variable: gateway.kong.declarativeMountPath
+  - variable: image.minio.tag
     type: string
-    default: "/kong-declarative"
-    required: false
-    label: Declarative 配置挂载路径
-    group: Kong 声明式挂载（mode=kong）
-    show_if: gateway.mode=kong
-
-  - variable: gateway.kong.declarativeFilename
-    type: string
-    default: "kong.yml"
-    required: false
-    label: Declarative 文件名（对应 ConfigMap 键）
-    group: Kong 声明式挂载（mode=kong）
-    show_if: gateway.mode=kong
-
-  # --- Components ---
-  - variable: components.auth
-    type: boolean
-    default: true
-    required: false
-    label: 启用 GoTrue（Auth）
-    group: Supabase 组件
-
-  - variable: components.rest
-    type: boolean
-    default: true
-    required: false
-    label: 启用 PostgREST
-    group: Supabase 组件
-
-  - variable: components.realtime
-    type: boolean
-    default: true
-    required: false
-    label: 启用 Realtime
-    group: Supabase 组件
+    default: "RELEASE.2024-01-10T00-54-08Z"
+    label: MinIO 镜像标签
+    group: 镜像（默认国内前缀）

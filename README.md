@@ -9,7 +9,7 @@
 - **观测与压测**：`charts/grafana-dash`（可视化）、`charts/k6-cronjobs`（k6 / RPS 与阈值）、`charts/locust-live`（Locust Web UI + Worker），可与既有 `charts/prometheus` 组合使用。
 - **消息与 ELK**：`charts/kafka`、`charts/rabbitmq`（已有单体）、新增 **`rocketmq-k8s`、`kubemq-standalone`**；**ELK** 参见 **`charts/elk-bundle`**（子 chart 已嵌入 `charts/elk-bundle/charts/`）与 **`logstash-oss`**。
 - **Ingress / NAT 穿透**：**`charts/frp-tunnel`**（首开环境 FRP：`frps` TCP / 可选 HTTP + 可选 `frpc`，见 chart 内 README）；另有 **Kong 声明式网关** **`charts/kong-gateway`**（`README.zh-CN.md`）。
-- **平台类**：Harbor **`harbor-registry`（占位+官方 Helm 说明）**、Traefik **`traefik-gateway`（文件 Provider）**、**`supabase`**（可选内置 PG/Kong：`charts/supabase/README.zh-CN.md`）、WordPress **`wordpress-site`**、ONLYOFFICE **`onlyoffice-docs`**、OpenClaw **`openclaw-runner`**、Dify / CozeLoop **`dify-lite` / `cozeloop-platform`（Compose/源码说明占位）**、Hadoop **`hadoop-dev`（说明占位）**。
+- **平台类**：Harbor **`harbor-registry`（占位+官方 Helm 说明）**、Traefik **`traefik-gateway`（文件 Provider）**、**`supabase`**（上游 Helm/K8s 栈 + 国内镜像 + `questions.yaml`：`charts/supabase/README.zh-CN.md`）、WordPress **`wordpress-site`**、ONLYOFFICE **`onlyoffice-docs`**、OpenClaw **`openclaw-runner`**、Dify / CozeLoop **`dify-lite` / `cozeloop-platform`（Compose/源码说明占位）**、Hadoop **`hadoop-dev`（说明占位）**。
 
 ## Chart 图标
 
@@ -22,7 +22,7 @@
 | [docs/HUAWEI_AND_INGRESS_zh.md](./docs/HUAWEI_AND_INGRESS_zh.md) | 镜像前缀与 Ingress 兼容策略 |
 | [docs/TEMPLATING_zh.md](./docs/TEMPLATING_zh.md) | Helm 模板约定（少用 tpl / 少套娃） |
 | [docs/CHART_CATALOG_zh.md](./docs/CHART_CATALOG_zh.md) | 当前 Chart 目录一览（节选） |
-| `charts/supabase/README.zh-CN.md` | Supabase（外链 PG 极简栈） |
+| `charts/supabase/README.zh-CN.md` | Supabase（upstream Helm/K8s 栈 · 默认 SWR · Rancher questions） |
 | `charts/kong-gateway/README.zh-CN.md` | Kong（DB-less 声明式网关） |
 | `charts/middleware-bundle/README.md` | 聚合中间件；子 chart 已内置，见该 README |
 

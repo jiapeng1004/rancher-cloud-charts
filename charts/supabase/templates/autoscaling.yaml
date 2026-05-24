@@ -1,0 +1,45 @@
+{{- /*
+  HorizontalPodAutoscaler：按组件名遍历，避免多行 `$foo := list (dict)...` 在旧 Helm/解析器上报 unclosed action。
+*/}}
+{{- $names := tuple "analytics" "auth" "db" "functions" "imgproxy" "kong" "meta" "minio" "realtime" "rest" "storage" "studio" "vector" }}
+{{- range $names }}
+{{- $n := . }}
+{{- $deployment := index $.Values.deployment $n }}
+{{- $autos := index $.Values.autoscaling $n }}
+{{- $fullnameTpl := printf "supabase.%s.fullname" $n }}
+{{- $kind := ternary "StatefulSet" "Deployment" (eq $n "db") }}
+{{- if and $deployment.enabled $autos.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include $fullnameTpl $ }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "supabase.labels" $ | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: {{ $kind }}
+    name: {{ include $fullnameTpl $ }}
+  minReplicas: {{ $autos.minReplicas }}
+  maxReplicas: {{ $autos.maxReplicas }}
+  metrics:
+    {{- with $autos.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ . }}
+    {{- end }}
+    {{- with $autos.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ . }}
+    {{- end }}
+{{- end }}
+{{- end }}
