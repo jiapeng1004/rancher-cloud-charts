@@ -21,6 +21,7 @@
 | | **`charts/logstash-oss`**（亦被 elk-bundle 引用） | Logstash → Elasticsearch |
 | | `charts/milvus` | Milvus |
 | 镜像/注册中心 | **`charts/harbor-registry`** | Harbor：**官方 Helm 指引占位** |
+| **存储** | **`charts/nfs-subdir-external-provisioner`** | **NFS Client 动态供给**：自 [kubernetes-sigs](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner) vendor；国内镜像默认值 + **`questions`**：`nfs.server` / `nfs.path` · `README.zh-CN.md` |
 | Ingress / 网关 | `charts/nginx-web`、`charts/openresty-web`、`charts/pingora-proxy`、`charts/nginx-ingress` | 常见网关/入口 |
 | | **`charts/traefik-gateway`** | Traefik：**文件 Provider 起步**，生产请看官方 Helm |
 | | **`charts/kong-gateway`** | **Kong**：DB-less **声明式**（`declarative.config`），可选 Ingress；详见 `README.zh-CN.md` |

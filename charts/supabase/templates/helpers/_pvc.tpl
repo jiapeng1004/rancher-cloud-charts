@@ -38,8 +38,8 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if $persistence.storageClassName }}
-  storageClassName: {{ $persistence.storageClassName }}
+  {{- if $root.Values.persistence.defaultStorageClassName }}
+  storageClassName: {{ $root.Values.persistence.defaultStorageClassName }}
   {{- end }}
   accessModes:
     {{- range $persistence.accessModes }}

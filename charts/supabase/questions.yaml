@@ -15,9 +15,69 @@ questions:
   - variable: ingress.className
     type: string
     default: nginx
-    label: IngressClass（K8s 1.18+）
-    description: 例如 nginx、alb、traefik。
+    label: IngressClass（Kong，K8s 1.18+）
+    description: Kong 网关 Ingress 控制器类名（如 nginx、alb）。Studio 可选单独覆盖。
     group: Ingress
+
+  - variable: ingress.studio.enabled
+    type: boolean
+    default: false
+    label: 为 Studio 单独创建 Ingress
+    description: |-
+      Kong Ingress 只管 API；打开此项后为 Studio Deployment 增设独立 Ingress。需填写域名或通过 YAML 填写 ingress.studio.hosts；
+      HTTPS 推荐使用 tlsAuto 或手写 ingress.studio.tls。
+    group: Ingress
+    required: false
+    show_if: deployment.studio.enabled=true
+
+  - variable: ingress.studio.hostNames
+    type: string
+    default: ""
+    label: Studio 域名（逗号分隔，多域名共用同一路径）
+    description: |-
+      例：mms.example.com,activity.example.com — 与各域名对应的 HTTPS 域名一致（配合 tlsAuto 或手写 tls）。
+      若使用「编辑 YAML」配置 ingress.studio.hosts（结构化），可留空本项。
+    group: Ingress
+    required: false
+    show_if: ingress.studio.enabled=true
+
+  - variable: ingress.studio.path
+    type: string
+    default: /
+    label: Studio Ingress 路径
+    description: hostNames 模式下各域名共用的路径（默认 `/`）。
+    group: Ingress
+    required: false
+    show_if: ingress.studio.enabled=true
+
+  - variable: ingress.studio.tlsAuto.enabled
+    type: boolean
+    default: false
+    label: 为 Studio 启用 HTTPS（自动组装 tls.hosts）
+    description: |-
+      打开后须在下方填写 tlsAuto.secretName（集群中已存在的 TLS Secret 名称，如 ssl）。
+      证书须覆盖上文 Studio 的全部域名。
+    group: Ingress
+    required: false
+    show_if: ingress.studio.enabled=true
+
+  - variable: ingress.studio.tlsAuto.secretName
+    type: string
+    default: ""
+    label: Studio TLS Secret 名称（如 ssl）
+    description: 对应 `kubectl create secret tls ssl ...`，并在证书 SAN 中包含所有 Studio 域名。
+    group: Ingress
+    required: false
+    show_if: ingress.studio.tlsAuto.enabled=true
+
+  - variable: ingress.studio.className
+    type: string
+    default: ""
+    label: Studio IngressClass（可留空继承 Kong）
+    description: 留空则使用 **ingress.className**（通常为 nginx）。
+    group: Ingress
+    required: false
+    show_if: ingress.studio.enabled=true
 
   # --- 密钥与数据库 ---
   - variable: secret.jwt.secret
@@ -65,6 +125,15 @@ questions:
     default: postgres
     label: 数据库库名（默认 postgres）
     group: Postgres
+
+  - variable: persistence.defaultStorageClassName
+    type: string
+    default: ""
+    label: 全局 PVC StorageClass（所有需要持久卷的组件共用）
+    description: >-
+      留空不写 storageClassName，由集群默认 StorageClass 绑定；填写则 Postgres、Functions、MinIO、storage、snippets、deno、imgproxy 等本 Chart PVC 共用该类名。
+    group: 持久卷（StorageClass）
+    required: false
 
   - variable: secret.realtime.secretKeyBase
     type: password

@@ -5,6 +5,7 @@
 - **国内部署**：默认值里大量使用华为云 **SWR 第三方镜像前缀**（`swr.<region>.myhuaweicloud.com/ddn-k8s/docker.io/...`），前缀以控制台说明为准。
 - **新旧 Kubernetes**：Ingress 模板在 **`networking.k8s.io/v1` / `v1beta1` / `extensions/v1beta1`** 之间按版本分支，老旧集群避免出现非法 `pathType` 或错误的 `backend` 结构。
 - **单体 + 聚合**：每种中间件可有 **独立 chart**，另提供 **`middleware-bundle`** 聚合 MySQL / Redis / PostgreSQL / MinIO。
+- **动态存储**：**`charts/nfs-subdir-external-provisioner`**（[kubernetes-sigs](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner) vendor + 国内 registry.k8s.io 镜像默认值 + Rancher `questions`：`nfs.server` / `nfs.path`）。
 - **直播 / WebRTC**：SRS、MediaMTX、OvenMediaEngine、Janus 等见 `charts/srs-live`、`charts/mediamtx-live`、`charts/ome-live`、`charts/janus-webrtc`（说明见 [`docs/HUAWEI_AND_INGRESS_zh.md`](./docs/HUAWEI_AND_INGRESS_zh.md) 中「直播协议与 Ingress」）。
 - **观测与压测**：`charts/grafana-dash`（可视化）、`charts/k6-cronjobs`（k6 / RPS 与阈值）、`charts/locust-live`（Locust Web UI + Worker），可与既有 `charts/prometheus` 组合使用。
 - **消息与 ELK**：`charts/kafka`、`charts/rabbitmq`（已有单体）、新增 **`rocketmq-k8s`、`kubemq-standalone`**；**ELK** 参见 **`charts/elk-bundle`**（子 chart 已嵌入 `charts/elk-bundle/charts/`）与 **`logstash-oss`**。

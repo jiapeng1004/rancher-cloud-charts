@@ -9,7 +9,7 @@ description: >-
   默认值预置华为云 SWR 「ddn-k8s/docker.io/…」前缀；附带 Rancher questions.yaml。
 type: application
 
-version: 1.1.1
+version: 1.1.6
 
 keywords:
   - supabase
