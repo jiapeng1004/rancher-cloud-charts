@@ -30,9 +30,15 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ if .Values.serviceAccount.create }}{{ default $fullname .Values.serviceAccount.name }}{{ else }}{{ default "default" .Values.serviceAccount.name }}{{ end }}
-      {{- with .Values.podSecurityContext }}
+      {{- /* seccompProfile 仅 K8s 1.22+;$kv 为空或低版本则从 values 整块剔除 */}}
+      {{- if .Values.podSecurityContext }}
+      {{- $kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion }}
+      {{- $podSc := .Values.podSecurityContext }}
+      {{- if or (not $kv) (not (semverCompare ">=1.22.0-0" $kv)) }}
+      {{- $podSc = omit $podSc "seccompProfile" }}
+      {{- end }}
       securityContext:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml $podSc | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -90,31 +96,31 @@ spec:
             {{- if $sc }}
             - name: initdb
               mountPath: /docker-entrypoint-initdb.d/migrations/99-realtime.sql
-              subPath: migrations/99-realtime.sql
+              subPath: migrations.99-realtime.sql
               readOnly: true
             - name: initdb
               mountPath: /docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql
-              subPath: init-scripts/98-webhooks.sql
+              subPath: init-scripts.98-webhooks.sql
               readOnly: true
             - name: initdb
               mountPath: /docker-entrypoint-initdb.d/init-scripts/99-roles.sql
-              subPath: init-scripts/99-roles.sql
+              subPath: init-scripts.99-roles.sql
               readOnly: true
             - name: initdb
               mountPath: /docker-entrypoint-initdb.d/init-scripts/99-jwt.sql
-              subPath: init-scripts/99-jwt.sql
+              subPath: init-scripts.99-jwt.sql
               readOnly: true
             - name: initdb
               mountPath: /docker-entrypoint-initdb.d/migrations/97-_supabase.sql
-              subPath: migrations/97-_supabase.sql
+              subPath: migrations.97-_supabase.sql
               readOnly: true
             - name: initdb
               mountPath: /docker-entrypoint-initdb.d/migrations/99-logs.sql
-              subPath: migrations/99-logs.sql
+              subPath: migrations.99-logs.sql
               readOnly: true
             - name: initdb
               mountPath: /docker-entrypoint-initdb.d/migrations/99-pooler.sql
-              subPath: migrations/99-pooler.sql
+              subPath: migrations.99-pooler.sql
               readOnly: true
             - name: postgresql-custom
               mountPath: /etc/postgresql-custom

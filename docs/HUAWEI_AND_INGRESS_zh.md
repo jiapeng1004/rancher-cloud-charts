@@ -16,7 +16,7 @@
 | 1.14 – 1.21             | `networking.k8s.io/v1beta1` | ✅ (≥ 1.18)         | `serviceName` 形式    |
 | 更旧集群                 | `extensions/v1beta1`        | ❌                   | `serviceName` 形式    |
 
-新版本集群请使用 **`networking.k8s.io/v1`**，并务必设置与各路径匹配的 **`pathType`**（`ImplementationSpecific` 常用于正则 + `nginx.ingress-controller`）。
+新版本集群请使用 **`networking.k8s.io/v1`**，并务必设置与各路径匹配的 **`pathType`**（`ImplementationSpecific` 常用于正则 + `nginx.ingress-controller`）。各 Chart 的 **`templates/ingress.yaml`** 须在**同一文件内**写好 **`Capabilities.KubeVersion`** 推导与 **`apiVersion`/path/backend** 分支，不在仓库内另建单独的「库 chart」承载片段模板（约定见 **[`docs/TEMPLATING_zh.md`](./TEMPLATING_zh.md)**）。
 
 ## 直播协议与 Ingress
 
@@ -26,7 +26,3 @@
 - **WebRTC RTP/ICE、SRT UDP**：往往要 **UDP 端口放行**、`hostNetwork`、云厂商 **UDP 监听器**，或 DaemonSet + 注解。
 
 相关 Chart：`charts/srs-live`、`charts/mediamtx-live`、`charts/ome-live`、`charts/janus-webrtc` —— 使用前请优先阅读各自的 `README.md`。
-
-## Helm Library
-
-`charts/rancher-lib` 为 **`type: library`**，可向新 Chart 增加 `dependency` 后通过 `define` 模板复用 Ingress API 推导逻辑（按需逐步迁入现有 Chart）。

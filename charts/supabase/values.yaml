@@ -26,7 +26,7 @@ postgresql:
     tag: "15.8.1.085"
     pullPolicy: IfNotPresent
   # 内嵌 PG Deployment：Pod/容器 securityContext（子 chart deployment 模板已接线）
-  # UID/GID 按集群 PSA/存储要求可自行改；以下为常用：runAsUser=105、组=106、卷 fsGroup=106
+  # UID/GID：runAsUser=105、runAsGroup=106、fsGroup=106；seccomp 见下（<1.22 模板自动去掉 seccompProfile）
   podSecurityContext:
     fsGroup: 106
     seccompProfile:

@@ -10,20 +10,20 @@
 2. **`templates/_helpers.tpl` 已不再使用**  
    命名与常用标签已**内联在各 `templates/*.yaml` 文件顶部**（`$name`、`$fullname`，以及少数 Chart 的 `$chartLabel`、`$masterHostname`、`$feFullname` 等），不在单独 `_helpers.tpl` 里维护 `define` / `include`。若你用 `helm create` 生成带 `_helpers.tpl` 的 chart，可参考本仓库写法删掉该文件并把变量段落拷到每个业务模板顶端；或对接到维护脚本 [`scripts/strip_helpers_tpl.py`](../scripts/strip_helpers_tpl.py)（会按惯例替换常见 `include` 并移除 `_helpers.tpl`，改完务必本地 `helm template` 自检）。
 
-3. **避免大面积 `{{- if eq ... }}` 嵌套五六层**，以及零碎的多层 `{{- define }}` / `include` 库式拼装  
-   条件多时优先考虑：拆资源（多个 yaml）、或用 values 开关分成两段可读结构。
+3. **不要用 `.tpl` 后缀**，也**不要为了复用 Ingress 而再建单独的「不占业务资源」YAML**（例如单独的 library chart、或 `templates/` 里只有 `define` 且无具体 Kind 的文件）：**兼容性分支写在当前这份 Ingress 模板顶部**——与 `postgresql-new`、`nginx-web` 等一致。「不要用 `tpl` / `mustTpl`」（Sprig）与「文件名不用 `.tpl`」是两件事。
+
+4. **避免大面积嵌套**，以及多套 `define`/`include` 串起来拼清单  
+   条件多时优先考虑：拆资源文件、或用 values 开关。
 
 ## 推荐写法
 
-1. **Ingress API 版本分支**  
-   - **单体 chart**：在 `ingress.yaml` 顶部用几行 `semverCompare` + 本地变量 `$kv`（与本仓库已有 mysql/redis 等 chart 一致），一目了然。  
-   - **希望单行引用**：可依赖 [`charts/rancher-lib`](../charts/rancher-lib/README.md)，使用 `{{ include "rancher-lib.ingress.apiVersion" . }}`（库内模板已刻意保持短小）。
+1. **Ingress**：在每个 **`ingress.yaml` 开头**写好 **`$kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion`**，紧跟 **`semverCompare`** 选对 **`networking.k8s.io/v1` / `v1beta1` / `extensions/v1beta1`**，与同路径 **`pathType` / backend** 结构一起放在同一文件里。
 
-2. **`range` / `index`**  
-   仅在确有动态列表（如多 host、按名称取端口）时使用；能用固定字段表达的就不要用 `index .Values.map $key`。
+2. **seccompProfile**（仅此字段常踩旧集群）：**&lt;1.22 不要写入**——在写 `securityContext` 的那段里 **`if semverCompare ">=1.22.0-0"` 包住**，或对 values **`omit ... "seccompProfile"`**。可照 **`charts/nginx-ingress`** / **`charts/supabase/charts/postgresql`** deployment。
 
-3. **新增 Chart**  
-   先写出「不加模板也能看懂」的静态 YAML，再把名字、镜像、端口等替换为 `{{ .Values... }}`。
+3. **`range` / `index`**：确有动态列表再用。
+
+4. **新增 Chart**：先写能看懂的静态 YAML，再改成 `Values` 插值。
 
 ## 与本仓库脚本的关系
 

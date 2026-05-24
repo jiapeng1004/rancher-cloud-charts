@@ -33,7 +33,7 @@
 
 ### Postgres
 
-**安全上下文**：内嵌 PG 在 **`postgresql.podSecurityContext` / `postgresql.securityContext`** 中默认 **`runAsUser: 105`、`runAsGroup: 106`、`fsGroup: 106`**（按常见集群/PSA 指定；与你的 `supabase/postgres` 镜像内 **`postgres` 用户 UID/GID 不一致时**，会启动失败或卷权限报错，必须用 **`kubectl exec … id`** 对上后再改 YAML）。其余项含 `runAsNonRoot`、`capabilities.drop`、`seccomp` 等。
+**安全上下文**：内嵌 PG 在 **`postgresql.podSecurityContext`** / **`postgresql.securityContext`** 中默认 **`runAsUser: 105`、`runAsGroup: 106`、`fsGroup: 106`**，且 **`podSecurityContext.seccompProfile: RuntimeDefault`**（与你的 `supabase/postgres` 镜像内 **`postgres` 用户 UID/GID 不一致时**会权限失败，务必 **`kubectl exec … id`** 核对）。部署模板会读取 **`Capabilities.KubeVersion`**：版本 **低于 1.22** 时自动从 **`PodSecurityContext` 剔除 `seccompProfile`**（避免 APIServer 校验 `unknown field`）；另有 `runAsNonRoot`、`capabilities.drop` 等。本地 **`helm template` 未带 `--kube-version` 时使用默认 Capability 版本，若需与高版本对齐请显式传参。
 
 | `bundled.postgres` | 说明 |
 |--------------------|------|

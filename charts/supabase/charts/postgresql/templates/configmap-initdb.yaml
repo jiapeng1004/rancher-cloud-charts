@@ -9,19 +9,20 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ quote $name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+{{- /* ConfigMap data 键不能含 /；用 . 占位目录，与 mount subPath 一致 */}}
 data:
-  migrations/99-realtime.sql: |
+  migrations.99-realtime.sql: |
 {{ $.Files.Get "files/docker-entrypoint-initdb.d/migrations/99-realtime.sql" | nindent 4 }}
-  init-scripts/98-webhooks.sql: |
+  init-scripts.98-webhooks.sql: |
 {{ $.Files.Get "files/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql" | nindent 4 }}
-  init-scripts/99-roles.sql: |
+  init-scripts.99-roles.sql: |
 {{ $.Files.Get "files/docker-entrypoint-initdb.d/init-scripts/99-roles.sql" | nindent 4 }}
-  init-scripts/99-jwt.sql: |
+  init-scripts.99-jwt.sql: |
 {{ $.Files.Get "files/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql" | nindent 4 }}
-  migrations/97-_supabase.sql: |
+  migrations.97-_supabase.sql: |
 {{ $.Files.Get "files/docker-entrypoint-initdb.d/migrations/97-_supabase.sql" | nindent 4 }}
-  migrations/99-logs.sql: |
+  migrations.99-logs.sql: |
 {{ $.Files.Get "files/docker-entrypoint-initdb.d/migrations/99-logs.sql" | nindent 4 }}
-  migrations/99-pooler.sql: |
+  migrations.99-pooler.sql: |
 {{ $.Files.Get "files/docker-entrypoint-initdb.d/migrations/99-pooler.sql" | nindent 4 }}
 {{- end }}

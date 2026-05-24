@@ -30,7 +30,6 @@ def si(slug: str) -> str:
 
 BY_PATH_SUFFIX: dict[str, str] = {
     "postgresql-new/16/Chart.yaml": dv("postgresql"),
-    "rancher-lib/Chart.yaml": dv("rancher"),
     "middleware-bundle/Chart.yaml": dv("helm"),
     "elk-bundle/Chart.yaml": dv("elasticsearch"),
     "logstash-oss/Chart.yaml": dv("elasticsearch"),

@@ -19,8 +19,8 @@ podAnnotations: {}
 
 imagePullSecrets: []
 
-# Pod 级 security（与 restricted / PSA 常见要求对齐）。
-# 默认与 umbrella 对齐：runAsUser=105、runAsGroup=106、fsGroup=106；换镜像时请 kubectl exec … id postgres 核对。
+# Pod 级 security。默认 runAsUser=105、runAsGroup=106、fsGroup=106；换镜像请 kubectl exec … id postgres 核对。
+# seccompProfile：仅 K8s 1.22+；内嵌 Postgres deployment 会根据 Capabilities.KubeVersion 在旧集群剔除该字段。
 podSecurityContext:
   fsGroup: 106
   seccompProfile:

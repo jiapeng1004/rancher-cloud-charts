@@ -120,12 +120,13 @@ spec:
                 secretKeyRef:
                   name: {{ $fullname }}-runtime
                   key: ANON_KEY
+          {{- /* 必须用 Helm quote：裸 YAML 中含 http:// 时 http: 易被解析成 map，导致 command[2] ValidationError */}}
           readinessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
-                - wget --no-verbose --tries=1 --server-response --spider --header="Authorization: Bearer ${ANON_KEY}" http://127.0.0.1:4000/api/tenants/realtime-dev/health
+                - {{ printf "wget --no-verbose --tries=1 --server-response --spider --header=\"Authorization: Bearer ${ANON_KEY}\" \"http://127.0.0.1:4000/api/tenants/realtime-dev/health\"" | quote }}
             initialDelaySeconds: 10
             periodSeconds: 30
             timeoutSeconds: 5

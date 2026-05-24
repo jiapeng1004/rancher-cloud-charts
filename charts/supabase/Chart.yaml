@@ -16,7 +16,7 @@ maintainers:
   - name: rancher-cloud-charts
 name: supabase
 type: application
-version: 1.2.5
+version: 1.2.8
 appVersion: "minimal"
 dependencies:
   - name: postgresql

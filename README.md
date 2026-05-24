@@ -28,7 +28,7 @@
 
 ## Rancher 自定义答案（questions.yaml）
 
-- **`type: library`（如 `charts/rancher-lib`）不生成表单**。
+- **`type: library`** 的子 chart **不生成表单**（本仓库一般不单独再放仅含模板片段的 library chart；Ingress / 兼容性逻辑写在对应资源的 `ingress.yaml` 等处）。
 - **其余 application Chart**：每个 Chart 目录下均有非空 `questions.yaml`（或由子 chart / 手写维护）；表单字段与常用 `values` 对齐，**复杂段落仍建议在 Rancher「编辑 YAML」中维护**。
 - **批量同步**：仓库根目录执行 **`py -3 scripts/sync_rancher_questions.py`**，可按 `values.yaml` 自动生成/补齐常见项（**跳过已有人工维护的非空文件**）。
 - **历史 `questions.yml`**：脚本会在缺少 `questions.yaml` 时用同名 `.yml` 复制补齐（便于 Rancher 读取）。
@@ -42,10 +42,4 @@ helm upgrade --install my-mw . -n default --create-namespace
 
 按需覆盖子 chart 的配置，例如在父级 `values.yaml` 中使用 `postgresql.*`、`redis.*`。
 
-## Helm Library（可选）
-
-参见 `charts/rancher-lib/README.md`，用于在新 chart 内复用 `Ingress apiVersion` 推导。
-
----
-
-历史模板中若仍存在硬编码 `networking.k8s.io/v1` 或未分支的 Ingress，可按 `postgresql-new` / `nginx-web` 中的写法逐步对齐。
+历史模板中若仍存在硬编码 `networking.k8s.io/v1` 或未分支的 Ingress，可复制 **`postgresql-new`**、**`nginx-web`**、**`middleware-bundle/charts/mysql`** 等 chart 里 **`ingress.yaml` 顶部**的 **`$kv` + `semverCompare`** 写法（[`docs/TEMPLATING_zh.md`](./docs/TEMPLATING_zh.md)）。

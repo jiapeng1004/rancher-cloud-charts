@@ -1,3 +1,5 @@
+{{- /* 与各 chart Ingress 同款：KubeVersion.Version 为空时用 GitVersion；无字符串则不注入 seccomp */}}
+{{- $kubeEffective := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion }}
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -495,8 +497,10 @@ spec:
             readOnlyRootFilesystem: false
             runAsNonRoot: true
             runAsUser: 101
+            {{- if and $kubeEffective (semverCompare ">=1.22.0-0" $kubeEffective) }}
             seccompProfile:
               type: RuntimeDefault
+            {{- end }}
           volumeMounts:
             - mountPath: /usr/local/certificates/
               name: webhook-cert
@@ -561,8 +565,10 @@ spec:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 65532
+            {{- if and $kubeEffective (semverCompare ">=1.22.0-0" $kubeEffective) }}
             seccompProfile:
               type: RuntimeDefault
+            {{- end }}
       nodeSelector:
         kubernetes.io/os: linux
       restartPolicy: OnFailure
@@ -614,8 +620,10 @@ spec:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 65532
+            {{- if and $kubeEffective (semverCompare ">=1.22.0-0" $kubeEffective) }}
             seccompProfile:
               type: RuntimeDefault
+            {{- end }}
       nodeSelector:
         kubernetes.io/os: linux
       restartPolicy: OnFailure
