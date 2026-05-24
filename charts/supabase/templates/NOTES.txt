@@ -1,5 +1,23 @@
----
 Thank you for installing {{ .Chart.Name }}!
-{{ if .Values.ingress.enabled }}
-Visit the Studio dashboard at http://{{ (index .Values.ingress.hosts 0).host }}
+
+{{- $kongHost := "" -}}
+{{- $kongTls := "" -}}
+{{- $studioHost := "" -}}
+{{- $studioTls := "" -}}
+
+{{- if .Values.ingress.enabled }}
+  {{- $kongHost = .Values.ingress.kongHostname | default "" | trim -}}
+  {{- $kongTls = .Values.ingress.tlsSecretName | default "" | trim -}}
+  {{- $kongProtocol := ternary "https" "http" (ne $kongTls "") -}}
+API (Kong) 入口（含协议示例）: {{ $kongProtocol }}://{{ $kongHost }}
+
+  {{- if and .Values.ingress.studio.enabled .Values.deployment.studio.enabled }}
+    {{- $studioHost = .Values.ingress.studio.hostname | default "" | trim -}}
+    {{- if ne $studioHost "" }}
+      {{- $studioTls = .Values.ingress.studio.tlsSecretName | default "" | trim -}}
+      {{- $useTls := ternary $studioTls $kongTls (ne $studioTls "") -}}
+      {{- $studioProtocol := ternary "https" "http" (ne $useTls "") -}}
+Studio 入口（含协议示例）: {{ $studioProtocol }}://{{ $studioHost }}
+    {{- end }}
+  {{- end }}
 {{- end }}

@@ -626,6 +626,8 @@ image:
     pullPolicy: IfNotPresent
     tag: "RELEASE.2024-01-05T07-53-51Z"
 
+# 组件环境变量：`templates/<组件>/deployment*.yaml` 对 `environment.<组件>` 做 `range`（整表逐项注入）。
+# Storage 等对个别键有直接引用后再 `range`。若某小节从本文件删掉，模板需能接受空 map（或为 `default dict`）。
 environment:
   analytics:
     LOGFLARE_NODE_HOST: 127.0.0.1
@@ -639,13 +641,16 @@ environment:
     LOGFLARE_FEATURE_FLAG_OVERRIDE: multibackend=true
 
   auth:
+    # GoTrue 环境变量由 templates/auth/_environment.tpl 显式列出；不要在 auth 根下乱放键（应放在 extra）。
     DB_USER: supabase_auth_admin
     DB_DRIVER: postgres
     ## SSL mode options: disable, allow, prefer, require, verify-ca, verify-full
     DB_SSL: disable
+    # 与 Kong Ingress 对外域名保持一致（协议 + host，按需改 https）。
     API_EXTERNAL_URL: http://supabase.local
     GOTRUE_API_HOST: "0.0.0.0"
     GOTRUE_API_PORT: "9999"
+    # 常为 Studio/前端入口；应与实际对外域名一致。
     GOTRUE_SITE_URL: http://supabase.local
     GOTRUE_URI_ALLOW_LIST: "*"
     GOTRUE_DISABLE_SIGNUP: "false"
@@ -668,21 +673,8 @@ environment:
     GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/auth/v1/verify"
     GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/v1/verify"
     GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: "/auth/v1/verify"
-    ## Uncomment to enable custom access token hook. Please see: https://supabase.com/docs/guides/auth/auth-hooks
-    ## for full list of hooks and additional details about custom_access_token_hook
-    # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_ENABLED: "true"
-    # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_URI: "pg-functions://postgres/public/custom_access_token_hook"
-    # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_SECRETS: "<standard-base64-secret>"
-    # GOTRUE_HOOK_MFA_VERIFICATION_ATTEMPT_ENABLED: "true"
-    # GOTRUE_HOOK_MFA_VERIFICATION_ATTEMPT_URI: "pg-functions://postgres/public/mfa_verification_attempt"
-    # GOTRUE_HOOK_PASSWORD_VERIFICATION_ATTEMPT_ENABLED: "true"
-    # GOTRUE_HOOK_PASSWORD_VERIFICATION_ATTEMPT_URI: "pg-functions://postgres/public/password_verification_attempt"
-    # GOTRUE_HOOK_SEND_SMS_ENABLED: "false"
-    # GOTRUE_HOOK_SEND_SMS_URI: "pg-functions://postgres/public/custom_access_token_hook"
-    # GOTRUE_HOOK_SEND_SMS_SECRETS: "v1,whsec_VGhpcyBpcyBhbiBleGFtcGxlIG9mIGEgc2hvcnRlciBCYXNlNjQgc3RyaW5n"
-    # GOTRUE_HOOK_SEND_EMAIL_ENABLED: "false"
-    # GOTRUE_HOOK_SEND_EMAIL_URI: "http://host.docker.internal:54321/functions/v1/email_sender"
-    # GOTRUE_HOOK_SEND_EMAIL_SECRETS: "v1,whsec_VGhpcyBpcyBhbiBleGFtcGxlIG9mIGEgc2hvcnRlciBCYXNlNjQgc3RyaW5n"
+    ## Hooks 等扩展键写在 extra（见 upstream auth-hooks）；空 map 不产生 env。
+    extra: { }
 
   db:
     POSTGRES_HOST: /var/run/postgresql
@@ -726,8 +718,6 @@ environment:
     ## SSL mode options: disable, allow, prefer, require, verify-ca, verify-full
     DB_SSL: disable
     PG_META_PORT: "8080"
-
-  minio: { }
 
   realtime:
     DB_USER: supabase_admin
@@ -775,12 +765,12 @@ environment:
     POSTGRES_PORT: 5432
     DEFAULT_ORGANIZATION_NAME: Default Organization
     DEFAULT_PROJECT_NAME: Default Project
+    # Studio 对外根 URL（与 Ingress / 浏览器地址栏一致）。
     SUPABASE_PUBLIC_URL: http://supabase.local
     NEXT_PUBLIC_ENABLE_LOGS: true
     ## Set value to bigquery to use Big Query backend for analytics (postgres or bigquery)
     NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
 
-  vector: { }
 
 persistence:
   # 本 Chart 内各 PVC 仅使用这一项作为 storageClass（留空不写 spec.storageClassName，交由集群默认 StorageClass）。
@@ -1056,42 +1046,21 @@ ingress:
   className: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    # cert-manager.io/cluster-issuer: "letsencrypt-staging"
-    # kubernetes.io/tls-acme: "true"
-  # HTTPS：填入 TLS Secret（需先于集群中创建 kubectl create secret tls ...）
-  # 结构与官方 Ingress.spec.tls 一致，多域名共用一张证书时每组一条 tls，hosts + secretName 即可。
-  # tls:
-  #   - hosts:
-  #       - api.example.com
-  #       - www.example.com
-  #     secretName: ssl
-  tls: [ ]
+  # Kong 对外域名（应与 environment.auth.API_EXTERNAL_URL 的根一致）。
+  kongHostname: supabase.local
+  kongPath: /
+  kongPathType: Prefix
+  # 填集群 TLS Secret 名则 Kong Ingress 挂载 HTTPS（证书 SAN 须含 kongHostname）。
+  tlsSecretName: ""
 
-  hosts:
-    - host: supabase.local
-      paths:
-        - path: /
-          pathType: Prefix
-
-  # Studio 控制台独立 Ingress（不归 Kong）。
   studio:
     enabled: false
-    className: ""
-    hostNames: ""
+    hostname: ""
+    tlsSecretName: ""
     path: /
     pathType: Prefix
+    className: ""
     annotations: { }
-    # YAML 进阶：若非空数组则优先生效，忽略 hostNames。示例每项可含自定义 paths：
-    #   - host: studio.example.com
-    #     paths:
-    #       - path: /
-    #         pathType: Prefix
-    hosts: [ ]
-    # 结构与顶层 ingress.tls 相同；手写多 SAN / 多证书时请填这里（优先生效，忽略 tlsAuto）
-    tls: [ ]
-    tlsAuto:
-      enabled: false
-      secretName: ""
 
 serviceAccount:
   analytics:
@@ -1162,38 +1131,8 @@ serviceAccount:
 networkPolicy:
   db:
     enabled: false
-    # example.values.yaml
-    # ingressRules:
-    #   - name: allow-supabase-internal
-    #     from:
-    #       podSelector:
-    #         matchLabels:
-    #           app.kubernetes.io/instance: supabase
-    #   - name: allow-analytics-team
-    #     from:
-    #       namespaceSelector:
-    #         matchLabels:
-    #           team: analytics
-    #       podSelector:
-    #         matchLabels:
-    #           role: analyst-tool
 
 migration:
-# example.sql: |
-#   \set pguser `echo "$POSTGRES_USER"`
-
-#   -- Create schema
-#   create schema if not exists app;
-#   alter schema app owner to :pguser;
-
-#   -- Create example table
-#   create table if not exists app.items (
-#     id   serial primary key,
-#     name text not null
-#   );
-
-#   -- Set table owner
-#   alter table app.items owner to :pguser;
 
 bigQuery:
   enabled: false

@@ -64,7 +64,7 @@ spec:
             - containerPort: {{ .Values.service.vector.port }}
               protocol: TCP
           env:
-            {{- range $key, $value := .Values.environment.vector }}
+            {{- range $key, $value := (.Values.environment.vector | default dict) }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}

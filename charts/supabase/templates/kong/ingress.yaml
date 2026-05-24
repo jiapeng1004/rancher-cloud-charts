@@ -1,7 +1,14 @@
 {{- if .Values.deployment.kong.enabled -}}
 {{- if .Values.ingress.enabled -}}
+{{- $kh := (.Values.ingress.kongHostname | default "") | trim -}}
+{{- if eq $kh "" -}}
+{{- fail "[supabase] ingress.enabled 且启用 Kong 时须设置 ingress.kongHostname（对外 API 域名）" -}}
+{{- end -}}
 {{- $fullName := include "supabase.kong.fullname" . -}}
 {{- $svcPort := .Values.service.kong.port -}}
+{{- $path := .Values.ingress.kongPath | default "/" | trim -}}
+{{- $pathType := .Values.ingress.kongPathType | default "Prefix" -}}
+{{- $tlsSecret := (.Values.ingress.tlsSecretName | default "") | trim -}}
 {{- $kv := default .Capabilities.KubeVersion.Version .Capabilities.KubeVersion.GitVersion }}
 {{- $ingressV1 := semverCompare ">=1.19-0" $kv }}
 {{- if $ingressV1 }}
@@ -22,37 +29,29 @@ spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" $kv) }}
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
-  {{- if .Values.ingress.tls }}
+  {{- if ne $tlsSecret "" }}
   tls:
-    {{- range .Values.ingress.tls }}
     - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
+        - {{ $kh | quote }}
+      secretName: {{ $tlsSecret }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ $kh | quote }}
       http:
         paths:
-          {{- range .paths }}
           {{- if $ingressV1 }}
-          - path: {{ .path }}
-            pathType: {{ default "Prefix" .pathType }}
+          - path: {{ $path }}
+            pathType: {{ $pathType }}
             backend:
               service:
                 name: {{ $fullName }}
                 port:
                   number: {{ $svcPort }}
           {{- else }}
-          - path: {{ .path }}
+          - path: {{ $path }}
             backend:
               serviceName: {{ $fullName }}
               servicePort: {{ $svcPort }}
           {{- end }}
-          {{- end }}
-    {{- end }}
 {{- end }}
 {{- end }}

@@ -16,27 +16,43 @@ questions:
     type: string
     default: nginx
     label: IngressClass（Kong，K8s 1.18+）
-    description: Kong 网关 Ingress 控制器类名（如 nginx、alb）。Studio 可选单独覆盖。
+    description: Kong Ingress 控制器类名；Studio 可单独覆盖 **ingress.studio.className**。
     group: Ingress
+
+  - variable: ingress.kongHostname
+    type: string
+    default: supabase.local
+    label: Kong / API 对外域名
+    description: 写入 Kong Ingress 的唯一 host；与 **environment.auth.API_EXTERNAL_URL** 根域名一致。
+    group: Ingress
+    required: true
+    show_if: ingress.enabled=true
+
+  - variable: ingress.tlsSecretName
+    type: string
+    default: ""
+    label: TLS Secret（Kong；Studio 默认复用）
+    description: |-
+      非空则 Kong Ingress 启用 HTTPS。**Studio Ingress** 默认同名 Secret；
+      Studio 独占证书时在 YAML 填写 **ingress.studio.tlsSecretName**。
+    group: Ingress
+    required: false
+    show_if: ingress.enabled=true
 
   - variable: ingress.studio.enabled
     type: boolean
     default: false
     label: 为 Studio 单独创建 Ingress
-    description: |-
-      Kong Ingress 只管 API；打开此项后为 Studio Deployment 增设独立 Ingress。需填写域名或通过 YAML 填写 ingress.studio.hosts；
-      HTTPS 推荐使用 tlsAuto 或手写 ingress.studio.tls。
+    description: Kong 仅 API；勾选后另一条 Ingress，使用「Studio 对外域名」。
     group: Ingress
     required: false
     show_if: deployment.studio.enabled=true
 
-  - variable: ingress.studio.hostNames
+  - variable: ingress.studio.hostname
     type: string
     default: ""
-    label: Studio 域名（逗号分隔，多域名共用同一路径）
-    description: |-
-      例：mms.example.com,activity.example.com — 与各域名对应的 HTTPS 域名一致（配合 tlsAuto 或手写 tls）。
-      若使用「编辑 YAML」配置 ingress.studio.hosts（结构化），可留空本项。
+    label: Studio 对外域名
+    description: 与浏览器访问 Studio 一致；勾选上一项时常填。
     group: Ingress
     required: false
     show_if: ingress.studio.enabled=true
@@ -45,36 +61,14 @@ questions:
     type: string
     default: /
     label: Studio Ingress 路径
-    description: hostNames 模式下各域名共用的路径（默认 `/`）。
     group: Ingress
     required: false
     show_if: ingress.studio.enabled=true
-
-  - variable: ingress.studio.tlsAuto.enabled
-    type: boolean
-    default: false
-    label: 为 Studio 启用 HTTPS（自动组装 tls.hosts）
-    description: |-
-      打开后须在下方填写 tlsAuto.secretName（集群中已存在的 TLS Secret 名称，如 ssl）。
-      证书须覆盖上文 Studio 的全部域名。
-    group: Ingress
-    required: false
-    show_if: ingress.studio.enabled=true
-
-  - variable: ingress.studio.tlsAuto.secretName
-    type: string
-    default: ""
-    label: Studio TLS Secret 名称（如 ssl）
-    description: 对应 `kubectl create secret tls ssl ...`，并在证书 SAN 中包含所有 Studio 域名。
-    group: Ingress
-    required: false
-    show_if: ingress.studio.tlsAuto.enabled=true
 
   - variable: ingress.studio.className
     type: string
     default: ""
-    label: Studio IngressClass（可留空继承 Kong）
-    description: 留空则使用 **ingress.className**（通常为 nginx）。
+    label: Studio IngressClass（留空继承 Kong）
     group: Ingress
     required: false
     show_if: ingress.studio.enabled=true
@@ -158,9 +152,9 @@ questions:
   - variable: environment.auth.GOTRUE_SITE_URL
     type: string
     default: "http://supabase.local"
-    label: GOTRUE_SITE_URL（可留空与 API_EXTERNAL_URL 相同）
+    label: GOTRUE_SITE_URL（GoTrue 站点 URL）
     description: >-
-      留空时可在 Helm 中用其它逻辑回填；表单建议与 **API_EXTERNAL_URL** 同源。
+      此值会通过 env 整块注入 Auth（GoTrue）容器，并非无用字段。通常与 API_EXTERNAL_URL 同源；邮件重定向仍会读 GOTRUE_SITE_URL。
     group: 对外 URL（Auth）
 
   # --- 组件开关 ---
