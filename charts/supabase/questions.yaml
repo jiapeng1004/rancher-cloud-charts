@@ -123,11 +123,12 @@ questions:
   - variable: global.storageClassName
     type: string
     default: ""
-    label: 全局 PVC StorageClass（所有需要持久卷的组件共用）
+    label: 全局 PVC StorageClass（必填）
     description: >-
-      留空不写 storageClassName，由集群默认 StorageClass 绑定；填写则 Postgres、Functions、MinIO、storage、snippets、deno、imgproxy 等本 Chart PVC 共用该类名。
+      所有需要持久卷的组件（Postgres、MinIO、imgproxy）共用此 StorageClass。
+      必须填写集群中存在的 StorageClass 名称，如 local-path、nfs-client 等。
     group: 持久卷（StorageClass）
-    required: false
+    required: true
 
   - variable: secret.realtime.secretKeyBase
     type: password

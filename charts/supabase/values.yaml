@@ -16,7 +16,7 @@
 ## 这些值会被注入到集群 Secret 中，各子 chart 通过 secretRef 显式引用
 
 global:
-  ## 全局 PVC StorageClass（留空使用集群默认 StorageClass）
+  ## 所有需要持久卷的组件（Postgres、MinIO、imgproxy）共用此 StorageClass
   storageClassName: ""
 
   ## JWT 密钥
