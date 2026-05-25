@@ -9,9 +9,9 @@ image:
   pullSecrets: []
 
 initDbImage:
-  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/postgres
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/codingpuss/postgres-client
   pullPolicy: IfNotPresent
-  tag: "15-alpine"
+  tag: "latest"
 
 service:
   type: ClusterIP
