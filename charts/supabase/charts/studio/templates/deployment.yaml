@@ -94,32 +94,26 @@ spec:
             - name: SUPABASE_DB_PORT
               value: {{ .Values.dbPort | quote }}
             {{- end }}
-            {{- if .Values.dbSecretRef }}
             - name: SUPABASE_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dbSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-db
                   key: password
-            {{- end }}
-            {{- if .Values.jwtSecretRef }}
             - name: SUPABASE_JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.jwtSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: secret
-            {{- end }}
-            {{- if .Values.apikeySecretRef }}
             - name: SUPABASE_ANON_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apikeySecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: anonKey
             - name: SUPABASE_SERVICE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apikeySecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: serviceKey
-            {{- end }}
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

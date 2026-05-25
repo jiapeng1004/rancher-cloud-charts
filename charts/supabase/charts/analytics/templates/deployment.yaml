@@ -95,25 +95,21 @@ spec:
             - name: POSTGRES_BACKEND_URL
               value: "postgresql://supabase_admin:$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/postgres"
             {{- end }}
-            {{- if .Values.dbSecretRef }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dbSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-db
                   key: password
-            {{- end }}
-            {{- if .Values.analyticsSecretRef }}
             - name: LOGFLARE_PUBLIC_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.analyticsSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-analytics
                   key: publicAccessToken
             - name: LOGFLARE_PRIVATE_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.analyticsSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-analytics
                   key: privateAccessToken
-            {{- end }}
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

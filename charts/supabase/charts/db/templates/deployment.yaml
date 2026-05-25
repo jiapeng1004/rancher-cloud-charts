@@ -67,27 +67,21 @@ spec:
               value: /var/run/postgresql
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
-            {{- if .Values.dbSecretRef }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dbSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-db
                   key: password
-            {{- end }}
-            {{- if .Values.jwtSecretRef }}
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.jwtSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: secret
-            {{- end }}
-            {{- if .Values.analyticsSecretRef }}
             - name: LOGFLARE_PUBLIC_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.analyticsSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-analytics
                   key: publicAccessToken
-            {{- end }}
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

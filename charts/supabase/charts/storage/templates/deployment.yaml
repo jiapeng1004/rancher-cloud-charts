@@ -111,49 +111,41 @@ spec:
             - name: DB_PORT
               value: {{ .Values.dbPort | quote }}
             {{- end }}
-            {{- if .Values.dbSecretRef }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dbSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-db
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dbSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-db
                   key: database
-            {{- end }}
-            {{- if .Values.jwtSecretRef }}
             - name: PGRST_JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.jwtSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: secret
             - name: ANON_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.jwtSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: anonKey
-            {{- end }}
-            {{- if .Values.apikeySecretRef }}
             - name: SERVICE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apikeySecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: serviceKey
-            {{- end }}
-            {{- if .Values.s3SecretRef }}
             - name: GLOBAL_S3_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.s3SecretRef }}
+                  name: {{ include "supabase.fullname" . }}-s3
                   key: accessKey
             - name: GLOBAL_S3_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.s3SecretRef }}
+                  name: {{ include "supabase.fullname" . }}-s3
                   key: secretKey
-            {{- end }}
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

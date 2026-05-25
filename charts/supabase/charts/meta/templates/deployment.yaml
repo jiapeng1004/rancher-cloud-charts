@@ -70,20 +70,16 @@ spec:
             - name: PG_META_DB_NAME
               value: {{ .Values.dbName | quote }}
             {{- end }}
-            {{- if .Values.dbSecretRef }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dbSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-db
                   key: password
-            {{- end }}
-            {{- if .Values.metaCryptoKeySecretRef }}
             - name: CRYPTO_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.metaCryptoKeySecretRef }}
+                  name: {{ include "supabase.fullname" . }}-meta
                   key: cryptoKey
-            {{- end }}
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

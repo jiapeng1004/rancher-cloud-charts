@@ -65,39 +65,26 @@ spec:
               value: {{ .Values.dbName | default "" | quote }}
             - name: DB_USER
               value: "supabase_functions_admin"
-            {{- if .Values.dbSecretRef }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dbSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-db
                   key: password
-            {{- end }}
-            {{- if .Values.jwtSecretRef }}
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.jwtSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: secret
-            {{- end }}
-            {{- if .Values.apikeySecretRef }}
             - name: ANON_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apikeySecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: anonKey
             - name: SERVICE_ROLE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apikeySecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: serviceKey
-            {{- end }}
-            {{- if .Values.functionsSecretRef }}
-            - name: FUNCTIONS_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.functionsSecretRef }}
-                  key: secret
-            {{- end }}
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

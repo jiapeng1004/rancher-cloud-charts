@@ -80,52 +80,36 @@ spec:
             - name: KONG_NGINX_WORKER_PROCESSES
               value: {{ .KONG_NGINX_WORKER_PROCESSES | quote }}
             {{- end }}
-            {{- if .Values.jwtSecretRef }}
             - name: SUPABASE_ANON_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.jwtSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: anonKey
             - name: SUPABASE_SERVICE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.jwtSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
                   key: serviceKey
-            {{- end }}
-            {{- if .Values.apikeySecretRef }}
             - name: SUPABASE_PUBLISHABLE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apikeySecretRef }}
-                  key: publishableKey
+                  name: {{ include "supabase.fullname" . }}-jwt
+                  key: anonKey
             - name: SUPABASE_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apikeySecretRef }}
-                  key: secretKey
-            - name: ANON_KEY_ASYMMETRIC
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.apikeySecretRef }}
-                  key: anonKeyAsymmetric
-            - name: SERVICE_ROLE_KEY_ASYMMETRIC
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.apikeySecretRef }}
-                  key: serviceRoleKeyAsymmetric
-            {{- end }}
-            {{- if .Values.dashboardSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-jwt
+                  key: serviceKey
             - name: DASHBOARD_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dashboardSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-dashboard
                   key: username
             - name: DASHBOARD_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dashboardSecretRef }}
+                  name: {{ include "supabase.fullname" . }}-dashboard
                   key: password
-            {{- end }}
           {{- with .Values.deployment.envFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}
