@@ -93,7 +93,8 @@ spec:
           {{- end }}
           volumeMounts:
             - name: functions-main
-              mountPath: /home/deno/functions/main
+              mountPath: /home/deno/functions/main/index.ts
+              subPath: index.ts
             {{- with .Values.deployment.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
