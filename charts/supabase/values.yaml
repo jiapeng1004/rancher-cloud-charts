@@ -17,7 +17,7 @@
 
 global:
   ## 全局 PVC StorageClass（留空使用集群默认 StorageClass）
-  defaultStorageClassName: ""
+  storageClassName: ""
 
   ## JWT 密钥
   jwt:

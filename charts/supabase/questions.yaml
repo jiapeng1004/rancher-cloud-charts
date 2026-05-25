@@ -120,7 +120,7 @@ questions:
     label: 数据库库名（默认 postgres）
     group: Postgres
 
-  - variable: global.defaultStorageClassName
+  - variable: global.storageClassName
     type: string
     default: ""
     label: 全局 PVC StorageClass（所有需要持久卷的组件共用）
