@@ -47,7 +47,7 @@ deployment:
   terminationGracePeriodSeconds: 60
   podSecurityContext:
     fsGroup: 106
-    fsGroupChangePolicy: "OnRootMismatch"
+    fsGroupChangePolicy: "Always"
   securityContext:
     runAsUser: 105
     runAsGroup: 106
