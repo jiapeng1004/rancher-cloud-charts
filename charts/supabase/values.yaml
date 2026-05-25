@@ -327,9 +327,9 @@ rest:
     lifecycle: {}
   ## 跨组件引用（显式）
   dbSecretRef: ""
-  dbHost: ""
-  dbPort: ""
-  dbName: ""
+  dbHost: "{{ .Release.Name }}-db"
+  dbPort: "5432"
+  dbName: "postgres"
   jwtSecretRef: ""
   apikeySecretRef: ""
 
@@ -395,9 +395,9 @@ realtime:
     lifecycle: {}
   ## 跨组件引用（显式）
   dbSecretRef: ""
-  dbHost: ""
-  dbPort: ""
-  dbName: ""
+  dbHost: "{{ .Release.Name }}-db"
+  dbPort: "5432"
+  dbName: "postgres"
   jwtSecretRef: ""
   apikeySecretRef: ""
   realtimeSecretKeyBaseRef: ""
@@ -467,9 +467,9 @@ storage:
     lifecycle: {}
   ## 跨组件引用（显式）
   dbSecretRef: ""
-  dbHost: ""
-  dbPort: ""
-  dbName: ""
+  dbHost: "{{ .Release.Name }}-db"
+  dbPort: "5432"
+  dbName: "postgres"
   jwtSecretRef: ""
   apikeySecretRef: ""
   s3SecretRef: ""
@@ -587,9 +587,9 @@ studio:
     lifecycle: {}
   ## 跨组件引用（显式）
   dbSecretRef: ""
-  dbHost: ""
-  dbPort: ""
-  dbName: ""
+  dbHost: "{{ .Release.Name }}-db"
+  dbPort: "5432"
+  dbName: "postgres"
   jwtSecretRef: ""
   apikeySecretRef: ""
   metaUrl: ""
@@ -646,9 +646,9 @@ functions:
     lifecycle: {}
   ## 跨组件引用（显式）
   dbSecretRef: ""
-  dbHost: ""
-  dbPort: ""
-  dbName: ""
+  dbHost: "{{ .Release.Name }}-db"
+  dbPort: "5432"
+  dbName: "postgres"
   jwtSecretRef: ""
   apikeySecretRef: ""
   functionsSecretRef: ""

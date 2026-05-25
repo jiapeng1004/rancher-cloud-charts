@@ -46,14 +46,10 @@ spec:
           image: "{{ .Values.initDbImage.repository }}:{{ .Values.initDbImage.tag }}"
           imagePullPolicy: {{ .Values.initDbImage.pullPolicy }}
           env:
-            {{- if .Values.dbHost }}
             - name: DB_HOST
-              value: {{ .Values.dbHost | quote }}
-            {{- end }}
-            {{- if .Values.dbPort }}
+              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
             - name: DB_PORT
-              value: {{ .Values.dbPort | quote }}
-            {{- end }}
+              value: {{ .Values.dbPort | default "5432" | quote }}
           command: [ "/bin/sh", "-c" ]
           args:
             - |
