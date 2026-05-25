@@ -1,0 +1,57 @@
+{
+  "env": {
+    "OPENCLAW_GATEWAY_PASSWORD": "${OPENCLAW_GATEWAY_PASSWORD}",
+    "DEEPSEEK_API_KEY": "${DEEPSEEK_API_KEY}",
+    "MODEL_PROVIDER": "deepseek",
+    "MODEL_PROVIDER_BASE_URL": "https://api.deepseek.com",
+    "MODEL_PROVIDER_API_KEY": "${DEEPSEEK_API_KEY}",
+    "MODEL_PROVIDER_API_ADAPTER": "openai-completions",
+    "MODEL_PROVIDER_MODEL_ID": "deepseek-chat"
+  },
+  "gateway": {
+    "mode": "local",
+    "controlUi": {
+      "enabled": true,
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://127.0.0.1:18789"
+      ]
+    },
+    "auth": {
+      "mode": "password",
+      "password": "${OPENCLAW_GATEWAY_PASSWORD}"
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": false
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "deepseek/deepseek-chat"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "deepseek": {
+        "baseUrl": "https://api.deepseek.com",
+        "apiKey": "${DEEPSEEK_API_KEY}",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "deepseek-chat",
+            "name": "deepseek/deepseek-chat"
+          },
+          {
+            "id": "deepseek-reasoner",
+            "name": "deepseek/deepseek-reasoner"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -110,9 +110,10 @@ spec:
               name: config
               subPath: kong.yml
               readOnly: true
-            {{- with .Values.deployment.volumeMounts }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
+            - mountPath: /home/kong/kong-entrypoint.sh
+              name: config
+              subPath: kong-entrypoint.sh
+              readOnly: true
           {{- with .Values.deployment.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -135,9 +136,7 @@ spec:
         - name: config
           configMap:
             name: {{ include "kong.fullname" . }}
-            items:
-            - key: kong.yml
-              path: kong.yml
+            defaultMode: 0755
         {{- with .Values.deployment.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

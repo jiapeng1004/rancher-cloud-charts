@@ -54,7 +54,6 @@ deployment:
   tolerations: []
   priorityClassName: ""
   envFrom: []
-  volumeMounts: []
   volumes: []
   livenessProbe: {}
   readinessProbe: {}

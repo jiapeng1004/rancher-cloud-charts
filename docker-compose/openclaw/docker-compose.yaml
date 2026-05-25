@@ -1,0 +1,51 @@
+# OpenClaw Gateway（DeepSeek 等模型密钥见 agent.env，勿提交 Git）
+
+x-openclaw-env: &openclaw-env
+  HOME: /home/node
+  TERM: xterm-256color
+  OPENCLAW_CONFIG_PATH: /openclaw.json
+  OPENCLAW_DISABLE_BONJOUR: "1"
+
+x-openclaw-volumes: &openclaw-volumes
+  - ./_data:/home/node/.openclaw:rw
+  - ./openclaw.json:/openclaw.json:ro
+
+services:
+  openclaw-gateway:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw-gateway
+    user: root
+    env_file:
+      - path: ./.env
+        required: false
+      - path: ./agent.env
+        required: true
+    environment:
+      <<: *openclaw-env
+    volumes: *openclaw-volumes
+    ports:
+      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+      - "${OPENCLAW_GATEWAY_WS_PORT:-18790}:18790"
+    init: true
+    restart: unless-stopped
+    command:
+      - node
+      - dist/index.js
+      - gateway
+      - --bind
+      - "${OPENCLAW_GATEWAY_BIND:-lan}"
+      - --port
+      - "18789"
+      - --allow-unconfigured
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

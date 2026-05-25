@@ -109,13 +109,13 @@ spec:
               value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
             - name: GOTRUE_DB_PORT
               value: {{ .Values.dbPort | default "5432" | quote }}
-            - name: GOTRUE_DB_DATABASE_URL
-              value: "postgres://supabase_auth_admin:$(DB_PASSWORD)@$(GOTRUE_DB_HOST):$(GOTRUE_DB_PORT)/postgres"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-db
                   key: password
+            - name: GOTRUE_DB_DATABASE_URL
+              value: "postgres://supabase_auth_admin:$(DB_PASSWORD)@{{ .Values.dbHost | default (printf "%s-db" .Release.Name) }}:{{ .Values.dbPort | default "5432" }}/postgres"
             - name: GOTRUE_JWT_SECRET
               valueFrom:
                 secretKeyRef:
