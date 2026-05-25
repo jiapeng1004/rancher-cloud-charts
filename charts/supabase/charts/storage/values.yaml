@@ -1,0 +1,82 @@
+## Storage sub-chart values
+enabled: true
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/storage-api
+  pullPolicy: IfNotPresent
+  tag: "v1.28.2"
+  pullSecrets: []
+
+initDbImage:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgres
+  pullPolicy: IfNotPresent
+  tag: "15.8"
+
+service:
+  type: ClusterIP
+  port: 5000
+  targetPort: 5000
+  protocol: TCP
+  portName: http
+  annotations: {}
+
+environment:
+  DB_USER: supabase_storage_admin
+  DB_DRIVER: postgres
+  DB_SSL: disable
+  PGOPTIONS: -c search_path=storage,public
+  FILE_SIZE_LIMIT: "52428800"
+  STORAGE_BACKEND: s3
+  GLOBAL_S3_PROTOCOL: http
+  GLOBAL_S3_ENDPOINT: http://localhost:9000
+  GLOBAL_S3_FORCE_PATH_STYLE: "true"
+  AWS_DEFAULT_REGION: stub
+  FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+  TENANT_ID: stub
+  REGION: stub
+  ENABLE_IMAGE_TRANSFORMATION: "true"
+  IMGPROXY_URL: http://localhost:5001
+  ENABLE_QUEUE_EVENTS: "true"
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+deployment:
+  annotations: {}
+  podAnnotations: {}
+  automountServiceAccountToken: false
+  terminationGracePeriodSeconds: 30
+  podSecurityContext: {}
+  securityContext: {}
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  priorityClassName: ""
+  envFrom: []
+  volumeMounts: []
+  volumes: []
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}
+  lifecycle: {}
+
+# Cross-component references (explicit)
+dbSecretRef: ""
+dbHost: ""
+dbPort: ""
+dbName: ""
+jwtSecretRef: ""
+apikeySecretRef: ""
+s3SecretRef: ""
+imgproxyUrl: ""

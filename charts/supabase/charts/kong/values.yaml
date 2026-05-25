@@ -1,0 +1,68 @@
+## Kong sub-chart values
+## All variables explicitly declared
+
+enabled: true
+
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong/kong
+  pullPolicy: IfNotPresent
+  tag: "3.9.1"
+  pullSecrets: []
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+  protocol: TCP
+  portName: http
+  annotations: {}
+
+environment:
+  KONG_DATABASE: "off"
+  KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml
+  KONG_DNS_ORDER: LAST,A,CNAME
+  KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth,post-function
+  KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+  KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+  KONG_LOG_LEVEL: warn
+  KONG_NGINX_WORKER_PROCESSES: "2"
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+deployment:
+  annotations: {}
+  podAnnotations: {}
+  automountServiceAccountToken: false
+  terminationGracePeriodSeconds: 30
+  podSecurityContext: {}
+  securityContext: {}
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  priorityClassName: ""
+  envFrom: []
+  volumeMounts: []
+  volumes: []
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}
+  lifecycle: {}
+
+# Cross-component references (explicit)
+supabaseUrl: ""
+jwtSecretRef: ""
+apikeySecretRef: ""
+dashboardSecretRef: ""

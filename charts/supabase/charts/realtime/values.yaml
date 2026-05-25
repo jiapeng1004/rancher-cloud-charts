@@ -1,0 +1,79 @@
+## Realtime sub-chart values
+enabled: true
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/realtime
+  pullPolicy: IfNotPresent
+  tag: "v2.76.5"
+  pullSecrets: []
+
+initDbImage:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgres
+  pullPolicy: IfNotPresent
+  tag: "15.8"
+
+service:
+  type: ClusterIP
+  port: 4000
+  targetPort: 4000
+  protocol: TCP
+  portName: http
+  annotations: {}
+
+environment:
+  DB_USER: supabase_admin
+  DB_SSL: false
+  PORT: "4000"
+  FLY_ALLOC_ID: fly123
+  FLY_APP_NAME: realtime
+  ENABLE_TAILSCALE: "false"
+  DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+  DB_ENC_KEY: supabaserealtime
+  ERL_AFLAGS: -proto_dist inet_tcp
+  DNS_NODES: "''"
+  RLIMIT_NOFILE: "10000"
+  APP_NAME: realtime
+  SEED_SELF_HOST: true
+  RUN_JANITOR: true
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+deployment:
+  annotations: {}
+  podAnnotations: {}
+  automountServiceAccountToken: false
+  terminationGracePeriodSeconds: 30
+  podSecurityContext: {}
+  securityContext: {}
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  priorityClassName: ""
+  envFrom: []
+  volumeMounts: []
+  volumes: []
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}
+  lifecycle: {}
+
+# Cross-component references (explicit)
+dbSecretRef: ""
+dbHost: ""
+dbPort: ""
+dbName: ""
+jwtSecretRef: ""
+apikeySecretRef: ""
+realtimeSecretKeyBaseRef: ""

@@ -1,0 +1,71 @@
+## Studio sub-chart values
+enabled: true
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/studio
+  pullPolicy: IfNotPresent
+  tag: "2025.12.17"
+  pullSecrets: []
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+  protocol: TCP
+  portName: http
+  annotations: {}
+
+environment:
+  STUDIO_DEFAULT_ORGANIZATION: Default Organization
+  STUDIO_DEFAULT_PROJECT: Default Project
+  STUDIO_PORT: "3000"
+  OPENAI_API_KEY: ""
+  NEXT_PUBLIC_ENABLE_LOGS: "true"
+  NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+deployment:
+  annotations: {}
+  podAnnotations: {}
+  automountServiceAccountToken: false
+  terminationGracePeriodSeconds: 30
+  podSecurityContext: {}
+  securityContext: {}
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  priorityClassName: ""
+  envFrom: []
+  volumeMounts: []
+  volumes: []
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}
+  lifecycle: {}
+
+# Cross-component references (explicit)
+dbSecretRef: ""
+dbHost: ""
+dbPort: ""
+dbName: ""
+jwtSecretRef: ""
+apikeySecretRef: ""
+metaUrl: ""
+restUrl: ""
+realtimeUrl: ""
+storageUrl: ""
+analyticsUrl: ""
+functionsUrl: ""

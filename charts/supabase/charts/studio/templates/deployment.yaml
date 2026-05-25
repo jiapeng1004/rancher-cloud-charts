@@ -1,0 +1,148 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "studio.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "studio.labels" . | nindent 4 }}
+  {{- with .Values.deployment.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "studio.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "studio.selectorLabels" . | nindent 8 }}
+      {{- with .Values.deployment.podAnnotations }}
+      annotations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "studio.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      securityContext: {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      containers:
+        - name: {{ include "studio.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: STUDIO_DEFAULT_ORGANIZATION
+              value: {{ .Values.environment.STUDIO_DEFAULT_ORGANIZATION | quote }}
+            - name: STUDIO_DEFAULT_PROJECT
+              value: {{ .Values.environment.STUDIO_DEFAULT_PROJECT | quote }}
+            - name: STUDIO_PORT
+              value: {{ .Values.environment.STUDIO_PORT | quote }}
+            - name: OPENAI_API_KEY
+              value: {{ .Values.environment.OPENAI_API_KEY | quote }}
+            - name: NEXT_PUBLIC_ENABLE_LOGS
+              value: {{ .Values.environment.NEXT_PUBLIC_ENABLE_LOGS | quote }}
+            - name: NEXT_ANALYTICS_BACKEND_PROVIDER
+              value: {{ .Values.environment.NEXT_ANALYTICS_BACKEND_PROVIDER | quote }}
+            {{- if .Values.metaUrl }}
+            - name: STUDIO_PG_META_URL
+              value: {{ .Values.metaUrl | quote }}
+            {{- end }}
+            {{- if .Values.restUrl }}
+            - name: POSTGRES_URL
+              value: {{ .Values.restUrl | quote }}
+            {{- end }}
+            {{- if .Values.realtimeUrl }}
+            - name: REALTIME_URL
+              value: {{ .Values.realtimeUrl | quote }}
+            {{- end }}
+            {{- if .Values.storageUrl }}
+            - name: STORAGE_URL
+              value: {{ .Values.storageUrl | quote }}
+            {{- end }}
+            {{- if .Values.analyticsUrl }}
+            - name: LOGFLARE_URL
+              value: {{ .Values.analyticsUrl | quote }}
+            {{- end }}
+            {{- if .Values.functionsUrl }}
+            - name: FUNCTIONS_URL
+              value: {{ .Values.functionsUrl | quote }}
+            {{- end }}
+            {{- if .Values.dbHost }}
+            - name: SUPABASE_DB_HOST
+              value: {{ .Values.dbHost | quote }}
+            {{- end }}
+            {{- if .Values.dbPort }}
+            - name: SUPABASE_DB_PORT
+              value: {{ .Values.dbPort | quote }}
+            {{- end }}
+            {{- if .Values.dbSecretRef }}
+            - name: SUPABASE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dbSecretRef }}
+                  key: password
+            {{- end }}
+            {{- if .Values.jwtSecretRef }}
+            - name: SUPABASE_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jwtSecretRef }}
+                  key: secret
+            {{- end }}
+            {{- if .Values.apikeySecretRef }}
+            - name: SUPABASE_ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: anonKey
+            - name: SUPABASE_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: serviceKey
+            {{- end }}
+          {{- with .Values.deployment.envFrom }}
+          envFrom: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.volumeMounts }}
+          volumeMounts: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.livenessProbe }}
+          livenessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.readinessProbe }}
+          readinessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.startupProbe }}
+          startupProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.lifecycle }}
+          lifecycle: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext: {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+      {{- with .Values.deployment.volumes }}
+      volumes: {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

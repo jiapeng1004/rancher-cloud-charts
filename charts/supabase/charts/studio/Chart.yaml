@@ -1,0 +1,6 @@
+apiVersion: v2
+name: studio
+description: Supabase Studio Admin UI sub-chart
+type: application
+version: 1.0.0
+appVersion: "2026.04.27-sha-5f60601"

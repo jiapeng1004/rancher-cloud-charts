@@ -1,656 +1,157 @@
-## Supabase Helm Chart Configuration
+## Supabase Helm Chart Configuration (v2.0 - 显式化重构)
 ##
-## 镜像：`image.*` 默认走华为云 SWR 「第三方镜像库」前缀
-## `${region}/ddn-k8s/docker.io/<Docker Hub 路径>`，与仓库内其它 Chart 对齐；可按控制台实际地址改 region。
-## MinIO / MC 原为 Chainguard 源，为国内拉取稳妥改为 **`docker.io/minio/minio`、`docker.io/minio/mc`**；需合规 Chainguard 时再自行改回原仓库/tag。
+## 架构说明：
+## - 所有组件已拆分为独立子 chart（supabase/charts/*）
+## - 所有变量通过显式声明传递，不再使用隐式 range
+## - 跨组件引用通过显式字段传递（如 dbHost, jwtSecretRef 等）
 ##
-## Supabase is composed of multiple services running together
-## to provide a full backend platform. This chart deploys and
-## configures the following components:
-##
-## - Kong (API Gateway)
-## - Studio (Admin UI)
-## - Postgres (Database)
-## - PostgREST (REST API)
-## - Realtime (WebSocket server)
-## - Storage API
-## - Postgres Meta
-## - GoTrue (Authentication)
-## - Edge Functions (Deno runtime)
-## - Logflare (Analytics)
-## - Vector (Logs pipeline)
-## - Imgproxy (Image transformation)
-## - MinIO (S3-compatible storage)
-##
-## This chart mirrors the official Supabase
-## Docker setup, adapted for Kubernetes.
-##
-## Reference:
-## https://github.com/supabase/supabase/tree/master/docker
-##
-## Configuration is grouped by domain rather than by component.
-## Each section contains per-component blocks where applicable.
-##
-##  1. secret         - All credentials and sensitive values
-##  2. deployment     - Pod configuration per component
-##  3. image          - Container image settings per component
-##  4. environment    - Environment variables per component
-##  5. persistence    - PVC configuration per component
-##  6. service        - Kubernetes Service configuration per component
-##  7. autoscaling    - HPA configuration per component
-##  8. ingress        - External access configuration
-##  9. serviceAccount - ServiceAccount configuration per component
-## 10. migration      - Optional SQL migration scripts
-## 11. bigQuery       - Optional BigQuery backend configuration
+## 使用方式：
+## 1. 配置全局 secrets（由父 chart 的 secret 模板生成）
+## 2. 配置各子 chart 的显式参数
+## 3. 配置跨组件引用（通过子 chart 的 xxxRef 字段）
 
-secret:
-  ## JSON Web Tokens
-  ## Used to sign and validate access tokens across all Supabase services
-  ## Docs: https://supabase.com/docs/guides/self-hosting/docker#generate-and-configure-api-keys
-  ##
+## ============================================================================
+## 全局 Secrets 配置
+## ============================================================================
+## 这些值会被注入到集群 Secret 中，各子 chart 通过 secretRef 显式引用
+
+global:
+  ## JWT 密钥
   jwt:
     anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE"
     serviceKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q"
     secret: "your-super-secret-jwt-token-with-at-least-32-characters-long"
 
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   anonKey: anonKey
-    #   serviceKey: serviceKey
-    #   secret: secret
-
-  ## API key material for asymmetric auth support
-  ## Docs: https://supabase.com/docs/guides/self-hosting/self-hosted-auth-keys
-  ##
-  apikey:
-    publishableKey: ""
-    secretKey: ""
-    anonKeyAsymmetric: ""
-    serviceRoleKeyAsymmetric: ""
-    jwtKeys: ""
-    jwtJwks: ""
-
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   publishableKey: publishableKey
-    #   secretKey: secretKey
-    #   anonKeyAsymmetric: anonKeyAsymmetric
-    #   serviceRoleKeyAsymmetric: serviceRoleKeyAsymmetric
-    #   jwtKeys: jwtKeys
-    #   jwtJwks: jwtJwks
-
-  ## PostgreSQL credentials
-  ## Required even when using an external database
-  ##
+  ## 数据库凭证
   db:
     password: "your-super-secret-and-long-postgres-password"
     database: "postgres"
 
-    ## External database host/port (used when deployment.db.enabled is false).
-    ## Host and port are required when using an external database.
-    ## Ignored when deployment.db.enabled is true (internal DB service is used).
-    host: ""
-    port: ""
-
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   host: host
-    #   port: port
-    #   password: password
-    #   database: database
-
-  ## Logflare credentials
-  ##
+  ## Analytics 凭证
   analytics:
     publicAccessToken: "your-super-secret-and-long-logflare-key-public"
     privateAccessToken: "your-super-secret-and-long-logflare-key-private"
 
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   publicAccessToken: publicAccessToken
-    #   privateAccessToken: privateAccessToken
-
-  ## BigQuery service account credentials
-  ## Used by Logflare when analytics backend is set to BigQuery
-  ##
-  bigquery:
-    gcloudJson: ""
-
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   gcloudJson: gcloud.json
-
-  ## SMTP credentials
-  ##
+  ## SMTP 凭证
   smtp:
     username: "fake_mail_user"
     password: "fake_mail_password"
 
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   username: username
-    #   password: password
-
-  ## Studio dashboard credentials
-  ##
+  ## Studio 凭证
   dashboard:
     username: "supabase"
     password: "this_password_is_insecure_and_should_be_updated"
     openAiApiKey: "key_super_secret"
 
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   username: username
-    #   password: password
-    #   openAiApiKey: openAiApiKey
-
-  ## S3-compatible credentials
-  ##
+  ## S3 凭证
   s3:
     keyId: "625729a08b95bf1b7ff351a663f3a23c"
     accessKey: "850181e4652dd023b7a98c58ae0d2d34bd487ee0cc3254aed6eda37307425907"
 
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   keyId: keyId
-    #   accessKey: accessKey
-
-  ## Realtime service
-  ## Docs: https://supabase.com/docs/guides/realtime
-  ##
+  ## Realtime 密钥
   realtime:
-    ## Used by Supabase Realtime (Phoenix) to sign and encrypt internal data,
-    ## sessions and tokens. Equivalent to Phoenix SECRET_KEY_BASE.
-    ## Generate with: openssl rand -base64 64
     secretKeyBase: "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq"
 
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   secretKeyBase: secretKeyBase
-
-  ## Meta service
-  ## Docs: https://github.com/supabase/postgres-meta
-  ##
+  ## Meta 加密密钥
   meta:
-    ## Used to encrypt sensitive metadata at rest.
-    ## Generate with: openssl rand -hex 32
     cryptoKey: "your-encryption-key-32-chars-min"
 
-    ## Reference to existing secret
-    # secretRef: ""
-
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   cryptoKey: cryptoKey
-
+  ## MinIO 凭证
   minio:
     user: supa-storage
     password: secret1234
 
-    ## Reference to existing secret
-    # secretRef: ""
+## ============================================================================
+## Secret 模板开关
+## ============================================================================
+## 设为 false 时使用外部已有的 Secret
+createSecrets: true
 
-    ## Map to actual keys inside secretRef if they differ
-    # secretRefKey:
-    #   user: user
-    #   password: password
+## ============================================================================
+## 子 Chart 配置（显式传递）
+## ============================================================================
 
-deployment:
-  analytics:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  auth:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  db:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-    extraInitContainers: [ ]
-
-  functions:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  imgproxy:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  kong:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  meta:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  minio:
-    enabled: false
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  realtime:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  rest:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  storage:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-    extraInitContainers: [ ]
-
-  studio:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-  vector:
-    enabled: true
-    replicaCount: 1
-    nameOverride: ""
-    fullnameOverride: ""
-    annotations: { }
-    podAnnotations: { }
-    podSecurityContext:
-    securityContext: { }
-    automountServiceAccountToken: true
-    terminationGracePeriodSeconds: 30
-    nodeSelector: { }
-    affinity: { }
-    tolerations: [ ]
-    priorityClassName: ""
-    envFrom: [ ]
-    livenessProbe: { }
-    readinessProbe: { }
-    startupProbe: { }
-    lifecycle: { }
-    resources: { }
-    volumeMounts: { }
-    volumes: { }
-
-image:
-  analytics:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/logflare
+## --- Kong (API Gateway) ---
+kong:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong
     pullPolicy: IfNotPresent
-    tag: "1.36.1"
-    pullSecrets: [ ]
+    tag: "3.9.1"
+    pullSecrets: []
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+    portName: http
+    annotations: {}
+  environment:
+    KONG_DATABASE: "off"
+    KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml
+    KONG_DNS_ORDER: LAST,A,CNAME
+    KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth,post-function
+    KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+    KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+    KONG_LOG_LEVEL: warn
+    KONG_NGINX_WORKER_PROCESSES: "2"
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  supabaseUrl: ""
+  jwtSecretRef: ""
+  apikeySecretRef: ""
+  dashboardSecretRef: ""
 
-  auth:
+## --- Auth (GoTrue) ---
+auth:
+  enabled: true
+  replicaCount: 1
+  image:
     repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/gotrue
     pullPolicy: IfNotPresent
     tag: "v2.186.0"
-    pullSecrets: [ ]
-
-  db:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres
-    pullPolicy: IfNotPresent
-    tag: "15.8.1.085"
-    pullSecrets: [ ]
-
-  functions:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/edge-runtime
-    pullPolicy: IfNotPresent
-    tag: "v1.71.2"
-    pullSecrets: [ ]
-
-  imgproxy:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/darthsim/imgproxy
-    pullPolicy: IfNotPresent
-    tag: "v3.30.1"
-    pullSecrets: [ ]
-
-  kong:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong/kong
-    pullPolicy: IfNotPresent
-    tag: "3.9.1"
-    pullSecrets: [ ]
-
-  meta:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres-meta
-    pullPolicy: IfNotPresent
-    tag: "v0.96.3"
-    pullSecrets: [ ]
-
-  minio:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio
-    pullPolicy: IfNotPresent
-    tag: "RELEASE.2024-01-10T00-54-08Z"
-    pullSecrets: [ ]
-
-  realtime:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/realtime
-    pullPolicy: IfNotPresent
-    tag: "v2.76.5"
-    pullSecrets: [ ]
-
-  rest:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgrest/postgrest
-    pullPolicy: IfNotPresent
-    tag: "v14.8"
-    pullSecrets: [ ]
-
-  storage:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/storage-api
-    pullPolicy: IfNotPresent
-    tag: "v1.48.26"
-    pullSecrets: [ ]
-
-  studio:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/studio
-    pullPolicy: IfNotPresent
-    tag: "2026.04.27-sha-5f60601"
-    pullSecrets: [ ]
-
-  vector:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/timberio/vector
-    pullPolicy: IfNotPresent
-    tag: "0.53.0-alpine"
-    pullSecrets: [ ]
-
-  initDb:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/postgres
-    pullPolicy: IfNotPresent
-    tag: "15-alpine"
-
-  minioClient:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/mc
-    pullPolicy: IfNotPresent
-    tag: "RELEASE.2024-01-05T07-53-51Z"
-
-# 组件环境变量：`templates/<组件>/deployment*.yaml` 对 `environment.<组件>` 做 `range`（整表逐项注入）。
-# Storage 等对个别键有直接引用后再 `range`。若某小节从本文件删掉，模板需能接受空 map（或为 `default dict`）。
-environment:
-  analytics:
-    LOGFLARE_NODE_HOST: 127.0.0.1
-    DB_USERNAME: supabase_admin
-    DB_DATABASE: _supabase
-    DB_DRIVER: postgresql
-    DB_SCHEMA: _analytics
-    POSTGRES_BACKEND_SCHEMA: _analytics
-    LOGFLARE_SINGLE_TENANT: "true"
-    LOGFLARE_SUPABASE_MODE: "true"
-    LOGFLARE_FEATURE_FLAG_OVERRIDE: multibackend=true
-
-  auth:
-    # GoTrue 环境变量由 templates/auth/_environment.tpl 显式列出；不要在 auth 根下乱放键（应放在 extra）。
-    DB_USER: supabase_auth_admin
-    DB_DRIVER: postgres
-    ## SSL mode options: disable, allow, prefer, require, verify-ca, verify-full
-    DB_SSL: disable
-    # 与 Kong Ingress 对外域名保持一致（协议 + host，按需改 https）。
+    pullSecrets: []
+  service:
+    type: ClusterIP
+    port: 9999
+    targetPort: 9999
+    protocol: TCP
+    portName: http
+    annotations: {}
+  environment:
     API_EXTERNAL_URL: http://supabase.local
     GOTRUE_API_HOST: "0.0.0.0"
     GOTRUE_API_PORT: "9999"
-    # 常为 Studio/前端入口；应与实际对外域名一致。
+    GOTRUE_DB_DRIVER: postgres
     GOTRUE_SITE_URL: http://supabase.local
     GOTRUE_URI_ALLOW_LIST: "*"
     GOTRUE_DISABLE_SIGNUP: "false"
@@ -661,67 +162,192 @@ environment:
     GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
     GOTRUE_MAILER_AUTOCONFIRM: "true"
     GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
-    # GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: true
-    # GOTRUE_SMTP_MAX_FREQUENCY: 1s
     GOTRUE_SMTP_ADMIN_EMAIL: "SMTP_ADMIN_MAIL"
     GOTRUE_SMTP_HOST: "SMTP_HOST"
     GOTRUE_SMTP_PORT: "123"
     GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
     GOTRUE_SMS_AUTOCONFIRM: "false"
     GOTRUE_SMTP_SENDER_NAME: "SMTP_SENDER_NAME"
-    GOTRUE_MAILER_URLPATHS_INVITE: "/auth/v1/verify"
-    GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/auth/v1/verify"
-    GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/v1/verify"
-    GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: "/auth/v1/verify"
-    ## Hooks 等扩展键写在 extra（见 upstream auth-hooks）；空 map 不产生 env。
-    extra: { }
+    GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+    GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+    GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
+    GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  dbSecretRef: ""
+  dbHost: ""
+  dbPort: ""
+  dbName: ""
+  jwtSecretRef: ""
+  apikeySecretRef: ""
+  smtpSecretRef: ""
 
-  db:
-    POSTGRES_HOST: /var/run/postgresql
-    PGPORT: "5432"
-    POSTGRES_PORT: "5432"
-    JWT_EXP: 3600
-    # POSTGRES_HOST_AUTH_METHOD: md5
-    ## Enable SSL for postgres by specifying paths for mounted certificate key pair
-    # POSTGRES_SSL_CERT: /path/to/ssl/server.crt
-    # POSTGRES_SSL_KEY: /path/to/ssl/server.key
+## --- Database (PostgreSQL) ---
+db:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres
+    pullPolicy: IfNotPresent
+    tag: "15.8.1.085"
+    pullSecrets: []
+  initImage:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/postgres
+    pullPolicy: IfNotPresent
+    tag: "15-alpine"
+  service:
+    type: ClusterIP
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+    portName: postgres
+    annotations: {}
+  persistence:
+    enabled: true
+    size: 8Gi
+    accessModes:
+      - ReadWriteOnce
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 60
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  dbSecretRef: ""
+  jwtSecretRef: ""
+  analyticsSecretRef: ""
 
-  functions:
-    DB_USERNAME: postgres
-    DB_DRIVER: postgresql
-    ## SSL mode options: disable, allow, prefer, require, verify-ca, verify-full
-    DB_SSL: disable
-    VERIFY_JWT: false
-
-  imgproxy:
-    IMGPROXY_BIND: ":5001"
-    IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
-    IMGPROXY_USE_ETAG: "true"
-    IMGPROXY_ENABLE_WEBP_DETECTION: "true"
-
-  kong:
-    KONG_DATABASE: "off"
-    KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml
-    ## https://github.com/supabase/cli/issues/14
-    KONG_DNS_ORDER: LAST,A,CNAME
-    KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth,post-function
-    KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
-    KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
-    KONG_LOG_LEVEL: warn
-
-    # Please see: https://github.com/supabase-community/supabase-kubernetes/issues/187
-    KONG_NGINX_WORKER_PROCESSES: "2"
-
-  meta:
-    DB_USER: supabase_admin
+## --- REST API (PostgREST) ---
+rest:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgrest/postgrest
+    pullPolicy: IfNotPresent
+    tag: "v14.8"
+    pullSecrets: []
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+    portName: http
+    annotations: {}
+  environment:
+    DB_USER: authenticator
     DB_DRIVER: postgres
-    ## SSL mode options: disable, allow, prefer, require, verify-ca, verify-full
     DB_SSL: disable
-    PG_META_PORT: "8080"
+    PGRST_DB_SCHEMAS: public,storage,graphql_public
+    PGRST_DB_ANON_ROLE: anon
+    PGRST_DB_USE_LEGACY_GUCS: false
+    PGRST_APP_SETTINGS_JWT_EXP: 3600
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  dbSecretRef: ""
+  dbHost: ""
+  dbPort: ""
+  dbName: ""
+  jwtSecretRef: ""
+  apikeySecretRef: ""
 
-  realtime:
+## --- Realtime (WebSocket) ---
+realtime:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/realtime
+    pullPolicy: IfNotPresent
+    tag: "v2.76.5"
+    pullSecrets: []
+  service:
+    type: ClusterIP
+    port: 4000
+    targetPort: 4000
+    protocol: TCP
+    portName: http
+    annotations: {}
+  environment:
     DB_USER: supabase_admin
-    ## Set to true to enforce TLS connections to Postgres
     DB_SSL: false
     PORT: "4000"
     FLY_ALLOC_ID: fly123
@@ -735,21 +361,63 @@ environment:
     APP_NAME: realtime
     SEED_SELF_HOST: true
     RUN_JANITOR: true
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  dbSecretRef: ""
+  dbHost: ""
+  dbPort: ""
+  dbName: ""
+  jwtSecretRef: ""
+  apikeySecretRef: ""
+  realtimeSecretKeyBaseRef: ""
 
-  rest:
-    DB_USER: authenticator
-    DB_DRIVER: postgres
-    ## SSL mode options: disable, allow, prefer, require, verify-ca, verify-full
-    DB_SSL: disable
-    PGRST_DB_SCHEMAS: public,storage,graphql_public
-    PGRST_DB_ANON_ROLE: anon
-    PGRST_DB_USE_LEGACY_GUCS: false
-    PGRST_APP_SETTINGS_JWT_EXP: 3600
-
-  storage:
+## --- Storage API ---
+storage:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/storage-api
+    pullPolicy: IfNotPresent
+    tag: "v1.48.26"
+    pullSecrets: []
+  service:
+    type: ClusterIP
+    port: 5000
+    targetPort: 5000
+    protocol: TCP
+    portName: http
+    annotations: {}
+  environment:
     DB_USER: supabase_storage_admin
     DB_DRIVER: postgres
-    ## SSL mode options: disable, allow, prefer, require, verify-ca, verify-full
     DB_SSL: disable
     REQUEST_ALLOW_X_FORWARDED_PATH: "true"
     FILE_SIZE_LIMIT: "52428800"
@@ -758,301 +426,458 @@ environment:
     REGION: stub
     GLOBAL_S3_BUCKET: stub
     ENABLE_IMAGE_TRANSFORMATION: "true"
+    STORAGE_BACKEND: s3
+    GLOBAL_S3_PROTOCOL: http
+    GLOBAL_S3_ENDPOINT: http://localhost:9000
+    GLOBAL_S3_FORCE_PATH_STYLE: "true"
+    AWS_DEFAULT_REGION: stub
+    IMGPROXY_URL: http://localhost:5001
+    ENABLE_QUEUE_EVENTS: "true"
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  dbSecretRef: ""
+  dbHost: ""
+  dbPort: ""
+  dbName: ""
+  jwtSecretRef: ""
+  apikeySecretRef: ""
+  s3SecretRef: ""
+  imgproxyUrl: ""
 
-  studio:
-    HOSTNAME: "::"
-    STUDIO_PORT: "3000"
-    POSTGRES_PORT: 5432
-    DEFAULT_ORGANIZATION_NAME: Default Organization
-    DEFAULT_PROJECT_NAME: Default Project
-    # Studio 对外根 URL（与 Ingress / 浏览器地址栏一致）。
-    SUPABASE_PUBLIC_URL: http://supabase.local
-    NEXT_PUBLIC_ENABLE_LOGS: true
-    ## Set value to bigquery to use Big Query backend for analytics (postgres or bigquery)
-    NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
-
-
-persistence:
-  # 本 Chart 内各 PVC 仅使用这一项作为 storageClass（留空不写 spec.storageClassName，交由集群默认 StorageClass）。
-  defaultStorageClassName: ""
-  db:
-    enabled: true
-    # existingClaim: ""
-    annotations: { }
-    size: 5Gi
-    accessModes:
-      - ReadWriteOnce
-
-  functions:
-    enabled: true
-    # existingClaim: ""
-    annotations: { }
-    size: 1Gi
-    accessModes:
-      - ReadWriteOnce
-
-  imgproxy:
-    enabled: true
-    # existingClaim: ""
-    annotations: { }
-    size: 1Gi
-    accessModes:
-      - ReadWriteOnce
-
-  minio:
-    enabled: true
-    # existingClaim: ""
-    annotations: { }
-    size: 1Gi
-    accessModes:
-      - ReadWriteOnce
-
-  snippets:
-    enabled: true
-    # existingClaim: ""
-    annotations: { }
-    size: 1Gi
-    accessModes:
-      - ReadWriteOnce
-
-  storage:
-    enabled: true
-    # existingClaim: ""
-    annotations: { }
-    size: 1Gi
-    accessModes:
-      - ReadWriteOnce
-
-  deno:
-    enabled: true
-    # existingClaim: ""
-    annotations: { }
-    size: 1Gi
-    accessModes:
-      - ReadWriteOnce
-
-service:
-  analytics:
-    type: ClusterIP
-    port: 4000
-    targetPort: 4000
-    protocol: TCP
-    annotations: { }
-    labels: { }
-    portName: http
-
-  auth:
-    type: ClusterIP
-    port: 9999
-    targetPort: 9999
-    protocol: TCP
-    annotations: { }
-    labels: { }
-    portName: http
-
-  db:
-    type: ClusterIP
-    port: 5432
-    targetPort: 5432
-    protocol: TCP
-    annotations: { }
-    labels: { }
-    portName: http
-
-  functions:
-    type: ClusterIP
-    port: 9000
-    targetPort: 9000
-    protocol: TCP
-    annotations: { }
-    labels: { }
-    portName: http
-
-  imgproxy:
-    type: ClusterIP
-    port: 5001
-    targetPort: 5001
-    protocol: TCP
-    annotations: { }
-    labels: { }
-    portName: http
-
-  kong:
-    type: ClusterIP
-    port: 8000
-    targetPort: 8000
-    protocol: TCP
-    annotations: { }
-    labels: { }
-    portName: http
-
-  meta:
+## --- Postgres Meta ---
+meta:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres-meta
+    pullPolicy: IfNotPresent
+    tag: "v0.96.3"
+    pullSecrets: []
+  service:
     type: ClusterIP
     port: 8080
     targetPort: 8080
     protocol: TCP
-    annotations: { }
-    labels: { }
     portName: http
+    annotations: {}
+  environment:
+    DB_USER: supabase_admin
+    DB_DRIVER: postgres
+    DB_SSL: disable
+    PG_META_PORT: "8080"
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  dbSecretRef: ""
+  dbHost: ""
+  dbPort: ""
+  dbName: ""
+  metaCryptoKeySecretRef: ""
 
-  minio:
+## --- Studio (Admin UI) ---
+studio:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/studio
+    pullPolicy: IfNotPresent
+    tag: "2026.04.27-sha-5f60601"
+    pullSecrets: []
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+    portName: http
+    annotations: {}
+  environment:
+    HOSTNAME: "::"
+    STUDIO_PORT: "3000"
+    STUDIO_DEFAULT_ORGANIZATION: Default Organization
+    STUDIO_DEFAULT_PROJECT: Default Project
+    OPENAI_API_KEY: ""
+    NEXT_PUBLIC_ENABLE_LOGS: "true"
+    NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  dbSecretRef: ""
+  dbHost: ""
+  dbPort: ""
+  dbName: ""
+  jwtSecretRef: ""
+  apikeySecretRef: ""
+  metaUrl: ""
+  restUrl: ""
+  realtimeUrl: ""
+  storageUrl: ""
+  analyticsUrl: ""
+  functionsUrl: ""
+
+## --- Functions (Edge Runtime) ---
+functions:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/edge-runtime
+    pullPolicy: IfNotPresent
+    tag: "v1.71.2"
+    pullSecrets: []
+  service:
     type: ClusterIP
     port: 9000
     targetPort: 9000
     protocol: TCP
-    annotations: { }
-    labels: { }
     portName: http
+    annotations: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  dbSecretRef: ""
+  dbHost: ""
+  dbPort: ""
+  dbName: ""
+  jwtSecretRef: ""
+  apikeySecretRef: ""
+  functionsSecretRef: ""
 
-  realtime:
+## --- Analytics (Logflare) ---
+analytics:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/logflare
+    pullPolicy: IfNotPresent
+    tag: "1.36.1"
+    pullSecrets: []
+  service:
     type: ClusterIP
     port: 4000
     targetPort: 4000
     protocol: TCP
-    annotations: { }
-    labels: { }
     portName: http
+    annotations: {}
+  environment:
+    LOGFLARE_NODE_HOST: 127.0.0.1
+    LOGFLARE_SINGLE_TENANT: "true"
+    LOGFLARE_SINGLE_TENANT_MODE_USER_ID: ""
+    LOGFLARE_FEATURE_FLAG_OVERRIDE: multibackend=true
+    LOGFLARE_NODE_PORT: "4000"
+    LOGFLARE_MIN_CLUSTER_SIZE: "1"
+    LOGFLARE_DB_SCHEMA: _analytics
+    LOGFLARE_SUPABASE_MODE: "true"
+    POSTGRES_BACKEND_SCHEMA: _analytics
+    LOGFLARE_ALLOWED_INSECURE_BACKENDS: "true"
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  dbSecretRef: ""
+  dbHost: ""
+  dbPort: ""
+  dbName: ""
+  analyticsSecretRef: ""
 
-  rest:
-    type: ClusterIP
-    port: 3000
-    targetPort: 3000
-    protocol: TCP
-    annotations: { }
-    labels: { }
-    portName: http
-
-  storage:
-    type: ClusterIP
-    port: 5000
-    targetPort: 5000
-    protocol: TCP
-    annotations: { }
-    labels: { }
-    portName: http
-
-  studio:
-    type: ClusterIP
-    port: 3000
-    targetPort: 3000
-    protocol: TCP
-    annotations: { }
-    labels: { }
-    portName: http
-
-  vector:
+## --- Vector (Logs Pipeline) ---
+vector:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/timberio/vector
+    pullPolicy: IfNotPresent
+    tag: "0.53.0-alpine"
+    pullSecrets: []
+  service:
     type: ClusterIP
     port: 9001
     targetPort: 9001
     protocol: TCP
-    annotations: { }
-    labels: { }
     portName: http
-
-autoscaling:
-  analytics:
+    annotations: {}
+  autoscaling:
     enabled: false
     minReplicas: 1
     maxReplicas: 100
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  analyticsSecretRef: ""
 
-  auth:
+## --- Imgproxy (Image Transformation) ---
+imgproxy:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/darthsim/imgproxy
+    pullPolicy: IfNotPresent
+    tag: "v3.30.1"
+    pullSecrets: []
+  service:
+    type: ClusterIP
+    port: 5001
+    targetPort: 8080
+    protocol: TCP
+    portName: http
+    annotations: {}
+  environment:
+    IMGPROXY_BIND: ":5001"
+    IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
+    IMGPROXY_USE_ETAG: "true"
+    IMGPROXY_ENABLE_WEBP_DETECTION: "true"
+  autoscaling:
     enabled: false
     minReplicas: 1
     maxReplicas: 100
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
 
-  db:
+## --- MinIO (S3-compatible Storage) ---
+minio:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio
+    pullPolicy: IfNotPresent
+    tag: "RELEASE.2024-01-10T00-54-08Z"
+    pullSecrets: []
+  service:
+    type: ClusterIP
+    port: 9000
+    targetPort: 9000
+    protocol: TCP
+    portName: http
+    annotations: {}
+  persistence:
+    enabled: true
+    size: 1Gi
+    accessModes:
+      - ReadWriteOnce
+  autoscaling:
     enabled: false
     minReplicas: 1
     maxReplicas: 100
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  deployment:
+    annotations: {}
+    podAnnotations: {}
+    automountServiceAccountToken: false
+    terminationGracePeriodSeconds: 30
+    podSecurityContext: {}
+    securityContext: {}
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    priorityClassName: ""
+    envFrom: []
+    volumeMounts: []
+    volumes: []
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
+    lifecycle: {}
+  ## 跨组件引用（显式）
+  minioSecretRef: ""
+  s3SecretRef: ""
 
-  functions:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  imgproxy:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  kong:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  meta:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  minio:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  realtime:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  rest:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  storage:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  studio:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  vector:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
+## ============================================================================
+## Ingress 配置
+## ============================================================================
 ingress:
   enabled: true
   className: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-  # Kong 对外域名（应与 environment.auth.API_EXTERNAL_URL 的根一致）。
   kongHostname: supabase.local
   kongPath: /
   kongPathType: Prefix
-  # 填集群 TLS Secret 名则 Kong Ingress 挂载 HTTPS（证书 SAN 须含 kongHostname）。
   tlsSecretName: ""
-
   studio:
     enabled: false
     hostname: ""
@@ -1060,81 +885,11 @@ ingress:
     path: /
     pathType: Prefix
     className: ""
-    annotations: { }
+    annotations: {}
 
-serviceAccount:
-  analytics:
-    create: true
-    annotations: { }
-    name: ""
-
-  auth:
-    create: true
-    annotations: { }
-    name: ""
-
-  db:
-    create: true
-    annotations: { }
-    name: ""
-
-  functions:
-    create: true
-    annotations: { }
-    name: ""
-
-  imgproxy:
-    create: true
-    annotations: { }
-    name: ""
-
-  kong:
-    create: true
-    annotations: { }
-    name: ""
-
-  meta:
-    create: true
-    annotations: { }
-    name: ""
-
-  minio:
-    create: true
-    annotations: { }
-    name: ""
-
-  realtime:
-    create: true
-    annotations: { }
-    name: ""
-
-  rest:
-    create: true
-    annotations: { }
-    name: ""
-
-  storage:
-    create: true
-    annotations: { }
-    name: ""
-
-  studio:
-    create: true
-    annotations: { }
-    name: ""
-
-  vector:
-    create: true
-    annotations: { }
-    name: ""
-
+## ============================================================================
+## Network Policy
+## ============================================================================
 networkPolicy:
   db:
     enabled: false
-
-migration:
-
-bigQuery:
-  enabled: false
-  projectId: google-project-id
-  projectNumber: google-project-number

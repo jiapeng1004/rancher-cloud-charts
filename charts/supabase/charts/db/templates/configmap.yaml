@@ -1,0 +1,27 @@
+{{- if .Values.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "db.fullname" . }}-initdb
+  labels: {{- include "db.labels" . | nindent 4 }}
+data:
+  99-jwt.sql: |
+    \set jwt_secret `echo "$JWT_SECRET"`
+    CREATE FUNCTION jwt.secret() RETURNS text AS $$
+    SELECT current_setting('app.settings.jwt_secret', true);
+    $$ LANGUAGE SQL STABLE;
+  99-realtime.sql: |
+    CREATE SCHEMA IF NOT EXISTS _realtime;
+  99-roles.sql: |
+    CREATE ROLE anon NOINHERIT LOGIN;
+    CREATE ROLE authenticated NOINHERIT LOGIN;
+    CREATE ROLE service_role NOINHERIT LOGIN;
+    CREATE ROLE supabase_admin NOINHERIT LOGIN;
+    CREATE ROLE supabase_auth_admin NOINHERIT LOGIN;
+    CREATE ROLE supabase_storage_admin NOINHERIT LOGIN;
+    CREATE ROLE supabase_replication_admin NOINHERIT LOGIN;
+    GRANT ALL ON DATABASE postgres TO supabase_admin;
+    GRANT ALL ON DATABASE postgres TO supabase_auth_admin;
+    GRANT ALL ON DATABASE postgres TO supabase_storage_admin;
+    GRANT ALL ON DATABASE postgres TO supabase_replication_admin;
+{{- end }}

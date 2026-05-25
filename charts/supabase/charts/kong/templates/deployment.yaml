@@ -1,0 +1,182 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kong.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kong.labels" . | nindent 4 }}
+  {{- with .Values.deployment.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "kong.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kong.selectorLabels" . | nindent 8 }}
+      {{- with .Values.deployment.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "kong.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      containers:
+        - name: {{ include "kong.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/bash"]
+          args: ["/scripts/kong-entrypoint.sh"]
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            {{- with .Values.environment }}
+            - name: KONG_DATABASE
+              value: {{ .KONG_DATABASE | quote }}
+            - name: KONG_DECLARATIVE_CONFIG
+              value: {{ .KONG_DECLARATIVE_CONFIG | quote }}
+            - name: KONG_DNS_ORDER
+              value: {{ .KONG_DNS_ORDER | quote }}
+            - name: KONG_PLUGINS
+              value: {{ .KONG_PLUGINS | quote }}
+            - name: KONG_NGINX_PROXY_PROXY_BUFFER_SIZE
+              value: {{ .KONG_NGINX_PROXY_PROXY_BUFFER_SIZE | quote }}
+            - name: KONG_NGINX_PROXY_PROXY_BUFFERS
+              value: {{ .KONG_NGINX_PROXY_PROXY_BUFFERS | quote }}
+            - name: KONG_LOG_LEVEL
+              value: {{ .KONG_LOG_LEVEL | quote }}
+            - name: KONG_NGINX_WORKER_PROCESSES
+              value: {{ .KONG_NGINX_WORKER_PROCESSES | quote }}
+            {{- end }}
+            {{- if .Values.jwtSecretRef }}
+            - name: SUPABASE_ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jwtSecretRef }}
+                  key: anonKey
+            - name: SUPABASE_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jwtSecretRef }}
+                  key: serviceKey
+            {{- end }}
+            {{- if .Values.apikeySecretRef }}
+            - name: SUPABASE_PUBLISHABLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: publishableKey
+            - name: SUPABASE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: secretKey
+            - name: ANON_KEY_ASYMMETRIC
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: anonKeyAsymmetric
+            - name: SERVICE_ROLE_KEY_ASYMMETRIC
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: serviceRoleKeyAsymmetric
+            {{- end }}
+            {{- if .Values.dashboardSecretRef }}
+            - name: DASHBOARD_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dashboardSecretRef }}
+                  key: username
+            - name: DASHBOARD_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dashboardSecretRef }}
+                  key: password
+            {{- end }}
+          {{- with .Values.deployment.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /usr/local/kong/template.yml
+              name: config
+              subPath: template.yml
+            - mountPath: /scripts
+              name: wrapper
+            {{- with .Values.deployment.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.deployment.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "kong.fullname" . }}
+            defaultMode: 0777
+            items:
+            - key: kong.yml
+              path: template.yml
+        - name: wrapper
+          configMap:
+            name: {{ include "kong.fullname" . }}
+            defaultMode: 0777
+            items:
+            - key: kong-entrypoint.sh
+              path: kong-entrypoint.sh
+        {{- with .Values.deployment.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

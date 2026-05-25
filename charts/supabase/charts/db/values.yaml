@@ -1,0 +1,70 @@
+## Database sub-chart values
+enabled: true
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres
+  pullPolicy: IfNotPresent
+  tag: "15.8.1.049"
+  pullSecrets: []
+
+initImage:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/init
+  pullPolicy: IfNotPresent
+  tag: "1.35.0"
+
+service:
+  type: ClusterIP
+  port: 5432
+  targetPort: 5432
+  protocol: TCP
+  portName: postgres
+  annotations: {}
+
+persistence:
+  enabled: true
+  size: 8Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+deployment:
+  annotations: {}
+  podAnnotations: {}
+  automountServiceAccountToken: false
+  terminationGracePeriodSeconds: 60
+  podSecurityContext: {}
+  securityContext: {}
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  priorityClassName: ""
+  envFrom: []
+  volumeMounts: []
+  volumes: []
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}
+  lifecycle: {}
+
+# Cross-component references (explicit)
+dbSecretRef: ""
+dbPassword: ""
+dbUser: ""
+dbName: ""
+jwtSecretRef: ""
+apikeySecretRef: ""
+analyticsSecretRef: ""

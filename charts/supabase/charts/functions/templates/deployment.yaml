@@ -1,0 +1,120 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "functions.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "functions.labels" . | nindent 4 }}
+  {{- with .Values.deployment.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "functions.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "functions.selectorLabels" . | nindent 8 }}
+      {{- with .Values.deployment.podAnnotations }}
+      annotations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "functions.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      securityContext: {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      containers:
+        - name: {{ include "functions.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - edge-runtime
+            - start
+            - --main-service
+            - /edge-runtime/functions/main
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          env:
+            - name: DB_HOSTNAME
+              value: {{ .Values.dbHost | default "" | quote }}
+            {{- if .Values.dbPort }}
+            - name: DB_PORT
+              value: {{ .Values.dbPort | quote }}
+            {{- end }}
+            - name: DB_DATABASE
+              value: {{ .Values.dbName | default "" | quote }}
+            - name: DB_USER
+              value: "supabase_functions_admin"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dbSecretRef }}
+                  key: password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jwtSecretRef }}
+                  key: secret
+            - name: ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: anonKey
+            - name: SERVICE_ROLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: serviceKey
+            {{- if .Values.functionsSecretRef }}
+            - name: FUNCTIONS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.functionsSecretRef }}
+                  key: secret
+            {{- end }}
+          {{- with .Values.deployment.envFrom }}
+          envFrom: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.volumeMounts }}
+          volumeMounts: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.livenessProbe }}
+          livenessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.readinessProbe }}
+          readinessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.startupProbe }}
+          startupProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.lifecycle }}
+          lifecycle: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext: {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+      {{- with .Values.deployment.volumes }}
+      volumes: {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

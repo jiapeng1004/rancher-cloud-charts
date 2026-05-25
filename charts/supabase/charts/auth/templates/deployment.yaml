@@ -1,0 +1,196 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "auth.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "auth.labels" . | nindent 4 }}
+  {{- with .Values.deployment.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "auth.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "auth.selectorLabels" . | nindent 8 }}
+      {{- with .Values.deployment.podAnnotations }}
+      annotations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "auth.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      securityContext: {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      initContainers:
+        - name: init-db
+          image: "{{ .Values.initDbImage.repository }}:{{ .Values.initDbImage.tag }}"
+          imagePullPolicy: {{ .Values.initDbImage.pullPolicy }}
+          env:
+            {{- if .Values.dbHost }}
+            - name: DB_HOST
+              value: {{ .Values.dbHost | quote }}
+            {{- end }}
+            {{- if .Values.dbPort }}
+            - name: DB_PORT
+              value: {{ .Values.dbPort | quote }}
+            {{- end }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U postgres; do
+              echo "Waiting for database to start..."
+              sleep 2
+              done
+            - echo "Database is ready"
+      containers:
+        - name: {{ include "auth.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 9999
+              protocol: TCP
+          env:
+            - name: API_EXTERNAL_URL
+              value: {{ .Values.environment.API_EXTERNAL_URL | quote }}
+            - name: GOTRUE_API_HOST
+              value: {{ .Values.environment.GOTRUE_API_HOST | quote }}
+            - name: GOTRUE_API_PORT
+              value: {{ .Values.environment.GOTRUE_API_PORT | quote }}
+            - name: GOTRUE_DB_DRIVER
+              value: {{ .Values.environment.GOTRUE_DB_DRIVER | quote }}
+            - name: GOTRUE_SITE_URL
+              value: {{ .Values.environment.GOTRUE_SITE_URL | quote }}
+            - name: GOTRUE_URI_OPERATOR_PATH
+              value: {{ .Values.environment.GOTRUE_URI_OPERATOR_PATH | quote }}
+            - name: GOTRUE_JWT_DEFAULT_GROUP_NAME
+              value: {{ .Values.environment.GOTRUE_JWT_DEFAULT_GROUP_NAME | quote }}
+            - name: GOTRUE_JWT_ADMIN_ROLES
+              value: {{ .Values.environment.GOTRUE_JWT_ADMIN_ROLES | quote }}
+            - name: GOTRUE_JWT_AUD
+              value: {{ .Values.environment.GOTRUE_JWT_AUD | quote }}
+            - name: GOTRUE_JWT_EXP
+              value: {{ .Values.environment.GOTRUE_JWT_EXP | quote }}
+            - name: GOTRUE_EXTERNAL_EMAIL_ENABLED
+              value: {{ .Values.environment.GOTRUE_EXTERNAL_EMAIL_ENABLED | quote }}
+            - name: GOTRUE_EXTERNAL_PHONE_ENABLED
+              value: {{ .Values.environment.GOTRUE_EXTERNAL_PHONE_ENABLED | quote }}
+            - name: GOTRUE_MAILER_AUTOCONFIRM
+              value: {{ .Values.environment.GOTRUE_MAILER_AUTOCONFIRM | quote }}
+            - name: GOTRUE_SMS_AUTOCONFIRM
+              value: {{ .Values.environment.GOTRUE_SMS_AUTOCONFIRM | quote }}
+            - name: GOTRUE_SMTP_ADMIN_EMAIL
+              value: {{ .Values.environment.GOTRUE_SMTP_ADMIN_EMAIL | quote }}
+            - name: GOTRUE_SMTP_HOST
+              value: {{ .Values.environment.GOTRUE_SMTP_HOST | quote }}
+            - name: GOTRUE_SMTP_PORT
+              value: {{ .Values.environment.GOTRUE_SMTP_PORT | quote }}
+            - name: GOTRUE_SMTP_SENDER_NAME
+              value: {{ .Values.environment.GOTRUE_SMTP_SENDER_NAME | quote }}
+            - name: GOTRUE_MAILER_URLPATHS_INVITE
+              value: {{ .Values.environment.GOTRUE_MAILER_URLPATHS_INVITE | quote }}
+            - name: GOTRUE_MAILER_URLPATHS_CONFIRMATION
+              value: {{ .Values.environment.GOTRUE_MAILER_URLPATHS_CONFIRMATION | quote }}
+            - name: GOTRUE_MAILER_URLPATHS_RECOVERY
+              value: {{ .Values.environment.GOTRUE_MAILER_URLPATHS_RECOVERY | quote }}
+            - name: GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE
+              value: {{ .Values.environment.GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE | quote }}
+            - name: GOTRUE_RATE_LIMIT_EMAIL_SENT
+              value: {{ .Values.environment.GOTRUE_RATE_LIMIT_EMAIL_SENT | quote }}
+            - name: GOTRUE_RATE_LIMIT_SMS_SENT
+              value: {{ .Values.environment.GOTRUE_RATE_LIMIT_SMS_SENT | quote }}
+            - name: GOTRUE_RATE_LIMIT_TOKEN_REFRESH
+              value: {{ .Values.environment.GOTRUE_RATE_LIMIT_TOKEN_REFRESH | quote }}
+            - name: GOTRUE_RATE_LIMIT_VERIFY
+              value: {{ .Values.environment.GOTRUE_RATE_LIMIT_VERIFY | quote }}
+            - name: GOTRUE_RATE_LIMIT_LOGIN
+              value: {{ .Values.environment.GOTRUE_RATE_LIMIT_LOGIN | quote }}
+            {{- if .Values.dbHost }}
+            - name: GOTRUE_DB_HOST
+              value: {{ .Values.dbHost | quote }}
+            {{- end }}
+            {{- if .Values.dbPort }}
+            - name: GOTRUE_DB_PORT
+              value: {{ .Values.dbPort | quote }}
+            {{- end }}
+            - name: GOTRUE_DB_DATABASE_URL
+              value: "postgres://supabase_auth_admin:$(DB_PASSWORD)@$(GOTRUE_DB_HOST):$(GOTRUE_DB_PORT)/postgres"
+            {{- if .Values.dbSecretRef }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dbSecretRef }}
+                  key: password
+            {{- end }}
+            {{- if .Values.jwtSecretRef }}
+            - name: GOTRUE_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jwtSecretRef }}
+                  key: secret
+            {{- end }}
+            {{- if .Values.apikeySecretRef }}
+            - name: GOTRUE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: anonKey
+            {{- end }}
+            {{- if .Values.smtpSecretRef }}
+            - name: GOTRUE_SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.smtpSecretRef }}
+                  key: password
+            - name: GOTRUE_SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.smtpSecretRef }}
+                  key: user
+            {{- end }}
+          {{- with .Values.deployment.envFrom }}
+          envFrom: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.volumeMounts }}
+          volumeMounts: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.livenessProbe }}
+          livenessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.readinessProbe }}
+          readinessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.startupProbe }}
+          startupProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.lifecycle }}
+          lifecycle: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext: {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+      {{- with .Values.deployment.volumes }}
+      volumes: {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,11 @@
+{{- if .Values.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vector.fullname" . }}-config
+  labels:
+    {{- include "vector.labels" . | nindent 4 }}
+data:
+  vector.yml: |
+{{ .Files.Get "files/vector/vector.yml" | indent 4 }}
+{{- end }}

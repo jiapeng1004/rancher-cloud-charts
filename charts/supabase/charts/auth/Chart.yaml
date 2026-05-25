@@ -1,0 +1,6 @@
+apiVersion: v2
+name: auth
+description: Supabase GoTrue Authentication sub-chart
+type: application
+version: 1.0.0
+appVersion: "v2.186.0"

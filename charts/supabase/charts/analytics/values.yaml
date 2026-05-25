@@ -1,0 +1,73 @@
+## Analytics sub-chart values
+enabled: true
+replicaCount: 1
+
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/logflare
+  pullPolicy: IfNotPresent
+  tag: "1.23.0"
+  pullSecrets: []
+
+initDbImage:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgres
+  pullPolicy: IfNotPresent
+  tag: "15.8"
+
+service:
+  type: ClusterIP
+  port: 4000
+  targetPort: 4000
+  protocol: TCP
+  portName: http
+  annotations: {}
+
+environment:
+  LOGFLARE_SINGLE_TENANT: "true"
+  LOGFLARE_SINGLE_TENANT_MODE_USER_ID: ""
+  LOGFLARE_FEATURE_FLAG_OVERRIDE: ""
+  LOGFLARE_NODE_HOST: "127.0.0.1"
+  LOGFLARE_NODE_PORT: "4000"
+  LOGFLARE_MIN_CLUSTER_SIZE: "1"
+  LOGFLARE_DB_SCHEMA: "analytics"
+  LOGFLARE_SUPABASE_MODE: "true"
+  POSTGRES_BACKEND_SCHEMA: analytics
+  LOGFLARE_ALLOWED_INSECURE_BACKENDS: "true"
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+deployment:
+  annotations: {}
+  podAnnotations: {}
+  automountServiceAccountToken: false
+  terminationGracePeriodSeconds: 30
+  podSecurityContext: {}
+  securityContext: {}
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  priorityClassName: ""
+  envFrom: []
+  volumeMounts: []
+  volumes: []
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}
+  lifecycle: {}
+
+# Cross-component references (explicit)
+dbSecretRef: ""
+dbHost: ""
+dbPort: ""
+dbName: ""
+analyticsSecretRef: ""

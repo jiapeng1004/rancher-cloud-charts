@@ -1,0 +1,177 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "realtime.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "realtime.labels" . | nindent 4 }}
+  {{- with .Values.deployment.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "realtime.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "realtime.selectorLabels" . | nindent 8 }}
+      {{- with .Values.deployment.podAnnotations }}
+      annotations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "realtime.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      securityContext: {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      initContainers:
+        - name: init-db
+          image: "{{ .Values.initDbImage.repository }}:{{ .Values.initDbImage.tag }}"
+          imagePullPolicy: {{ .Values.initDbImage.pullPolicy }}
+          env:
+            {{- if .Values.dbHost }}
+            - name: DB_HOST
+              value: {{ .Values.dbHost | quote }}
+            {{- end }}
+            {{- if .Values.dbPort }}
+            - name: DB_PORT
+              value: {{ .Values.dbPort | quote }}
+            {{- end }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U postgres; do
+              echo "Waiting for database to start..."
+              sleep 2
+              done
+            - echo "Database is ready"
+      containers:
+        - name: {{ include "realtime.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh"]
+          args: ["-c", "/app/bin/migrate && /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)' && /app/bin/server"]
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          env:
+            - name: DB_USER
+              value: {{ .Values.environment.DB_USER | quote }}
+            - name: DB_SSL
+              value: {{ .Values.environment.DB_SSL | quote }}
+            - name: PORT
+              value: {{ .Values.environment.PORT | quote }}
+            - name: FLY_ALLOC_ID
+              value: {{ .Values.environment.FLY_ALLOC_ID | quote }}
+            - name: FLY_APP_NAME
+              value: {{ .Values.environment.FLY_APP_NAME | quote }}
+            - name: ENABLE_TAILSCALE
+              value: {{ .Values.environment.ENABLE_TAILSCALE | quote }}
+            - name: DB_AFTER_CONNECT_QUERY
+              value: {{ .Values.environment.DB_AFTER_CONNECT_QUERY | quote }}
+            - name: DB_ENC_KEY
+              value: {{ .Values.environment.DB_ENC_KEY | quote }}
+            - name: ERL_AFLAGS
+              value: {{ .Values.environment.ERL_AFLAGS | quote }}
+            - name: DNS_NODES
+              value: {{ .Values.environment.DNS_NODES | quote }}
+            - name: RLIMIT_NOFILE
+              value: {{ .Values.environment.RLIMIT_NOFILE | quote }}
+            - name: APP_NAME
+              value: {{ .Values.environment.APP_NAME | quote }}
+            - name: SEED_SELF_HOST
+              value: {{ .Values.environment.SEED_SELF_HOST | quote }}
+            - name: RUN_JANITOR
+              value: {{ .Values.environment.RUN_JANITOR | quote }}
+            {{- if .Values.dbHost }}
+            - name: DB_HOST
+              value: {{ .Values.dbHost | quote }}
+            {{- end }}
+            {{- if .Values.dbPort }}
+            - name: DB_PORT
+              value: {{ .Values.dbPort | quote }}
+            {{- end }}
+            - name: SELF_HOST_TENANT_NAME
+              value: {{ include "realtime.fullname" . }}
+            {{- if .Values.dbSecretRef }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dbSecretRef }}
+                  key: password
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dbSecretRef }}
+                  key: database
+            {{- end }}
+            {{- if .Values.jwtSecretRef }}
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jwtSecretRef }}
+                  key: secret
+            - name: API_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jwtSecretRef }}
+                  key: secret
+            {{- end }}
+            {{- if .Values.apikeySecretRef }}
+            - name: API_JWT_JWKS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.apikeySecretRef }}
+                  key: jwtJwks
+            {{- end }}
+            {{- if .Values.realtimeSecretKeyBaseRef }}
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.realtimeSecretKeyBaseRef }}
+                  key: secretKeyBase
+            {{- end }}
+          {{- with .Values.deployment.envFrom }}
+          envFrom: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.volumeMounts }}
+          volumeMounts: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.livenessProbe }}
+          livenessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.readinessProbe }}
+          readinessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.startupProbe }}
+          startupProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.lifecycle }}
+          lifecycle: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext: {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+      {{- with .Values.deployment.volumes }}
+      volumes: {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

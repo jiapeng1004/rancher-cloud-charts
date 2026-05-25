@@ -1,0 +1,142 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "analytics.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "analytics.labels" . | nindent 4 }}
+  {{- with .Values.deployment.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "analytics.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "analytics.selectorLabels" . | nindent 8 }}
+      {{- with .Values.deployment.podAnnotations }}
+      annotations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "analytics.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      securityContext: {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      initContainers:
+        - name: init-db
+          image: "{{ .Values.initDbImage.repository }}:{{ .Values.initDbImage.tag }}"
+          imagePullPolicy: {{ .Values.initDbImage.pullPolicy }}
+          env:
+            {{- if .Values.dbHost }}
+            - name: DB_HOST
+              value: {{ .Values.dbHost | quote }}
+            {{- end }}
+            {{- if .Values.dbPort }}
+            - name: DB_PORT
+              value: {{ .Values.dbPort | quote }}
+            {{- end }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U postgres; do
+              echo "Waiting for database to start..."
+              sleep 2
+              done
+            - echo "Database is ready"
+      containers:
+        - name: {{ include "analytics.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          env:
+            - name: LOGFLARE_SINGLE_TENANT
+              value: {{ .Values.environment.LOGFLARE_SINGLE_TENANT | quote }}
+            - name: LOGFLARE_SINGLE_TENANT_MODE_USER_ID
+              value: {{ .Values.environment.LOGFLARE_SINGLE_TENANT_MODE_USER_ID | quote }}
+            - name: LOGFLARE_FEATURE_FLAG_OVERRIDE
+              value: {{ .Values.environment.LOGFLARE_FEATURE_FLAG_OVERRIDE | quote }}
+            - name: LOGFLARE_NODE_HOST
+              value: {{ .Values.environment.LOGFLARE_NODE_HOST | quote }}
+            - name: LOGFLARE_NODE_PORT
+              value: {{ .Values.environment.LOGFLARE_NODE_PORT | quote }}
+            - name: LOGFLARE_MIN_CLUSTER_SIZE
+              value: {{ .Values.environment.LOGFLARE_MIN_CLUSTER_SIZE | quote }}
+            - name: LOGFLARE_DB_SCHEMA
+              value: {{ .Values.environment.LOGFLARE_DB_SCHEMA | quote }}
+            - name: LOGFLARE_SUPABASE_MODE
+              value: {{ .Values.environment.LOGFLARE_SUPABASE_MODE | quote }}
+            - name: POSTGRES_BACKEND_SCHEMA
+              value: {{ .Values.environment.POSTGRES_BACKEND_SCHEMA | quote }}
+            - name: LOGFLARE_ALLOWED_INSECURE_BACKENDS
+              value: {{ .Values.environment.LOGFLARE_ALLOWED_INSECURE_BACKENDS | quote }}
+            {{- if .Values.dbHost }}
+            - name: POSTGRES_BACKEND_URL
+              value: "postgresql://supabase_admin:$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/postgres"
+            {{- end }}
+            {{- if .Values.dbSecretRef }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dbSecretRef }}
+                  key: password
+            {{- end }}
+            {{- if .Values.analyticsSecretRef }}
+            - name: LOGFLARE_PUBLIC_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.analyticsSecretRef }}
+                  key: publicAccessToken
+            - name: LOGFLARE_PRIVATE_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.analyticsSecretRef }}
+                  key: privateAccessToken
+            {{- end }}
+          {{- with .Values.deployment.envFrom }}
+          envFrom: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.volumeMounts }}
+          volumeMounts: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.livenessProbe }}
+          livenessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.readinessProbe }}
+          readinessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.startupProbe }}
+          startupProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.deployment.lifecycle }}
+          lifecycle: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext: {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+      {{- with .Values.deployment.volumes }}
+      volumes: {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

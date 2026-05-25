@@ -7,9 +7,10 @@ name: supabase
 description: >-
   Self-hosted Supabase stack on Kubernetes（基于上游 Helm 结构与 docker-compose），
   默认值预置华为云 SWR 「ddn-k8s/docker.io/…」前缀；附带 Rancher questions.yaml。
+  所有子 chart 显式声明变量，无隐式 range 传递。
 type: application
 
-version: 1.2.0
+version: 2.0.0
 
 keywords:
   - supabase
@@ -27,3 +28,44 @@ sources:
 
 maintainers:
   - name: rancher-cloud-charts
+
+dependencies:
+  - name: kong
+    version: "2.0.0"
+    condition: kong.enabled
+  - name: auth
+    version: "2.0.0"
+    condition: auth.enabled
+  - name: db
+    version: "2.0.0"
+    condition: db.enabled
+  - name: rest
+    version: "2.0.0"
+    condition: rest.enabled
+  - name: realtime
+    version: "2.0.0"
+    condition: realtime.enabled
+  - name: storage
+    version: "2.0.0"
+    condition: storage.enabled
+  - name: meta
+    version: "2.0.0"
+    condition: meta.enabled
+  - name: studio
+    version: "2.0.0"
+    condition: studio.enabled
+  - name: functions
+    version: "2.0.0"
+    condition: functions.enabled
+  - name: analytics
+    version: "2.0.0"
+    condition: analytics.enabled
+  - name: vector
+    version: "2.0.0"
+    condition: vector.enabled
+  - name: imgproxy
+    version: "2.0.0"
+    condition: imgproxy.enabled
+  - name: minio
+    version: "2.0.0"
+    condition: minio.enabled
