@@ -99,14 +99,14 @@ spec:
               value: {{ .Values.environment.IMGPROXY_URL | quote }}
             - name: ENABLE_QUEUE_EVENTS
               value: {{ .Values.environment.ENABLE_QUEUE_EVENTS | quote }}
-            {{- if .Values.dbHost }}
             - name: DB_HOST
-              value: {{ .Values.dbHost | quote }}
-            {{- end }}
-            {{- if .Values.dbPort }}
+              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
             - name: DB_PORT
-              value: {{ .Values.dbPort | quote }}
-            {{- end }}
+              value: {{ .Values.dbPort | default "5432" | quote }}
+            - name: DB_NAME
+              value: {{ .Values.dbName | default "postgres" | quote }}
+            - name: DATABASE_URL
+              value: "postgres://supabase_storage_admin:$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:

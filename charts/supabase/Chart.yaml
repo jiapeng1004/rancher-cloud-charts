@@ -10,7 +10,7 @@ description: >-
   所有子 chart 显式声明变量，无隐式 range 传递。
 type: application
 
-version: 2.0.10
+version: 2.0.11
 
 keywords:
   - supabase

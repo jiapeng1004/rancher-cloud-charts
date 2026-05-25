@@ -86,15 +86,13 @@ spec:
             - name: FUNCTIONS_URL
               value: {{ .Values.functionsUrl | quote }}
             {{- end }}
-            {{- if .Values.dbHost }}
-            - name: SUPABASE_DB_HOST
-              value: {{ .Values.dbHost | quote }}
-            {{- end }}
-            {{- if .Values.dbPort }}
-            - name: SUPABASE_DB_PORT
-              value: {{ .Values.dbPort | quote }}
-            {{- end }}
-            - name: SUPABASE_DB_PASSWORD
+            - name: POSTGRES_HOST
+              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.dbPort | default "5432" | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.dbName | default "postgres" | quote }}
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-db

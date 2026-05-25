@@ -87,15 +87,17 @@ spec:
               value: {{ .Values.environment.POSTGRES_BACKEND_SCHEMA | quote }}
             - name: LOGFLARE_ALLOWED_INSECURE_BACKENDS
               value: {{ .Values.environment.LOGFLARE_ALLOWED_INSECURE_BACKENDS | quote }}
-            {{- if .Values.dbHost }}
-            - name: POSTGRES_BACKEND_URL
-              value: "postgresql://supabase_admin:$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/postgres"
-            {{- end }}
+            - name: DB_HOST
+              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
+            - name: DB_PORT
+              value: {{ .Values.dbPort | default "5432" | quote }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-db
                   key: password
+            - name: POSTGRES_BACKEND_URL
+              value: "postgresql://supabase_admin:$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/_supabase"
             - name: LOGFLARE_PUBLIC_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:

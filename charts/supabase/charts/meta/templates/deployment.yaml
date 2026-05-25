@@ -58,18 +58,12 @@ spec:
               value: {{ .Values.environment.DB_SSL | quote }}
             - name: PG_META_PORT
               value: {{ .Values.environment.PG_META_PORT | quote }}
-            {{- if .Values.dbHost }}
             - name: PG_META_DB_HOST
-              value: {{ .Values.dbHost | quote }}
-            {{- end }}
-            {{- if .Values.dbPort }}
+              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
             - name: PG_META_DB_PORT
-              value: {{ .Values.dbPort | quote }}
-            {{- end }}
-            {{- if .Values.dbName }}
+              value: {{ .Values.dbPort | default "5432" | quote }}
             - name: PG_META_DB_NAME
-              value: {{ .Values.dbName | quote }}
-            {{- end }}
+              value: {{ .Values.dbName | default "postgres" | quote }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:

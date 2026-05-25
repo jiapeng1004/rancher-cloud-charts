@@ -40,33 +40,7 @@ spec:
       {{- with .Values.deployment.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
-      initContainers:
-        - name: fix-permissions
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["sh", "-c"]
-          args:
-            - |
-              chown -R 105:106 /var/lib/postgresql/data
-              chmod 700 /var/lib/postgresql/data
-          securityContext:
-            runAsUser: 0
-          volumeMounts:
-            - name: db-data
-              mountPath: /var/lib/postgresql/data
-        - name: init-db
-          image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
-          imagePullPolicy: {{ .Values.initImage.pullPolicy }}
-          command: ["sh", "-c"]
-          args:
-            - |
-              cp /docker-entrypoint-initdb.d/* /initdb.d/
-          volumeMounts:
-            - mountPath: /initdb.d
-              name: initdb-scripts
-            - mountPath: /docker-entrypoint-initdb.d
-              name: initdb-scripts-source
-              readOnly: true
+      initContainers: []
       containers:
         - name: {{ include "db.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -78,8 +52,6 @@ spec:
           env:
             - name: POSTGRES_HOST
               value: /var/run/postgresql
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -109,6 +81,7 @@ spec:
               name: db-data
             - mountPath: /docker-entrypoint-initdb.d
               name: initdb-scripts
+              readOnly: true
           {{- with .Values.deployment.livenessProbe }}
           livenessProbe: {{- toYaml . | nindent 12 }}
           {{- end }}
