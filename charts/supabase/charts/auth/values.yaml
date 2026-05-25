@@ -9,9 +9,9 @@ image:
   pullSecrets: []
 
 initDbImage:
-  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgres
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres
   pullPolicy: IfNotPresent
-  tag: "15.8"
+  tag: "15.8.1.085"
 
 service:
   type: ClusterIP

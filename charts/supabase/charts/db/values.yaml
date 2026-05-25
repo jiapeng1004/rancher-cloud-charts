@@ -46,11 +46,11 @@ deployment:
   automountServiceAccountToken: false
   terminationGracePeriodSeconds: 60
   podSecurityContext:
-    fsGroup: 999
+    fsGroup: 106
     fsGroupChangePolicy: "OnRootMismatch"
   securityContext:
-    runAsUser: 999
-    runAsGroup: 999
+    runAsUser: 105
+    runAsGroup: 106
     runAsNonRoot: true
   resources: {}
   nodeSelector: {}
