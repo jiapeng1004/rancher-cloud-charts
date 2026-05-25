@@ -80,6 +80,34 @@ spec:
             - name: KONG_NGINX_WORKER_PROCESSES
               value: {{ .KONG_NGINX_WORKER_PROCESSES | quote }}
             {{- end }}
+            - name: SUPABASE_AUTH_HOST
+              value: {{ include "supabase.fullname" . }}-auth
+            - name: SUPABASE_AUTH_PORT
+              value: "9999"
+            - name: SUPABASE_REST_HOST
+              value: {{ include "supabase.fullname" . }}-rest
+            - name: SUPABASE_REST_PORT
+              value: "3000"
+            - name: SUPABASE_REALTIME_HOST
+              value: {{ include "supabase.fullname" . }}-realtime
+            - name: SUPABASE_REALTIME_PORT
+              value: "4000"
+            - name: SUPABASE_STORAGE_HOST
+              value: {{ include "supabase.fullname" . }}-storage
+            - name: SUPABASE_STORAGE_PORT
+              value: "5000"
+            - name: SUPABASE_FUNCTIONS_HOST
+              value: {{ include "supabase.fullname" . }}-functions
+            - name: SUPABASE_FUNCTIONS_PORT
+              value: "9000"
+            - name: SUPABASE_ANALYTICS_HOST
+              value: {{ include "supabase.fullname" . }}-analytics
+            - name: SUPABASE_ANALYTICS_PORT
+              value: "4000"
+            - name: SUPABASE_META_HOST
+              value: {{ include "supabase.fullname" . }}-meta
+            - name: SUPABASE_META_PORT
+              value: "8080"
             - name: SUPABASE_ANON_KEY
               valueFrom:
                 secretKeyRef:

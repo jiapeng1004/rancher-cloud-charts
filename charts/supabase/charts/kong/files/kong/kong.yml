@@ -1,0 +1,66 @@
+_format_version: "2.1"
+
+services:
+  - name: supabase-auth
+    url: http://${SUPABASE_AUTH_HOST}:${SUPABASE_AUTH_PORT}
+    routes:
+      - name: auth-route
+        strip_path: true
+        paths:
+          - /auth/v1/
+    plugins:
+      - name: cors
+  - name: supabase-rest
+    url: http://${SUPABASE_REST_HOST}:${SUPABASE_REST_PORT}
+    routes:
+      - name: rest-route
+        strip_path: true
+        paths:
+          - /rest/v1/
+    plugins:
+      - name: cors
+  - name: supabase-realtime
+    url: http://${SUPABASE_REALTIME_HOST}:${SUPABASE_REALTIME_PORT}
+    routes:
+      - name: realtime-route
+        strip_path: true
+        paths:
+          - /realtime/v1/
+    plugins:
+      - name: cors
+  - name: supabase-storage
+    url: http://${SUPABASE_STORAGE_HOST}:${SUPABASE_STORAGE_PORT}
+    routes:
+      - name: storage-route
+        strip_path: true
+        paths:
+          - /storage/v1/
+    plugins:
+      - name: cors
+  - name: supabase-functions
+    url: http://${SUPABASE_FUNCTIONS_HOST}:${SUPABASE_FUNCTIONS_PORT}
+    routes:
+      - name: functions-route
+        strip_path: true
+        paths:
+          - /functions/v1/
+    plugins:
+      - name: cors
+  - name: supabase-analytics
+    url: http://${SUPABASE_ANALYTICS_HOST}:${SUPABASE_ANALYTICS_PORT}
+    routes:
+      - name: analytics-route
+        strip_path: true
+        paths:
+          - /analytics/v1/
+    plugins:
+      - name: cors
+  - name: supabase-meta
+    url: http://${SUPABASE_META_HOST}:${SUPABASE_META_PORT}
+    routes:
+      - name: meta-route
+        strip_path: true
+        paths:
+          - /pg/
+    plugins:
+      - name: cors

@@ -1,0 +1,10 @@
+sources:
+  vector:
+    type: internal_metrics
+
+sinks:
+  prometheus:
+    type: prometheus_exporter
+    inputs:
+      - vector
+    address: 0.0.0.0:9001
