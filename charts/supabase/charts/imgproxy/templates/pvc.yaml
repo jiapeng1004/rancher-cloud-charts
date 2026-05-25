@@ -6,8 +6,9 @@ metadata:
   labels:
     {{- include "imgproxy.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.persistence.storageClassName }}
-  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- $sc := .Values.persistence.storageClassName | default .Values.global.defaultStorageClassName }}
+  {{- if $sc }}
+  storageClassName: {{ $sc }}
   {{- end }}
   accessModes:
     {{- toYaml .Values.persistence.accessModes | nindent 4 }}

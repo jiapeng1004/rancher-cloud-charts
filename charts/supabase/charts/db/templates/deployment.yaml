@@ -131,8 +131,9 @@ spec:
         name: db-data
         labels: {{- include "db.selectorLabels" . | nindent 10 }}
       spec:
-        {{- if .Values.persistence.storageClassName }}
-        storageClassName: {{ .Values.persistence.storageClassName }}
+        {{- $sc := .Values.persistence.storageClassName | default .Values.global.defaultStorageClassName }}
+        {{- if $sc }}
+        storageClassName: {{ $sc }}
         {{- end }}
         accessModes:
           {{- toYaml .Values.persistence.accessModes | nindent 10 }}
