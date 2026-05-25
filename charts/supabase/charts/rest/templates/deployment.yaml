@@ -54,7 +54,7 @@ spec:
             - name: DB_PORT
               value: {{ .Values.dbPort | quote }}
             {{- end }}
-          command: ["/bin/sh", "-c"]
+          command: [ "/bin/sh", "-c" ]
           args:
             - |
               until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U postgres; do

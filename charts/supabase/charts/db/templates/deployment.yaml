@@ -41,6 +41,19 @@ spec:
       priorityClassName: {{ . }}
       {{- end }}
       initContainers:
+        - name: fix-permissions
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c"]
+          args:
+            - |
+              chown -R 105:106 /var/lib/postgresql/data
+              chmod 700 /var/lib/postgresql/data
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
         - name: init-db
           image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
           imagePullPolicy: {{ .Values.initImage.pullPolicy }}
