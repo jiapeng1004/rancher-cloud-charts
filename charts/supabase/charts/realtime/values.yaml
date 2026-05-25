@@ -71,7 +71,7 @@ deployment:
 
 # Cross-component references (explicit)
 dbSecretRef: ""
-dbHost: ""
+
 dbPort: ""
 dbName: ""
 jwtSecretRef: ""

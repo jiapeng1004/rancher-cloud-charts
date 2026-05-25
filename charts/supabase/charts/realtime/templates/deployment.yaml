@@ -56,7 +56,7 @@ spec:
             - name: PORT
               value: "4000"
             - name: DB_HOST
-              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
+              value: "{{ .Release.Name }}-db"
             - name: DB_PORT
               value: {{ .Values.dbPort | default "5432" | quote }}
             - name: DB_USER

@@ -13,4 +13,10 @@ data:
 {{ .Files.Get "files/roles.sql" | indent 4 }}
   98-webhooks.sql: |
 {{ .Files.Get "files/webhooks.sql" | indent 4 }}
+  97-_supabase.sql: |
+{{ .Files.Get "files/_supabase.sql" | indent 4 }}
+  99-logs.sql: |
+{{ .Files.Get "files/logs.sql" | indent 4 }}
+  99-pooler.sql: |
+{{ .Files.Get "files/pooler.sql" | indent 4 }}
 {{- end }}
