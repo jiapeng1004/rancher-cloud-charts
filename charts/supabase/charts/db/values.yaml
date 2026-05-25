@@ -45,8 +45,13 @@ deployment:
   podAnnotations: {}
   automountServiceAccountToken: false
   terminationGracePeriodSeconds: 60
-  podSecurityContext: {}
-  securityContext: {}
+  podSecurityContext:
+    fsGroup: 999
+    fsGroupChangePolicy: "OnRootMismatch"
+  securityContext:
+    runAsUser: 999
+    runAsGroup: 999
+    runAsNonRoot: true
   resources: {}
   nodeSelector: {}
   affinity: {}
