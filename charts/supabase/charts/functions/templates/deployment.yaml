@@ -65,16 +65,21 @@ spec:
               value: {{ .Values.dbName | default "" | quote }}
             - name: DB_USER
               value: "supabase_functions_admin"
+            {{- if .Values.dbSecretRef }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.dbSecretRef }}
                   key: password
+            {{- end }}
+            {{- if .Values.jwtSecretRef }}
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.jwtSecretRef }}
                   key: secret
+            {{- end }}
+            {{- if .Values.apikeySecretRef }}
             - name: ANON_KEY
               valueFrom:
                 secretKeyRef:
@@ -85,6 +90,7 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.apikeySecretRef }}
                   key: serviceKey
+            {{- end }}
             {{- if .Values.functionsSecretRef }}
             - name: FUNCTIONS_SECRET
               valueFrom:
