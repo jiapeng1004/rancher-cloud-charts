@@ -146,8 +146,6 @@ spec:
               name: initdb-scripts-source
               subPath: 99-pooler.sql
               readOnly: true
-            - mountPath: /etc/postgresql-custom
-              name: db-config
           {{- with .Values.deployment.livenessProbe }}
           livenessProbe: {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -168,8 +166,6 @@ spec:
           configMap:
             name: {{ include "db.fullname" . }}-initdb
             defaultMode: 0755
-        - name: db-config
-          emptyDir: {}
         {{- with .Values.deployment.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
