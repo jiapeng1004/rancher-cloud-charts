@@ -55,75 +55,34 @@ spec:
         - name: {{ include "kong.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/bin/bash"]
-          args: ["/scripts/kong-entrypoint.sh"]
+          command: ["bash", "-c"]
+          args:
+            - |
+              eval "echo \"$$(cat /usr/local/kong/template.yml)\"" > /home/kong/kong.yml
+              /docker-entrypoint.sh kong docker-start
           ports:
             - name: http
               containerPort: 8000
               protocol: TCP
           env:
-            {{- with .Values.environment }}
             - name: KONG_DATABASE
-              value: {{ .KONG_DATABASE | quote }}
+              value: "off"
             - name: KONG_DECLARATIVE_CONFIG
-              value: {{ .KONG_DECLARATIVE_CONFIG | quote }}
+              value: /home/kong/kong.yml
             - name: KONG_DNS_ORDER
-              value: {{ .KONG_DNS_ORDER | quote }}
+              value: LAST,A,CNAME
             - name: KONG_PLUGINS
-              value: {{ .KONG_PLUGINS | quote }}
+              value: request-transformer,cors,key-auth,acl,basic-auth,request-termination,ip-restriction
             - name: KONG_NGINX_PROXY_PROXY_BUFFER_SIZE
-              value: {{ .KONG_NGINX_PROXY_PROXY_BUFFER_SIZE | quote }}
+              value: 160k
             - name: KONG_NGINX_PROXY_PROXY_BUFFERS
-              value: {{ .KONG_NGINX_PROXY_PROXY_BUFFERS | quote }}
-            - name: KONG_LOG_LEVEL
-              value: {{ .KONG_LOG_LEVEL | quote }}
-            - name: KONG_NGINX_WORKER_PROCESSES
-              value: {{ .KONG_NGINX_WORKER_PROCESSES | quote }}
-            {{- end }}
-            - name: SUPABASE_AUTH_HOST
-              value: {{ include "supabase.fullname" . }}-auth
-            - name: SUPABASE_AUTH_PORT
-              value: "9999"
-            - name: SUPABASE_REST_HOST
-              value: {{ include "supabase.fullname" . }}-rest
-            - name: SUPABASE_REST_PORT
-              value: "3000"
-            - name: SUPABASE_REALTIME_HOST
-              value: {{ include "supabase.fullname" . }}-realtime
-            - name: SUPABASE_REALTIME_PORT
-              value: "4000"
-            - name: SUPABASE_STORAGE_HOST
-              value: {{ include "supabase.fullname" . }}-storage
-            - name: SUPABASE_STORAGE_PORT
-              value: "5000"
-            - name: SUPABASE_FUNCTIONS_HOST
-              value: {{ include "supabase.fullname" . }}-functions
-            - name: SUPABASE_FUNCTIONS_PORT
-              value: "9000"
-            - name: SUPABASE_ANALYTICS_HOST
-              value: {{ include "supabase.fullname" . }}-analytics
-            - name: SUPABASE_ANALYTICS_PORT
-              value: "4000"
-            - name: SUPABASE_META_HOST
-              value: {{ include "supabase.fullname" . }}-meta
-            - name: SUPABASE_META_PORT
-              value: "8080"
+              value: 64 160k
             - name: SUPABASE_ANON_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-jwt
                   key: anonKey
             - name: SUPABASE_SERVICE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-jwt
-                  key: serviceKey
-            - name: SUPABASE_PUBLISHABLE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-jwt
-                  key: anonKey
-            - name: SUPABASE_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-jwt
@@ -147,11 +106,10 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - mountPath: /usr/local/kong/template.yml
+            - mountPath: /home/kong/temp.yml
               name: config
-              subPath: template.yml
-            - mountPath: /scripts
-              name: wrapper
+              subPath: kong.yml
+              readOnly: true
             {{- with .Values.deployment.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -177,17 +135,9 @@ spec:
         - name: config
           configMap:
             name: {{ include "kong.fullname" . }}
-            defaultMode: 0777
             items:
             - key: kong.yml
-              path: template.yml
-        - name: wrapper
-          configMap:
-            name: {{ include "kong.fullname" . }}
-            defaultMode: 0777
-            items:
-            - key: kong-entrypoint.sh
-              path: kong-entrypoint.sh
+              path: kong.yml
         {{- with .Values.deployment.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

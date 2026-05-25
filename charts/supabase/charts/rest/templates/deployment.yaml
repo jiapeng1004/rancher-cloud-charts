@@ -41,23 +41,7 @@ spec:
       {{- with .Values.deployment.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
-      initContainers:
-        - name: init-db
-          image: "{{ .Values.initDbImage.repository }}:{{ .Values.initDbImage.tag }}"
-          imagePullPolicy: {{ .Values.initDbImage.pullPolicy }}
-          env:
-            - name: DB_HOST
-              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
-            - name: DB_PORT
-              value: {{ .Values.dbPort | default "5432" | quote }}
-          command: [ "/bin/sh", "-c" ]
-          args:
-            - |
-              until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U postgres; do
-              echo "Waiting for database to start..."
-              sleep 2
-              done
-            - echo "Database is ready"
+      initContainers: []
       containers:
         - name: {{ include "rest.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -67,20 +51,26 @@ spec:
               containerPort: 3000
               protocol: TCP
           env:
-            - name: DB_USER
-              value: {{ .Values.environment.DB_USER | quote }}
-            - name: DB_DRIVER
-              value: {{ .Values.environment.DB_DRIVER | quote }}
-            - name: DB_SSL
-              value: {{ .Values.environment.DB_SSL | quote }}
+            - name: PGRST_DB_URI
+              value: "postgres://authenticator:$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
             - name: PGRST_DB_SCHEMAS
-              value: {{ .Values.environment.PGRST_DB_SCHEMAS | quote }}
+              value: "public,storage,graphql_public"
             - name: PGRST_DB_ANON_ROLE
-              value: {{ .Values.environment.PGRST_DB_ANON_ROLE | quote }}
+              value: anon
+            - name: PGRST_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.fullname" . }}-jwt
+                  key: secret
             - name: PGRST_DB_USE_LEGACY_GUCS
-              value: {{ .Values.environment.PGRST_DB_USE_LEGACY_GUCS | quote }}
+              value: "false"
+            - name: PGRST_APP_SETTINGS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.fullname" . }}-jwt
+                  key: secret
             - name: PGRST_APP_SETTINGS_JWT_EXP
-              value: {{ .Values.environment.PGRST_APP_SETTINGS_JWT_EXP | quote }}
+              value: "3600"
             - name: DB_HOST
               value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
             - name: DB_PORT
@@ -92,23 +82,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-db
                   key: password
-            - name: DB_PASSWORD_ENC
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-db
-                  key: passwordEncoded
-            - name: PGRST_DB_URI
-              value: "postgres://authenticator:$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
-            - name: PGRST_JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-jwt
-                  key: secret
-            - name: PGRST_APP_SETTINGS_JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-jwt
-                  key: secret
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

@@ -27,7 +27,7 @@ environment:
   DB_SSL: disable
   PGOPTIONS: -c search_path=storage,public
   FILE_SIZE_LIMIT: "52428800"
-  STORAGE_BACKEND: s3
+  STORAGE_BACKEND: file
   GLOBAL_S3_PROTOCOL: http
   GLOBAL_S3_ENDPOINT: http://localhost:9000
   GLOBAL_S3_FORCE_PATH_STYLE: "true"

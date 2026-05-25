@@ -41,23 +41,7 @@ spec:
       {{- with .Values.deployment.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
-      initContainers:
-        - name: init-db
-          image: "{{ .Values.initDbImage.repository }}:{{ .Values.initDbImage.tag }}"
-          imagePullPolicy: {{ .Values.initDbImage.pullPolicy }}
-          env:
-            - name: DB_HOST
-              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
-            - name: DB_PORT
-              value: {{ .Values.dbPort | default "5432" | quote }}
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U postgres; do
-              echo "Waiting for database to start..."
-              sleep 2
-              done
-            - echo "Database is ready"
+      initContainers: []
       containers:
         - name: {{ include "analytics.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -67,27 +51,13 @@ spec:
               containerPort: 4000
               protocol: TCP
           env:
-            - name: LOGFLARE_SINGLE_TENANT
-              value: {{ .Values.environment.LOGFLARE_SINGLE_TENANT | quote }}
-            - name: LOGFLARE_SINGLE_TENANT_MODE_USER_ID
-              value: {{ .Values.environment.LOGFLARE_SINGLE_TENANT_MODE_USER_ID | quote }}
-            - name: LOGFLARE_FEATURE_FLAG_OVERRIDE
-              value: {{ .Values.environment.LOGFLARE_FEATURE_FLAG_OVERRIDE | quote }}
             - name: LOGFLARE_NODE_HOST
-              value: {{ .Values.environment.LOGFLARE_NODE_HOST | quote }}
-            - name: LOGFLARE_NODE_PORT
-              value: {{ .Values.environment.LOGFLARE_NODE_PORT | quote }}
-            - name: LOGFLARE_MIN_CLUSTER_SIZE
-              value: {{ .Values.environment.LOGFLARE_MIN_CLUSTER_SIZE | quote }}
-            - name: LOGFLARE_DB_SCHEMA
-              value: {{ .Values.environment.LOGFLARE_DB_SCHEMA | quote }}
-            - name: LOGFLARE_SUPABASE_MODE
-              value: {{ .Values.environment.LOGFLARE_SUPABASE_MODE | quote }}
-            - name: POSTGRES_BACKEND_SCHEMA
-              value: {{ .Values.environment.POSTGRES_BACKEND_SCHEMA | quote }}
-            - name: LOGFLARE_ALLOWED_INSECURE_BACKENDS
-              value: {{ .Values.environment.LOGFLARE_ALLOWED_INSECURE_BACKENDS | quote }}
-            - name: DB_HOST
+              value: "127.0.0.1"
+            - name: DB_USERNAME
+              value: "supabase_admin"
+            - name: DB_DATABASE
+              value: "_supabase"
+            - name: DB_HOSTNAME
               value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
             - name: DB_PORT
               value: {{ .Values.dbPort | default "5432" | quote }}
@@ -96,8 +66,8 @@ spec:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-db
                   key: password
-            - name: POSTGRES_BACKEND_URL
-              value: "postgresql://supabase_admin:$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/_supabase"
+            - name: DB_SCHEMA
+              value: "_analytics"
             - name: LOGFLARE_PUBLIC_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -108,6 +78,16 @@ spec:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-analytics
                   key: privateAccessToken
+            - name: LOGFLARE_SINGLE_TENANT
+              value: "true"
+            - name: LOGFLARE_SUPABASE_MODE
+              value: "true"
+            - name: POSTGRES_BACKEND_URL
+              value: "postgresql://supabase_admin:$(DB_PASSWORD)@$(DB_HOSTNAME):$(DB_PORT)/_supabase"
+            - name: POSTGRES_BACKEND_SCHEMA
+              value: "_analytics"
+            - name: LOGFLARE_FEATURE_FLAG_OVERRIDE
+              value: "multibackend=true"
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

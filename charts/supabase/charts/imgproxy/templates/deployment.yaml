@@ -60,16 +60,16 @@ spec:
               containerPort: 8080
               protocol: TCP
           env:
-            {{- with .Values.environment }}
             - name: IMGPROXY_BIND
-              value: {{ .IMGPROXY_BIND | quote }}
+              value: ":5001"
             - name: IMGPROXY_LOCAL_FILESYSTEM_ROOT
-              value: {{ .IMGPROXY_LOCAL_FILESYSTEM_ROOT | quote }}
+              value: /
             - name: IMGPROXY_USE_ETAG
-              value: {{ .IMGPROXY_USE_ETAG | quote }}
+              value: "true"
             - name: IMGPROXY_ENABLE_WEBP_DETECTION
-              value: {{ .IMGPROXY_ENABLE_WEBP_DETECTION | quote }}
-            {{- end }}
+              value: "true"
+            - name: IMGPROXY_MAX_SRC_RESOLUTION
+              value: "16.8"
           {{- with .Values.deployment.envFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}

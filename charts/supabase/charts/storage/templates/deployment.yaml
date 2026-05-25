@@ -41,23 +41,7 @@ spec:
       {{- with .Values.deployment.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
-      initContainers:
-        - name: init-db
-          image: "{{ .Values.initDbImage.repository }}:{{ .Values.initDbImage.tag }}"
-          imagePullPolicy: {{ .Values.initDbImage.pullPolicy }}
-          env:
-            - name: DB_HOST
-              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
-            - name: DB_PORT
-              value: {{ .Values.dbPort | default "5432" | quote }}
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U postgres; do
-              echo "Waiting for database to start..."
-              sleep 2
-              done
-            - echo "Database is ready"
+      initContainers: []
       containers:
         - name: {{ include "storage.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -67,38 +51,41 @@ spec:
               containerPort: 5000
               protocol: TCP
           env:
-            - name: DB_USER
-              value: {{ .Values.environment.DB_USER | quote }}
-            - name: DB_DRIVER
-              value: {{ .Values.environment.DB_DRIVER | quote }}
-            - name: DB_SSL
-              value: {{ .Values.environment.DB_SSL | quote }}
-            - name: PGOPTIONS
-              value: {{ .Values.environment.PGOPTIONS | quote }}
+            - name: ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.fullname" . }}-jwt
+                  key: anonKey
+            - name: SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.fullname" . }}-jwt
+                  key: serviceKey
+            - name: PGRST_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.fullname" . }}-jwt
+                  key: secret
+            - name: POSTGREST_URL
+              value: "http://{{ include "rest.fullname" . }}:3000"
             - name: FILE_SIZE_LIMIT
-              value: {{ .Values.environment.FILE_SIZE_LIMIT | quote }}
+              value: "52428800"
             - name: STORAGE_BACKEND
-              value: {{ .Values.environment.STORAGE_BACKEND | quote }}
-            - name: GLOBAL_S3_PROTOCOL
-              value: {{ .Values.environment.GLOBAL_S3_PROTOCOL | quote }}
-            - name: GLOBAL_S3_ENDPOINT
-              value: {{ .Values.environment.GLOBAL_S3_ENDPOINT | quote }}
-            - name: GLOBAL_S3_FORCE_PATH_STYLE
-              value: {{ .Values.environment.GLOBAL_S3_FORCE_PATH_STYLE | quote }}
-            - name: AWS_DEFAULT_REGION
-              value: {{ .Values.environment.AWS_DEFAULT_REGION | quote }}
+              value: file
             - name: FILE_STORAGE_BACKEND_PATH
-              value: {{ .Values.environment.FILE_STORAGE_BACKEND_PATH | quote }}
+              value: /var/lib/storage
             - name: TENANT_ID
-              value: {{ .Values.environment.TENANT_ID | quote }}
+              value: stub
             - name: REGION
-              value: {{ .Values.environment.REGION | quote }}
+              value: stub
+            - name: GLOBAL_S3_BUCKET
+              value: stub
             - name: ENABLE_IMAGE_TRANSFORMATION
-              value: {{ .Values.environment.ENABLE_IMAGE_TRANSFORMATION | quote }}
+              value: "true"
             - name: IMGPROXY_URL
-              value: {{ .Values.environment.IMGPROXY_URL | quote }}
-            - name: ENABLE_QUEUE_EVENTS
-              value: {{ .Values.environment.ENABLE_QUEUE_EVENTS | quote }}
+              value: "http://{{ include "imgproxy.fullname" . }}:5001"
+            - name: REQUEST_ALLOW_X_FORWARDED_PATH
+              value: "true"
             - name: DB_HOST
               value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
             - name: DB_PORT
@@ -112,36 +99,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-db
                   key: password
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-db
-                  key: database
-            - name: PGRST_JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-jwt
-                  key: secret
-            - name: ANON_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-jwt
-                  key: anonKey
-            - name: SERVICE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-jwt
-                  key: serviceKey
-            - name: GLOBAL_S3_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-s3
-                  key: accessKey
-            - name: GLOBAL_S3_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-s3
-                  key: secretKey
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

@@ -50,46 +50,14 @@ spec:
               containerPort: 3000
               protocol: TCP
           env:
-            - name: STUDIO_DEFAULT_ORGANIZATION
-              value: {{ .Values.environment.STUDIO_DEFAULT_ORGANIZATION | quote }}
-            - name: STUDIO_DEFAULT_PROJECT
-              value: {{ .Values.environment.STUDIO_DEFAULT_PROJECT | quote }}
-            - name: STUDIO_PORT
-              value: {{ .Values.environment.STUDIO_PORT | quote }}
-            - name: OPENAI_API_KEY
-              value: {{ .Values.environment.OPENAI_API_KEY | quote }}
-            - name: NEXT_PUBLIC_ENABLE_LOGS
-              value: {{ .Values.environment.NEXT_PUBLIC_ENABLE_LOGS | quote }}
-            - name: NEXT_ANALYTICS_BACKEND_PROVIDER
-              value: {{ .Values.environment.NEXT_ANALYTICS_BACKEND_PROVIDER | quote }}
-            {{- if .Values.metaUrl }}
+            - name: HOSTNAME
+              value: "::"
             - name: STUDIO_PG_META_URL
-              value: {{ .Values.metaUrl | quote }}
-            {{- end }}
-            {{- if .Values.restUrl }}
-            - name: POSTGRES_URL
-              value: {{ .Values.restUrl | quote }}
-            {{- end }}
-            {{- if .Values.realtimeUrl }}
-            - name: REALTIME_URL
-              value: {{ .Values.realtimeUrl | quote }}
-            {{- end }}
-            {{- if .Values.storageUrl }}
-            - name: STORAGE_URL
-              value: {{ .Values.storageUrl | quote }}
-            {{- end }}
-            {{- if .Values.analyticsUrl }}
-            - name: LOGFLARE_URL
-              value: {{ .Values.analyticsUrl | quote }}
-            {{- end }}
-            {{- if .Values.functionsUrl }}
-            - name: FUNCTIONS_URL
-              value: {{ .Values.functionsUrl | quote }}
-            {{- end }}
-            - name: POSTGRES_HOST
-              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
+              value: "http://{{ include "meta.fullname" . }}:8080"
             - name: POSTGRES_PORT
               value: {{ .Values.dbPort | default "5432" | quote }}
+            - name: POSTGRES_HOST
+              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
             - name: POSTGRES_DB
               value: {{ .Values.dbName | default "postgres" | quote }}
             - name: POSTGRES_PASSWORD
@@ -97,11 +65,19 @@ spec:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-db
                   key: password
-            - name: SUPABASE_JWT_SECRET
+            - name: PG_META_CRYPTO_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-jwt
-                  key: secret
+                  name: {{ include "supabase.fullname" . }}-meta
+                  key: cryptoKey
+            - name: DEFAULT_ORGANIZATION_NAME
+              value: {{ .Values.environment.STUDIO_DEFAULT_ORGANIZATION | quote }}
+            - name: DEFAULT_PROJECT_NAME
+              value: {{ .Values.environment.STUDIO_DEFAULT_PROJECT | quote }}
+            - name: OPENAI_API_KEY
+              value: ""
+            - name: SUPABASE_URL
+              value: "http://{{ include "kong.fullname" . }}:8000"
             - name: SUPABASE_ANON_KEY
               valueFrom:
                 secretKeyRef:
@@ -112,6 +88,27 @@ spec:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-jwt
                   key: serviceKey
+            - name: AUTH_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.fullname" . }}-jwt
+                  key: secret
+            - name: LOGFLARE_PUBLIC_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.fullname" . }}-analytics
+                  key: publicAccessToken
+            - name: LOGFLARE_PRIVATE_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.fullname" . }}-analytics
+                  key: privateAccessToken
+            - name: LOGFLARE_URL
+              value: "http://{{ include "analytics.fullname" . }}:4000"
+            - name: NEXT_PUBLIC_ENABLE_LOGS
+              value: "true"
+            - name: NEXT_ANALYTICS_BACKEND_PROVIDER
+              value: postgres
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

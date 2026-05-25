@@ -41,23 +41,7 @@ spec:
       {{- with .Values.deployment.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
-      initContainers:
-        - name: init-db
-          image: "{{ .Values.initDbImage.repository }}:{{ .Values.initDbImage.tag }}"
-          imagePullPolicy: {{ .Values.initDbImage.pullPolicy }}
-          env:
-            - name: DB_HOST
-              value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
-            - name: DB_PORT
-              value: {{ .Values.dbPort | default "5432" | quote }}
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U postgres; do
-              echo "Waiting for database to start..."
-              sleep 2
-              done
-            - echo "Database is ready"
+      initContainers: []
       containers:
         - name: {{ include "realtime.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -69,57 +53,25 @@ spec:
               containerPort: 4000
               protocol: TCP
           env:
-            - name: DB_USER
-              value: {{ .Values.environment.DB_USER | quote }}
-            - name: DB_SSL
-              value: {{ .Values.environment.DB_SSL | quote }}
             - name: PORT
-              value: {{ .Values.environment.PORT | quote }}
-            - name: FLY_ALLOC_ID
-              value: {{ .Values.environment.FLY_ALLOC_ID | quote }}
-            - name: FLY_APP_NAME
-              value: {{ .Values.environment.FLY_APP_NAME | quote }}
-            - name: ENABLE_TAILSCALE
-              value: {{ .Values.environment.ENABLE_TAILSCALE | quote }}
-            - name: DB_AFTER_CONNECT_QUERY
-              value: {{ .Values.environment.DB_AFTER_CONNECT_QUERY | quote }}
-            - name: DB_ENC_KEY
-              value: {{ .Values.environment.DB_ENC_KEY | quote }}
-            - name: ERL_AFLAGS
-              value: {{ .Values.environment.ERL_AFLAGS | quote }}
-            - name: DNS_NODES
-              value: {{ .Values.environment.DNS_NODES | quote }}
-            - name: RLIMIT_NOFILE
-              value: {{ .Values.environment.RLIMIT_NOFILE | quote }}
-            - name: APP_NAME
-              value: {{ .Values.environment.APP_NAME | quote }}
-            - name: SEED_SELF_HOST
-              value: {{ .Values.environment.SEED_SELF_HOST | quote }}
-            - name: RUN_JANITOR
-              value: {{ .Values.environment.RUN_JANITOR | quote }}
+              value: "4000"
             - name: DB_HOST
               value: {{ .Values.dbHost | default (printf "%s-db" .Release.Name) | quote }}
             - name: DB_PORT
               value: {{ .Values.dbPort | default "5432" | quote }}
-            - name: DB_NAME
-              value: {{ .Values.dbName | default "postgres" | quote }}
-            - name: SELF_HOST_TENANT_NAME
-              value: {{ include "realtime.fullname" . }}
+            - name: DB_USER
+              value: "supabase_admin"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-db
                   key: password
             - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-db
-                  key: database
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-jwt
-                  key: secret
+              value: {{ .Values.dbName | default "postgres" | quote }}
+            - name: DB_AFTER_CONNECT_QUERY
+              value: "SET search_path TO _realtime"
+            - name: DB_ENC_KEY
+              value: supabaserealtime
             - name: API_JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -128,8 +80,22 @@ spec:
             - name: SECRET_KEY_BASE
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "supabase.fullname" . }}-realtime
-                  key: secretKeyBase
+                  name: {{ include "supabase.fullname" . }}-jwt
+                  key: secret
+            - name: ERL_AFLAGS
+              value: -proto_dist inet_tcp
+            - name: DNS_NODES
+              value: "''"
+            - name: RLIMIT_NOFILE
+              value: "10000"
+            - name: APP_NAME
+              value: realtime
+            - name: SEED_SELF_HOST
+              value: "true"
+            - name: RUN_JANITOR
+              value: "true"
+            - name: DISABLE_HEALTHCHECK_LOGGING
+              value: "true"
           {{- with .Values.deployment.envFrom }}
           envFrom: {{- toYaml . | nindent 12 }}
           {{- end }}

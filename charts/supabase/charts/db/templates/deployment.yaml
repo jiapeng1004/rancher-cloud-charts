@@ -45,6 +45,12 @@ spec:
         - name: {{ include "db.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - postgres
+            - -c
+            - config_file=/etc/postgresql/postgresql.conf
+            - -c
+            - log_min_messages=fatal
           ports:
             - name: postgres
               containerPort: 5432
@@ -52,16 +58,31 @@ spec:
           env:
             - name: POSTGRES_HOST
               value: /var/run/postgresql
+            - name: PGPORT
+              value: "5432"
+            - name: POSTGRES_PORT
+              value: "5432"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-db
                   key: password
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.fullname" . }}-db
+                  key: password
+            - name: PGDATABASE
+              value: postgres
+            - name: POSTGRES_DB
+              value: postgres
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ include "supabase.fullname" . }}-jwt
                   key: secret
+            - name: JWT_EXP
+              value: "3600"
             - name: LOGFLARE_PUBLIC_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:
