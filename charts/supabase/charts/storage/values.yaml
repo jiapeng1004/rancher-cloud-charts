@@ -5,7 +5,7 @@ replicaCount: 1
 image:
   repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/storage-api
   pullPolicy: IfNotPresent
-  tag: "v1.28.2"
+  tag: "v1.33.5"
   pullSecrets: []
 
 initDbImage:
