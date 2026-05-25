@@ -7,5 +7,5 @@ metadata:
     {{- include "vector.labels" . | nindent 4 }}
 data:
   vector.yml: |
-{{ .Files.Get "files/vector/vector.yml" | indent 4 }}
+{{ .Files.Get "files/vector.yml" | indent 4 }}
 {{- end }}

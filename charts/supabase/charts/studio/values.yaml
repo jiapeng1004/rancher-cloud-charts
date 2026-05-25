@@ -69,3 +69,15 @@ realtimeUrl: ""
 storageUrl: ""
 analyticsUrl: ""
 functionsUrl: ""
+
+persistence:
+  snippets:
+    enabled: true
+    size: 1Gi
+    accessModes:
+      - ReadWriteOnce
+  edgeFunctions:
+    enabled: true
+    size: 1Gi
+    accessModes:
+      - ReadWriteOnce

@@ -1,37 +1,42 @@
 api:
   enabled: true
-  address: 0.0.0.0:{{ .Values.service.vector.port }}
+  address: 0.0.0.0:9001
 
 sources:
-  kubernetes_host:
-    type: kubernetes_logs
-    extra_label_selector: app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/name!={{ include "supabase.vector.name" . }}
+  docker_host:
+    type: docker_logs
+    exclude_containers:
+      - supabase-vector
 
 transforms:
   project_logs:
     type: remap
     inputs:
-      - kubernetes_host
+      - docker_host
     source: |-
       .project = "default"
       .event_message = del(.message)
-      .appname = del(.kubernetes.container_name)
-      del(.file)
-      del(.kubernetes)
+      .appname = del(.container_name)
+      del(.container_created_at)
+      del(.container_id)
       del(.source_type)
+      del(.stream)
+      del(.label)
+      del(.image)
+      del(.host)
       del(.stream)
   router:
     type: route
     inputs:
       - project_logs
     route:
-      kong: '.appname == {{ include "supabase.kong.name" . | quote }}'
-      auth: '.appname == {{ include "supabase.auth.name" . | quote }}'
-      rest: '.appname == {{ include "supabase.rest.name" . | quote }}'
-      realtime: '.appname == {{ include "supabase.realtime.name" . | quote }}'
-      storage: '.appname == {{ include "supabase.storage.name" . | quote }}'
-      functions: '.appname == {{ include "supabase.functions.name" . | quote }}'
-      db: '.appname == {{ include "supabase.db.name" . | quote }}'
+      kong: '.appname == "supabase-kong"'
+      auth: '.appname == "supabase-auth"'
+      rest: '.appname == "supabase-rest"'
+      realtime: '.appname == "realtime-dev.supabase-realtime"'
+      storage: '.appname == "supabase-storage"'
+      functions: '.appname == "supabase-edge-functions"'
+      db: '.appname == "supabase-db"'
   # Ignores non nginx errors since they are related with kong booting up
   kong_logs:
     type: remap
@@ -44,13 +49,10 @@ transforms:
           .metadata.request.headers.referer = req.referer
           .metadata.request.headers.user_agent = req.agent
           .metadata.request.headers.cf_connecting_ip = req.client
+          .metadata.request.method = req.method
+          .metadata.request.path = req.path
+          .metadata.request.protocol = req.protocol
           .metadata.response.status_code = req.status
-          url, split_err = split(req.request, " ")
-          if split_err == null {
-              .metadata.request.method = url[0]
-              .metadata.request.path = url[1]
-              .metadata.request.protocol = url[2]
-          }
       }
       if err != null {
         abort
@@ -99,7 +101,7 @@ transforms:
       parsed, err = parse_regex(.event_message, r'^(?P<time>.*): (?P<msg>.*)$')
       if err == null {
           .event_message = parsed.msg
-          .timestamp = parse_timestamp!(value: parsed.time,format: "%d/%b/%Y:%H:%M:%S %z")
+          .timestamp = to_timestamp!(parsed.time)
           .metadata.host = .project
       }
   # Filter out healthcheck logs from Realtime
@@ -107,7 +109,7 @@ transforms:
     type: filter
     inputs:
       - router.realtime
-    condition: '!contains(string!(.event_message), "/health")' 
+    condition: '!contains(string!(.event_message), "/health")'
   # Realtime logs are structured so we parse the severity level using regex (ignore time because it has no date)
   realtime_logs:
     type: remap
@@ -152,21 +154,20 @@ transforms:
     source: |-
       .metadata.host = "db-default"
       .metadata.parsed.timestamp = .timestamp
-      
+
       parsed, err = parse_regex(.event_message, r'.*(?P<level>INFO|NOTICE|WARNING|ERROR|LOG|FATAL|PANIC?):.*', numeric_groups: true)
 
       if err != null || parsed == null {
         .metadata.parsed.error_severity = "info"
       }
       if parsed.level != null {
-      .metadata.parsed.error_severity = parsed.level
+       .metadata.parsed.error_severity = parsed.level
       }
       if .metadata.parsed.error_severity == "info" {
           .metadata.parsed.error_severity = "log"
       }
       .metadata.parsed.error_severity = upcase!(.metadata.parsed.error_severity)
 
-{{- if .Values.deployment.analytics.enabled }}
 sinks:
   logflare_auth:
     type: 'http'
@@ -176,10 +177,10 @@ sinks:
       codec: 'json'
     method: 'post'
     request:
-      retry_max_duration_secs: 30
+      retry_max_duration_secs: 10
       headers:
         x-api-key: ${LOGFLARE_PUBLIC_ACCESS_TOKEN?LOGFLARE_PUBLIC_ACCESS_TOKEN is required}
-    uri: 'http://{{ include "supabase.analytics.fullname" . }}:{{ .Values.service.analytics.port }}/api/logs?source_name=gotrue.logs.prod'
+    uri: 'http://analytics:4000/api/logs?source_name=gotrue.logs.prod'
   logflare_realtime:
     type: 'http'
     inputs:
@@ -188,10 +189,10 @@ sinks:
       codec: 'json'
     method: 'post'
     request:
-      retry_max_duration_secs: 30
+      retry_max_duration_secs: 10
       headers:
         x-api-key: ${LOGFLARE_PUBLIC_ACCESS_TOKEN?LOGFLARE_PUBLIC_ACCESS_TOKEN is required}
-    uri: 'http://{{ include "supabase.analytics.fullname" . }}:{{ .Values.service.analytics.port }}/api/logs?source_name=realtime.logs.prod'
+    uri: 'http://analytics:4000/api/logs?source_name=realtime.logs.prod'
   logflare_rest:
     type: 'http'
     inputs:
@@ -200,10 +201,10 @@ sinks:
       codec: 'json'
     method: 'post'
     request:
-      retry_max_duration_secs: 30
+      retry_max_duration_secs: 10
       headers:
         x-api-key: ${LOGFLARE_PUBLIC_ACCESS_TOKEN?LOGFLARE_PUBLIC_ACCESS_TOKEN is required}
-    uri: 'http://{{ include "supabase.analytics.fullname" . }}:{{ .Values.service.analytics.port }}/api/logs?source_name=postgREST.logs.prod'
+    uri: 'http://analytics:4000/api/logs?source_name=postgREST.logs.prod'
   logflare_db:
     type: 'http'
     inputs:
@@ -212,13 +213,13 @@ sinks:
       codec: 'json'
     method: 'post'
     request:
-      retry_max_duration_secs: 30
+      retry_max_duration_secs: 10
       headers:
         x-api-key: ${LOGFLARE_PUBLIC_ACCESS_TOKEN?LOGFLARE_PUBLIC_ACCESS_TOKEN is required}
     # We must route the sink through kong because ingesting logs before logflare is fully initialised will
     # lead to broken queries from studio. This works by the assumption that containers are started in the
     # following order: vector > db > logflare > kong
-    uri: 'http://{{ include "supabase.analytics.fullname" . }}:{{ .Values.service.analytics.port }}/api/logs?source_name=postgres.logs'
+    uri: 'http://kong:8000/analytics/v1/api/logs?source_name=postgres.logs'
   logflare_functions:
     type: 'http'
     inputs:
@@ -227,10 +228,10 @@ sinks:
       codec: 'json'
     method: 'post'
     request:
-      retry_max_duration_secs: 30
+      retry_max_duration_secs: 10
       headers:
         x-api-key: ${LOGFLARE_PUBLIC_ACCESS_TOKEN?LOGFLARE_PUBLIC_ACCESS_TOKEN is required}
-    uri: 'http://{{ include "supabase.analytics.fullname" . }}:{{ .Values.service.analytics.port }}/api/logs?source_name=deno-relay-logs'
+    uri: 'http://analytics:4000/api/logs?source_name=deno-relay-logs'
   logflare_storage:
     type: 'http'
     inputs:
@@ -239,10 +240,10 @@ sinks:
       codec: 'json'
     method: 'post'
     request:
-      retry_max_duration_secs: 30
+      retry_max_duration_secs: 10
       headers:
         x-api-key: ${LOGFLARE_PUBLIC_ACCESS_TOKEN?LOGFLARE_PUBLIC_ACCESS_TOKEN is required}
-    uri: 'http://{{ include "supabase.analytics.fullname" . }}:{{ .Values.service.analytics.port }}/api/logs?source_name=storage.logs.prod.2'
+    uri: 'http://analytics:4000/api/logs?source_name=storage.logs.prod.2'
   logflare_kong:
     type: 'http'
     inputs:
@@ -252,8 +253,7 @@ sinks:
       codec: 'json'
     method: 'post'
     request:
-      retry_max_duration_secs: 30
+      retry_max_duration_secs: 10
       headers:
         x-api-key: ${LOGFLARE_PUBLIC_ACCESS_TOKEN?LOGFLARE_PUBLIC_ACCESS_TOKEN is required}
-    uri: 'http://{{ include "supabase.analytics.fullname" . }}:{{ .Values.service.analytics.port }}/api/logs?source_name=cloudflare.logs.prod'
-{{- end }}
+    uri: 'http://analytics:4000/api/logs?source_name=cloudflare.logs.prod'

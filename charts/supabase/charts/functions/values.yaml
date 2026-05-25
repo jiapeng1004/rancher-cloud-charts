@@ -58,3 +58,9 @@ dbName: ""
 jwtSecretRef: ""
 apikeySecretRef: ""
 functionsSecretRef: ""
+
+persistence:
+  enabled: true
+  size: 1Gi
+  accessModes:
+    - ReadWriteOnce

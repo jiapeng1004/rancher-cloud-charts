@@ -115,9 +115,14 @@ spec:
           {{- with .Values.deployment.resources }}
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.deployment.volumeMounts }}
-          volumeMounts: {{- toYaml . | nindent 12 }}
-          {{- end }}
+          volumeMounts:
+            - name: snippets-data
+              mountPath: /app/snippets
+            - name: functions-data
+              mountPath: /app/edge-functions
+            {{- with .Values.deployment.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- with .Values.deployment.livenessProbe }}
           livenessProbe: {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -131,7 +136,14 @@ spec:
           lifecycle: {{- toYaml . | nindent 12 }}
           {{- end }}
           securityContext: {{- toYaml .Values.deployment.securityContext | nindent 12 }}
-      {{- with .Values.deployment.volumes }}
-      volumes: {{- toYaml . | nindent 8 }}
-      {{- end }}
+      volumes:
+        - name: snippets-data
+          persistentVolumeClaim:
+            claimName: {{ include "studio.fullname" . }}-snippets
+        - name: functions-data
+          persistentVolumeClaim:
+            claimName: {{ include "studio.fullname" . }}-edge-functions
+        {{- with .Values.deployment.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
 {{- end }}

@@ -80,3 +80,9 @@ jwtSecretRef: ""
 apikeySecretRef: ""
 s3SecretRef: ""
 imgproxyUrl: ""
+
+persistence:
+  enabled: true
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce

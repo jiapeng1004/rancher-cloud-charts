@@ -93,9 +93,8 @@ spec:
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: functions-main
-              mountPath: /home/deno/functions/main/index.ts
-              subPath: index.ts
+            - name: functions-data
+              mountPath: /home/deno/functions
             {{- with .Values.deployment.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -113,10 +112,9 @@ spec:
           {{- end }}
           securityContext: {{- toYaml .Values.deployment.securityContext | nindent 12 }}
       volumes:
-        - name: functions-main
-          configMap:
-            name: {{ include "functions.fullname" . }}-main
-            defaultMode: 0755
+        - name: functions-data
+          persistentVolumeClaim:
+            claimName: {{ include "functions.fullname" . }}-data
         {{- with .Values.deployment.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

@@ -1,0 +1,35 @@
+{{- if and .Values.enabled .Values.persistence.snippets.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "studio.fullname" . }}-snippets
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "studio.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.global.storageClassName }}
+  storageClassName: {{ .Values.global.storageClassName }}
+  {{- end }}
+  accessModes:
+    {{- toYaml .Values.persistence.snippets.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.snippets.size }}
+{{- end }}
+---
+{{- if and .Values.enabled .Values.persistence.edgeFunctions.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "studio.fullname" . }}-edge-functions
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "studio.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.global.storageClassName }}
+  storageClassName: {{ .Values.global.storageClassName }}
+  {{- end }}
+  accessModes:
+    {{- toYaml .Values.persistence.edgeFunctions.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.edgeFunctions.size }}
+{{- end }}
