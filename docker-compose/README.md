@@ -3,6 +3,7 @@
 | 目录 | 说明 |
 |------|------|
 | [**middleware/**](./middleware/) | 常用中间件 MVP + `include` 聚合（Java / 多库 / 数据平台） |
+| [**k3s/**](./k3s/) | K3s 单节点（Docker 内，导出 kubeconfig） |
 | [kong/](./kong/) | Kong + PostgreSQL + Konga |
 | [snowy/](./snowy/) | Snowy Cloud 全家桶 |
 | [openclaw/](./openclaw/) | OpenClaw Gateway + DeepSeek |
