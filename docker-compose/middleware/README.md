@@ -98,7 +98,7 @@ networks:
 | PostgreSQL | `postgresql:5432` | postgres / 123456，库 `app` |
 | MongoDB | `mongodb:27017` | root / 123456 |
 | Elasticsearch | `http://elasticsearch:9200` | 无认证（dev） |
-| Kafka | `kafka:9092` | PLAINTEXT |
+| Kafka | `kafka:9092` | Apache **kafka-native**（KRaft，PLAINTEXT） |
 | RabbitMQ | `rabbitmq:5672`，控制台 `:15672` | admin / 123456 |
 | MinIO | API `:9000`，控制台 `:9001` | minioadmin / minioadmin |
 
