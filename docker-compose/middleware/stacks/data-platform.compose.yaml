@@ -1,0 +1,9 @@
+# 数据平台向：库 + 缓存 + 检索 + 流 + 对象存储
+name: mw-data-platform
+
+include:
+  - path: ../services/mysql/compose.yaml
+  - path: ../services/redis/compose.yaml
+  - path: ../services/elasticsearch/compose.yaml
+  - path: ../services/kafka/compose.yaml
+  - path: ../services/minio/compose.yaml

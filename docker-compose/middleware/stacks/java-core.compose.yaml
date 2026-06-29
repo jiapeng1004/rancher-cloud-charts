@@ -1,0 +1,6 @@
+# Spring / Java 最常见：关系库 + 缓存
+name: mw-java-core
+
+include:
+  - path: ../services/mysql/compose.yaml
+  - path: ../services/redis/compose.yaml

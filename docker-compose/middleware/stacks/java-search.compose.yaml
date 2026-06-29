@@ -1,0 +1,7 @@
+# Java + 全文检索
+name: mw-java-search
+
+include:
+  - path: ../services/mysql/compose.yaml
+  - path: ../services/redis/compose.yaml
+  - path: ../services/elasticsearch/compose.yaml

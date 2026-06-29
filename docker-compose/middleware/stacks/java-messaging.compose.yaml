@@ -1,0 +1,7 @@
+# Java + 消息队列（AMQP）
+name: mw-java-messaging
+
+include:
+  - path: ../services/mysql/compose.yaml
+  - path: ../services/redis/compose.yaml
+  - path: ../services/rabbitmq/compose.yaml

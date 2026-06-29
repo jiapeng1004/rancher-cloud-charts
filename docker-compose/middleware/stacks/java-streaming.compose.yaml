@@ -1,0 +1,7 @@
+# Java + 流式（Kafka）
+name: mw-java-streaming
+
+include:
+  - path: ../services/mysql/compose.yaml
+  - path: ../services/redis/compose.yaml
+  - path: ../services/kafka/compose.yaml

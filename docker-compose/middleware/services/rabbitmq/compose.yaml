@@ -1,0 +1,31 @@
+services:
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/rabbitmq:3-management}
+    container_name: mw-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-123456}
+      TZ: Asia/Shanghai
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - middleware
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  rabbitmq-data:
+    name: mw-rabbitmq-data
+
+networks:
+  middleware:
+    name: app
+    driver: bridge

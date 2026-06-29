@@ -1,0 +1,35 @@
+# 单服务：docker compose -f services/mysql/compose.yaml up -d
+services:
+  mysql:
+    image: ${MYSQL_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/mysql:8.0}
+    container_name: mw-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-app}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - middleware
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  mysql-data:
+    name: mw-mysql-data
+
+networks:
+  middleware:
+    name: app
+    driver: bridge

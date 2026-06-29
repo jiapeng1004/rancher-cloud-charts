@@ -1,0 +1,8 @@
+# 多数据库并存（微服务 / 多租户本地联调）
+name: mw-polyglot-db
+
+include:
+  - path: ../services/mysql/compose.yaml
+  - path: ../services/postgresql/compose.yaml
+  - path: ../services/mongodb/compose.yaml
+  - path: ../services/redis/compose.yaml

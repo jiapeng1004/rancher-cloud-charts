@@ -1,0 +1,6 @@
+# 对象存储 + 缓存（附件 / 静态资源场景）
+name: mw-object-storage
+
+include:
+  - path: ../services/minio/compose.yaml
+  - path: ../services/redis/compose.yaml
