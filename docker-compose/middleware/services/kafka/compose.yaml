@@ -1,7 +1,7 @@
 # KRaft 单节点（Apache Kafka Native，无 ZooKeeper）
 services:
   kafka:
-    image: ${KAFKA_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/apache/kafka-native:3.9.0}
+    image: ${KAFKA_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/apache/kafka-native:4.0.0}
     container_name: mw-kafka
     restart: unless-stopped
     environment:
