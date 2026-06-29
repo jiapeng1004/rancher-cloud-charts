@@ -45,6 +45,23 @@ kubectl get node
 
 K3s Pod 默认在 K3s 内部 CNI，**不会**自动与 `app` 上的 MySQL 等同网；业务 Pod 需通过宿主机端口或 K8s Service 访问 middleware。
 
+## 镜像加速（全在 compose 内，不改 daemon.json）
+
+| 机制 | 写法 | 作用 |
+|------|------|------|
+| 服务 `image` 前缀 | `${DOCKER_MIRROR}/rancher/k3s:…` | `docker compose pull/up` 走 mirror |
+| `configs.k3s-registries` | 内联 `mirrors.docker.io` | K3s Pod 经 containerd 走同一 mirror |
+
+默认 `DOCKER_MIRROR=docker.1ms.run`（见 `.env.example`）。
+
+若 Pod **ImagePullBackOff**：
+
+```bash
+docker compose down
+docker compose up -d --force-recreate
+kubectl --kubeconfig output/kubeconfig.yaml get pods -A -w
+```
+
 ## 默认选项
 
 - 关闭内置 **Traefik**（`--disable=traefik`），可自装 `charts/traefik-gateway` 等
@@ -66,6 +83,6 @@ docker compose down -v       # 删集群数据（慎用）
 
 ## 说明
 
-- 镜像默认华为云 SWR：`rancher/k3s:v1.31.5-k3s1`
+- 镜像 `${DOCKER_MIRROR}/rancher/k3s:v1.31.5-k3s1`（默认 mirror：`docker.1ms.run`）
 - 非生产高可用；多节点请用 k3d / 真机 k3s
 - 若需 Pod 与宿主机 Docker 同级（`--docker` + `docker.sock`），见 [k3s 文档](https://docs.k3s.io/)，本 MVP 未默认开启
