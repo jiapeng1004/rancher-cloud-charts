@@ -81,9 +81,10 @@ docker compose down          # 保留 k3s-server-data 卷
 docker compose down -v       # 删集群数据（慎用）
 ```
 
-## Kuboard 联合套件
+## Kuboard / KubePi 联合套件
 
-与 Kuboard 一键启动及集群导入见 [`../stacks/k3s-kuboard.compose.yaml`](../stacks/k3s-kuboard.compose.yaml)。
+- Kuboard：[../stacks/k3s-kuboard.compose.yaml](../stacks/k3s-kuboard.compose.yaml)
+- KubePi（飞致云）：[../stacks/k3s-kubepi.compose.yaml](../stacks/k3s-kubepi.compose.yaml)
 
 ## 说明
 

@@ -14,7 +14,7 @@ docker compose up -d
 
 ## 与 K3s 联合套件
 
-一键 K3s + Kuboard + 生成 Kuboard 专用 kubeconfig：
+一键 K3s + Kuboard + 生成 Kuboard 专用 kubeconfig，并**自动导入**集群：
 
 ```bash
 cd docker-compose/stacks
@@ -22,7 +22,7 @@ cp k3s-kuboard.env.example .env
 docker compose -f k3s-kuboard.compose.yaml up -d
 ```
 
-导入集群见 [stacks/README.md](../stacks/README.md)。
+启动后 `kuboard-import-init` 会将 K3s 以 **`k3s-local`** 导入 Kuboard，详见 [stacks/README.md](../stacks/README.md)。
 
 ## 端口
 
@@ -37,8 +37,7 @@ docker compose -f k3s-kuboard.compose.yaml up -d
 
 ## 绑定外部集群
 
-1. 登录 Kuboard → **添加集群** → **KubeConfig 导入**
-2. 粘贴 kubeconfig；`server` 须为 **Kuboard 容器能访问的地址**（同 Docker 网络内用服务名，如 `https://k3s-server:6443`）
+套件模式已自动导入；单独使用 Kuboard 时可在 UI **添加集群 → KubeConfig 导入**，`server` 须为容器网络内可达地址（如 `https://k3s-server:6443`）。
 
 ## 停止
 

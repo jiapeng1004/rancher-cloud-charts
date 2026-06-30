@@ -1,3 +1,4 @@
 .env
 output/kubeconfig.yaml
 output/kuboard-kubeconfig.yaml
+output/kubepi-kubeconfig.yaml

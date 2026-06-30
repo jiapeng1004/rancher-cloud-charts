@@ -1,0 +1,30 @@
+# KubePi（飞致云 / 1Panel）— K8s 多集群管理 UI
+services:
+  kubepi:
+    image: ${KUBEPI_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/1panel/kubepi:v1.9.0}
+    container_name: kubepi
+    privileged: true
+    restart: unless-stopped
+    ports:
+      - "${KUBEPI_HTTP_PORT:-8091}:80"
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - kubepi-data:/var/lib/kubepi
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80/ >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  kubepi-data:
+    name: kubepi-data
+
+networks:
+  app:
+    name: app
+    driver: bridge

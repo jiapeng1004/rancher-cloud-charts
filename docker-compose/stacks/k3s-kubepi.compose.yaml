@@ -1,15 +1,14 @@
-# K3s + Kuboard 联合套件
-name: k3s-kuboard
+# K3s + KubePi（飞致云）联合套件
+name: k3s-kubepi
 
 include:
   - path: ../k3s/compose.yaml
-  - path: ../kuboard/compose.yaml
+  - path: ../kubepi/compose.yaml
 
 services:
-  # 将 k3s 输出的 kubeconfig 改写为 Kuboard 容器内可访问的 API 地址
-  kuboard-kubeconfig:
+  kubepi-kubeconfig:
     image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/alpine:3.20.3
-    container_name: kuboard-kubeconfig-init
+    container_name: kubepi-kubeconfig-init
     depends_on:
       k3s-server:
         condition: service_healthy
@@ -25,27 +24,27 @@ services:
           sleep 2
         done
         [ -f /output/kubeconfig.yaml ] || { echo "kubeconfig.yaml not found"; exit 1; }
-        sed 's|https://127.0.0.1:6443|https://k3s-server:6443|g' /output/kubeconfig.yaml > /output/kuboard-kubeconfig.yaml
-        echo "wrote /output/kuboard-kubeconfig.yaml (server=https://k3s-server:6443)"
+        sed 's|https://127.0.0.1:6443|https://k3s-server:6443|g' /output/kubeconfig.yaml > /output/kubepi-kubeconfig.yaml
+        echo "wrote /output/kubepi-kubeconfig.yaml (server=https://k3s-server:6443)"
     restart: "no"
     networks:
       - app
 
-  kuboard-import:
+  kubepi-import:
     image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/alpine:3.20.3
-    container_name: kuboard-import-init
+    container_name: kubepi-import-init
     depends_on:
-      kuboard-kubeconfig:
+      kubepi-kubeconfig:
         condition: service_completed_successfully
-      kuboard:
+      kubepi:
         condition: service_healthy
     volumes:
       - ../k3s/output:/output:ro
-      - ../kuboard/scripts:/scripts:ro
+      - ../kubepi/scripts:/scripts:ro
     environment:
-      CLUSTER_NAME: ${KUBOARD_CLUSTER_NAME:-k3s-local}
-      KUBOARD_USER: ${KUBOARD_USER:-admin}
-      KUBOARD_PASS: ${KUBOARD_PASS:-Kuboard123}
+      CLUSTER_NAME: ${KUBEPI_CLUSTER_NAME:-k3s-local}
+      KUBEPI_USER: ${KUBEPI_USER:-admin}
+      KUBEPI_PASS: ${KUBEPI_PASS:-kubepi}
     entrypoint:
       - /bin/sh
       - -c

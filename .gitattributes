@@ -1,0 +1,2 @@
+# Shell scripts in compose stacks must use LF (Linux containers)
+docker-compose/**/*.sh text eol=lf

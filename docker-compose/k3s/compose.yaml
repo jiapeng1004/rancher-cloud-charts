@@ -24,6 +24,7 @@ services:
       - --tls-san=k3s-server
       - --disable=traefik
       - --write-kubeconfig-mode=644
+      - --system-default-registry=swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io
     tmpfs:
       - /run
       - /var/run
