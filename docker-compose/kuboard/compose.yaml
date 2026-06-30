@@ -1,0 +1,30 @@
+# Kuboard v3 — K8s 多集群管理 UI（独立于集群之外运行）
+services:
+  kuboard:
+    image: ${KUBOARD_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/eipwork/kuboard:v3}
+    container_name: kuboard
+    restart: unless-stopped
+    ports:
+      - "${KUBOARD_HTTP_PORT:-8090}:80/tcp"
+      - "${KUBOARD_AGENT_PORT:-10081}:10081/tcp"
+    environment:
+      KUBOARD_ENDPOINT: ${KUBOARD_ENDPOINT:-http://127.0.0.1:8090}
+      KUBOARD_AGENT_SERVER_TCP_PORT: "10081"
+      TZ: Asia/Shanghai
+    volumes:
+      - kuboard-data:/data
+    networks:
+      - app
+    depends_on:
+      k3s-server:
+        condition: service_healthy
+        required: false
+
+volumes:
+  kuboard-data:
+    name: kuboard-data
+
+networks:
+  app:
+    name: app
+    driver: bridge

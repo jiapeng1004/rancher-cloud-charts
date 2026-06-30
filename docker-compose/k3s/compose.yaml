@@ -1,21 +1,18 @@
-# K3s 单节点 — 镜像加速全部在 compose 内完成，无需改宿主机 daemon.json
-#
-# 1) 本服务 image 走 mirror 前缀 → 宿主机 docker compose pull
-# 2) configs.k3s-registries → K3s containerd 拉 Pod 镜像
+# K3s 单节点 — 默认华为云 SWR 镜像；Pod 拉取走内联 registries mirror
 configs:
   k3s-registries:
     content: |
       mirrors:
         docker.io:
           endpoint:
-            - "https://${DOCKER_MIRROR:-docker.1ms.run}"
+            - "https://swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io"
         registry-1.docker.io:
           endpoint:
-            - "https://${DOCKER_MIRROR:-docker.1ms.run}"
+            - "https://swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io"
 
 services:
   k3s-server:
-    image: ${DOCKER_MIRROR:-docker.1ms.run}/rancher/k3s:${K3S_VERSION:-v1.31.5-k3s1}
+    image: ${K3S_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/rancher/k3s:v1.31.5-k3s1}
     container_name: k3s-server
     hostname: k3s-server
     privileged: true

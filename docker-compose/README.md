@@ -4,6 +4,8 @@
 |------|------|
 | [**middleware/**](./middleware/) | 常用中间件 MVP + `include` 聚合（Java / 多库 / 数据平台） |
 | [**k3s/**](./k3s/) | K3s 单节点（Docker 内，导出 kubeconfig） |
+| [**kuboard/**](./kuboard/) | Kuboard v3 集群管理 UI |
+| [**stacks/**](./stacks/) | 聚合栈（如 **K3s + Kuboard**） |
 | [kong/](./kong/) | Kong + PostgreSQL + Konga |
 | [snowy/](./snowy/) | Snowy Cloud 全家桶 |
 | [openclaw/](./openclaw/) | OpenClaw Gateway + DeepSeek |
@@ -15,13 +17,23 @@ cd middleware
 docker compose -f stacks/java-full.compose.yaml up -d
 ```
 
+K3s + Kuboard：
+
+```bash
+cd stacks
+cp k3s-kuboard.env.example .env
+docker compose -f k3s-kuboard.compose.yaml up -d
+```
+
 需 **Docker Compose v2.20+**（`include`）。
 
-## 镜像加速
+## 镜像
 
-**不必改宿主机 `daemon.json`**。在 compose 里两种写法即可：
+默认使用华为云 SWR 第三方库前缀（与 Helm Chart 一致）：
 
-1. **服务镜像**：`image: docker.1ms.run/命名空间/镜像:tag`（或 `.env` 里 `DOCKER_MIRROR` 变量前缀）
-2. **K3s Pod 镜像**：`configs` 内联 `mirrors.docker.io.endpoint`（见 [`k3s/compose.yaml`](./k3s/compose.yaml)）
+```text
+swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/…
+swr.cn-north-4.myhuaweicloud.com/ddn-k8s/ghcr.io/…
+```
 
-默认 mirror：`https://docker.1ms.run`
+K3s 集群内 Pod 另在 `k3s/compose.yaml` 的 `configs.k3s-registries` 内联 mirror 指向同一 SWR 路径。

@@ -19,7 +19,7 @@ services:
 #    restart: "always"
 #    container_name: mysql
   redis:
-    image: redis
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/redis:7
     ports:
       - "6379:6379"
     networks:

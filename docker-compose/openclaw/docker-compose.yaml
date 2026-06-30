@@ -12,7 +12,7 @@ x-openclaw-volumes: &openclaw-volumes
 
 services:
   openclaw-gateway:
-    image: ghcr.io/openclaw/openclaw:latest
+    image: ${OPENCLAW_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/ghcr.io/openclaw/openclaw:latest}
     container_name: openclaw-gateway
     user: root
     env_file:
