@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pack publishable charts under charts/ and build helm repo index.yaml."""
+"""Pack publishable charts under charts/ — 备用脚本，CI / make 不使用；日常请 make helm-package。"""
 
 from __future__ import annotations
 
@@ -8,6 +8,9 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from normalize_index_utf8 import normalize_index_utf8  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CHARTS_ROOT = REPO_ROOT / "charts"
@@ -53,26 +56,6 @@ def package_chart(chart_dir: Path, output_dir: Path) -> Path | None:
     tgz = sorted(output_dir.glob("*.tgz"), key=lambda p: p.stat().st_mtime)[-1]
     print(f"[ok] {tgz.name}")
     return tgz
-
-
-def normalize_index_utf8(index_path: Path) -> None:
-    """Ensure index.yaml is UTF-8 (with BOM) so browsers on Windows render CJK correctly."""
-    raw = index_path.read_bytes()
-    if raw.startswith(b"\xef\xbb\xbf"):
-        raw = raw[3:]
-    for encoding in ("utf-8", "gbk", "cp936"):
-        try:
-            text = raw.decode(encoding)
-            break
-        except UnicodeDecodeError:
-            continue
-    else:
-        text = raw.decode("utf-8", errors="replace")
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-    if not text.endswith("\n"):
-        text += "\n"
-    # BOM: GitHub Pages serves text/yaml without charset=; BOM nudges browsers to UTF-8.
-    index_path.write_bytes(b"\xef\xbb\xbf" + text.encode("utf-8"))
 
 
 def build_index(output_dir: Path, repo_url: str, merge: bool) -> None:

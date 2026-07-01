@@ -14,7 +14,7 @@
 
 ## Chart 图标
 
-各 Chart 的 `icon` **优先使用 Devicon 彩色矢量**（`*-original.svg`，经 jsDelivr：`https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/...`）；少数 Devicon 未收录的品牌（如 Milvus）退回 **Simple Icons** 单色官方标识；MinIO / Gitea 等使用对应开源仓库内经 jsDelivr 镜像的 **官方彩色 SVG**。映射表见 [`scripts/apply_chart_icons.py`](./scripts/apply_chart_icons.py)；修改后在仓库根执行 `py -3 scripts/apply_chart_icons.py` 写回全部 `Chart.yaml`。
+各 Chart 的 `icon` **优先使用 Devicon 彩色矢量**（`*-original.svg`，经 jsDelivr：`https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/...`）；少数 Devicon 未收录的品牌（如 Milvus）退回 **Simple Icons** 单色官方标识；MinIO / Gitea 等使用对应开源仓库内经 jsDelivr 镜像的 **官方彩色 SVG**。映射表见 [`scripts/apply_chart_icons.py`](./scripts/apply_chart_icons.py)；批量写回：`make icons`。
 
 ## 文档
 
@@ -31,7 +31,7 @@
 
 - **`type: library`** 的子 chart **不生成表单**（本仓库一般不单独再放仅含模板片段的 library chart；Ingress / 兼容性逻辑写在对应资源的 `ingress.yaml` 等处）。
 - **其余 application Chart**：每个 Chart 目录下均有非空 `questions.yaml`（或由子 chart / 手写维护）；表单字段与常用 `values` 对齐，**复杂段落仍建议在 Rancher「编辑 YAML」中维护**。
-- **批量同步**：仓库根目录执行 **`py -3 scripts/sync_rancher_questions.py`**，可按 `values.yaml` 自动生成/补齐常见项（**跳过已有人工维护的非空文件**）。
+- **批量同步**：`make questions`，可按 `values.yaml` 自动生成/补齐常见项（**跳过已有人工维护的非空文件**）。
 - **历史 `questions.yml`**：脚本会在缺少 `questions.yaml` 时用同名 `.yml` 复制补齐（便于 Rancher 读取）。
 
 ## Helm 仓库（GitHub Pages）
@@ -44,11 +44,19 @@ helm repo update
 helm search repo rancher-cloud-charts
 ```
 
-本地打包（需 Helm 3）：
+本地打包（Helm 3 + make）：
 
 ```bash
-py -3 scripts/package_helm_charts.py --clean
+make helm-package
 ```
+
+## 维护约定
+
+| 层级 | 何时用 | 示例 |
+|------|--------|------|
+| **简单命令** | 日常、单步 | `helm install …`、`helm repo add …` |
+| **Makefile** | 多步固定流程（仅 helm + shell） | `make helm-package` |
+| **Python 脚本** | 批量/一次性维护 | `make icons`、`make questions` |
 
 ## 快速聚合安装
 

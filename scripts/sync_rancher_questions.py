@@ -7,7 +7,7 @@
 - 若仅有 questions.yml 则复制为 questions.yaml（Rancher 原生读 *.yaml）
 
 用法（仓库根目录）:
-  py -3 scripts/sync_rancher_questions.py
+  make questions
 """
 
 from __future__ import annotations

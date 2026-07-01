@@ -7,7 +7,7 @@ on:
       - develop
     paths:
       - "charts/**"
-      - "scripts/package_helm_charts.py"
+      - "Makefile"
       - ".github/workflows/helm-publish.yml"
   workflow_dispatch:
 
@@ -38,8 +38,7 @@ jobs:
         env:
           LANG: C.UTF-8
           LC_ALL: C.UTF-8
-          PYTHONUTF8: "1"
-        run: python3 scripts/package_helm_charts.py --clean --merge
+        run: make helm-package
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

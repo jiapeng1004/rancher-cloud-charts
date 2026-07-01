@@ -22,35 +22,23 @@ helm search repo rancher-cloud-charts/mysql
 helm upgrade --install supabase rancher-cloud-charts/supabase -n supabase --create-namespace
 ```
 
-## 本地打包（Windows / Linux）
+## 本地打包
 
-需已安装 [Helm 3](https://helm.sh/docs/intro/install/)：
+需 **Helm 3 + make**（MinGW / Linux）：
 
-```powershell
-# 仓库根目录
-py -3 scripts/package_helm_charts.py --clean
+```bash
+make helm-package
 ```
 
-产物在 `.helm-packages/`（`*.tgz` + `index.yaml` + `.nojekyll`），已加入 `.gitignore`。
+等价于：`find` 扫描 chart → `helm dependency build` → `helm package` → `helm repo index`，index 用 shell 加 UTF-8 BOM（浏览器中文不乱码）。**不依赖 Python。**
 
-`index.yaml` 以 **UTF-8 BOM** 写入，避免 GitHub Pages 返回 `text/yaml` 无 `charset` 时 Windows 浏览器按 GBK 误读中文。
-
-预览本地 index：
-
-```powershell
-helm repo index .helm-packages --url https://jiapeng1004.github.io/rancher-cloud-charts
-helm repo add local .helm-packages
-helm search repo local/
-```
+产物在 `.helm-packages/`（`*.tgz` + `index.yaml` + `.nojekyll`），已 gitignore。
 
 ## CI 发布
 
-推送到 `main` / `develop` 且 `charts/**` 有变更时，GitHub Actions 工作流 [`.github/workflows/helm-publish.yml`](../.github/workflows/helm-publish.yml) 会：
+推送到 `main` / `develop` 且 `charts/**` 有变更时，CI 执行 **`make helm-package`**，然后推送到 **`gh-pages`**。
 
-1. 扫描 `charts/`（排除 umbrella 内嵌子 chart，如 `middleware-bundle/charts/*`）
-2. `helm dependency build` + `helm package`
-3. 生成/合并 `index.yaml`
-4. 推送到 **`gh-pages`** 分支
+工作流：[`.github/workflows/helm-publish.yml`](../.github/workflows/helm-publish.yml)
 
 ### 首次启用 GitHub Pages
 
@@ -63,9 +51,11 @@ helm search repo local/
 
 ## 发布范围
 
-脚本 [`scripts/package_helm_charts.py`](../scripts/package_helm_charts.py) 会发布：
+`make helm-package` 会发布：
 
 - 顶层 chart（如 `charts/kafka`）
 - 版本化子目录 chart（如 `charts/mysql-new/8.0`、`charts/redis-new/7.2`）
 
 **不会**单独发布仅作为依赖嵌入的 chart（如 `middleware-bundle/charts/mysql`、`supabase/charts/auth`）。
+
+备用脚本 [`scripts/package_helm_charts.py`](../scripts/package_helm_charts.py) 仍保留（本地调试、失败汇总），**CI 与 make 均不使用**。
