@@ -55,12 +55,34 @@ def package_chart(chart_dir: Path, output_dir: Path) -> Path | None:
     return tgz
 
 
+def normalize_index_utf8(index_path: Path) -> None:
+    """Ensure index.yaml is UTF-8 (with BOM) so browsers on Windows render CJK correctly."""
+    raw = index_path.read_bytes()
+    if raw.startswith(b"\xef\xbb\xbf"):
+        raw = raw[3:]
+    for encoding in ("utf-8", "gbk", "cp936"):
+        try:
+            text = raw.decode(encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        text = raw.decode("utf-8", errors="replace")
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    if not text.endswith("\n"):
+        text += "\n"
+    # BOM: GitHub Pages serves text/yaml without charset=; BOM nudges browsers to UTF-8.
+    index_path.write_bytes(b"\xef\xbb\xbf" + text.encode("utf-8"))
+
+
 def build_index(output_dir: Path, repo_url: str, merge: bool) -> None:
     index = output_dir / "index.yaml"
     cmd = ["helm", "repo", "index", str(output_dir), "--url", repo_url.rstrip("/")]
     if merge and index.exists():
         cmd.extend(["--merge", str(index)])
     run(cmd)
+    normalize_index_utf8(index)
+    (output_dir / ".nojekyll").touch(exist_ok=True)
 
 
 def main() -> int:

@@ -31,7 +31,9 @@ helm upgrade --install supabase rancher-cloud-charts/supabase -n supabase --crea
 py -3 scripts/package_helm_charts.py --clean
 ```
 
-产物在 `.helm-packages/`（`*.tgz` + `index.yaml`），已加入 `.gitignore`。
+产物在 `.helm-packages/`（`*.tgz` + `index.yaml` + `.nojekyll`），已加入 `.gitignore`。
+
+`index.yaml` 以 **UTF-8 BOM** 写入，避免 GitHub Pages 返回 `text/yaml` 无 `charset` 时 Windows 浏览器按 GBK 误读中文。
 
 预览本地 index：
 

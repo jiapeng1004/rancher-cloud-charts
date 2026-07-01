@@ -35,6 +35,10 @@ jobs:
           version: v3.16.4
 
       - name: Package charts
+        env:
+          LANG: C.UTF-8
+          LC_ALL: C.UTF-8
+          PYTHONUTF8: "1"
         run: python3 scripts/package_helm_charts.py --clean --merge
 
       - name: Deploy to GitHub Pages
