@@ -1,2 +1,7 @@
 .idea
 /docker-compose/openclaw/_data/workspace/
+.helm-packages/
+.helm-packages-test/
+.helm-packages-test2/
+charts/**/Chart.lock
+charts/**/charts/*.tgz

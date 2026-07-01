@@ -22,7 +22,7 @@
 |------|------|
 | [docs/HUAWEI_AND_INGRESS_zh.md](./docs/HUAWEI_AND_INGRESS_zh.md) | 镜像前缀与 Ingress 兼容策略 |
 | [docs/TEMPLATING_zh.md](./docs/TEMPLATING_zh.md) | Helm 模板约定（少用 tpl / 少套娃） |
-| [docs/CHART_CATALOG_zh.md](./docs/CHART_CATALOG_zh.md) | 当前 Chart 目录一览（节选） |
+| [docs/HELM_REPO_zh.md](./docs/HELM_REPO_zh.md) | Helm 仓库发布与 `helm repo add` |
 | `charts/supabase/README.zh-CN.md` | Supabase（upstream Helm/K8s 栈 · 默认 SWR · Rancher questions） |
 | `charts/kong-gateway/README.zh-CN.md` | Kong（DB-less 声明式网关） |
 | `charts/middleware-bundle/README.md` | 聚合中间件；子 chart 已内置，见该 README |
@@ -33,6 +33,22 @@
 - **其余 application Chart**：每个 Chart 目录下均有非空 `questions.yaml`（或由子 chart / 手写维护）；表单字段与常用 `values` 对齐，**复杂段落仍建议在 Rancher「编辑 YAML」中维护**。
 - **批量同步**：仓库根目录执行 **`py -3 scripts/sync_rancher_questions.py`**，可按 `values.yaml` 自动生成/补齐常见项（**跳过已有人工维护的非空文件**）。
 - **历史 `questions.yml`**：脚本会在缺少 `questions.yaml` 时用同名 `.yml` 复制补齐（便于 Rancher 读取）。
+
+## Helm 仓库（GitHub Pages）
+
+Chart 已打包发布为标准 HTTP Helm 仓库，详见 [`docs/HELM_REPO_zh.md`](./docs/HELM_REPO_zh.md)。
+
+```bash
+helm repo add rancher-cloud-charts https://jiapeng1004.github.io/rancher-cloud-charts
+helm repo update
+helm search repo rancher-cloud-charts
+```
+
+本地打包（需 Helm 3）：
+
+```bash
+py -3 scripts/package_helm_charts.py --clean
+```
 
 ## 快速聚合安装
 

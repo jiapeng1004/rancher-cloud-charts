@@ -31,41 +31,41 @@ maintainers:
 
 dependencies:
   - name: kong
-    version: "2.0.0"
+    version: "1.0.0"
     condition: kong.enabled
   - name: auth
-    version: "2.0.0"
+    version: "1.0.0"
     condition: auth.enabled
   - name: db
-    version: "2.0.0"
+    version: "1.0.0"
     condition: db.enabled
   - name: rest
-    version: "2.0.0"
+    version: "1.0.0"
     condition: rest.enabled
   - name: realtime
-    version: "2.0.0"
+    version: "1.0.0"
     condition: realtime.enabled
   - name: storage
-    version: "2.0.0"
+    version: "1.0.0"
     condition: storage.enabled
   - name: meta
-    version: "2.0.0"
+    version: "1.0.0"
     condition: meta.enabled
   - name: studio
-    version: "2.0.0"
+    version: "1.0.0"
     condition: studio.enabled
   - name: functions
-    version: "2.0.0"
+    version: "1.0.0"
     condition: functions.enabled
   - name: analytics
-    version: "2.0.0"
+    version: "1.0.0"
     condition: analytics.enabled
   - name: vector
-    version: "2.0.0"
+    version: "1.0.0"
     condition: vector.enabled
   - name: imgproxy
-    version: "2.0.0"
+    version: "1.0.0"
     condition: imgproxy.enabled
   - name: minio
-    version: "2.0.0"
+    version: "1.0.0"
     condition: minio.enabled

@@ -1,0 +1,49 @@
+name: Publish Helm charts
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "charts/**"
+      - "scripts/package_helm_charts.py"
+      - ".github/workflows/helm-publish.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: helm-pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4
+
+      - name: Package charts
+        run: python3 scripts/package_helm_charts.py --clean --merge
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .helm-packages
+          publish_branch: gh-pages
+          force_orphan: false
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          commit_message: "chore(helm): publish charts"

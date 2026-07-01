@@ -31,10 +31,10 @@ dependencies:
     repository: "file://charts/redis"
     condition: redis.enabled
   - name: minio
-    version: "RELEASE.2023-06-19T18-23-48Z"
+    version: "2024.01.10"
     repository: "file://charts/minio"
     condition: minio.enabled
   - name: doris
-    version: "2.0.0"
+    version: "1.2.0"
     repository: "file://charts/doris"
     condition: doris.enabled
