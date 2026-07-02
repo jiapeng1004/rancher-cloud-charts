@@ -5,9 +5,9 @@ entries:
       catalog.cattle.io/release-name: elasticsearch
     apiVersion: v2
     appVersion: 8.17.3
-    created: "2026-07-02T10:25:31.921387832Z"
+    created: "2026-07-02T10:36:54.963779203Z"
     description: A Helm chart for deploying the elasticsearch application
-    digest: a90d6053698edac8c35523e5033348e99f724469dad448c95c483beb5f158285
+    digest: 9588e2d209e359544f3e8abc7da49d36b48b30c35a2c490d763e10034b57c610
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/elasticsearch/elasticsearch-original.svg
     keywords:
@@ -26,9 +26,9 @@ entries:
       catalog.cattle.io/release-name: elasticsearch
     apiVersion: v2
     appVersion: 7.17.6
-    created: "2026-07-02T10:25:31.921133146Z"
+    created: "2026-07-02T10:36:54.963518271Z"
     description: A Helm chart for deploying the elasticsearch application
-    digest: dd161e023f91c6866e315ac136d00d93aa85568f7810a7c6bc513f42aca720b8
+    digest: fc9b646f0e03a56929dd55457e79a45fed541ea05fbbe9c8bff0f0ff72f0e324
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/elasticsearch/elasticsearch-original.svg
     keywords:
@@ -45,7 +45,7 @@ entries:
     version: 1.0.1
   elk-bundle:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.922251137Z"
+    created: "2026-07-02T10:36:54.964646021Z"
     dependencies:
     - condition: elasticsearch.enabled
       name: elasticsearch
@@ -56,7 +56,7 @@ entries:
       repository: file://charts/logstash-oss
       version: 0.1.0
     description: 'Elasticsearch（本仓库 chart） + Logstash 轻量捆绑；Kibana 可启用 elasticsearch.installKibana '
-    digest: 87581671eb0af36bb1f66d1a67d41efe1ad7fae78de58711ca32dfeb080d08ca
+    digest: fa2fbfdb849d8658be8d24cbb709fbd602dba6ca68a59c675a2c50fce245047c
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/elasticsearch/elasticsearch-original.svg
     maintainers:
     - name: rancher-cloud-charts
@@ -67,10 +67,10 @@ entries:
     version: 0.1.1
   frp-tunnel:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.922650654Z"
+    created: "2026-07-02T10:36:54.965052831Z"
     description: '首开 / 演示环境可用的 FRP：集群内部署 frps（HTTP vhost / TCP bind + Dashboard），按需启用
       frpc 将集群内 TCP/HTTP 暴露到 frps。 '
-    digest: 895047a88d169fe7e98f2446105fc0fb4d87b227043cdb1b31573027dc18d7bb
+    digest: 94876e21e2b517947ce03b0e3ee2368110fa6e886ef2cb0df7a70f55fc053592
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/nginx/nginx-original.svg
     keywords:
     - frp
@@ -89,9 +89,9 @@ entries:
   gitea:
   - apiVersion: v2
     appVersion: 1.21.0
-    created: "2026-07-02T10:25:31.923044531Z"
+    created: "2026-07-02T10:36:54.965435426Z"
     description: Gitea 是一个轻量级Git服务器，使用Go语言开发
-    digest: ecf5c3dcdc81ffb5ed0712bf18c4b9e4a9839a7228a6edaee74ee3640d1521e9
+    digest: 34ab4c7fd7046396a23a365e3e48115b9c30a3feb392967f0114b08f8f39bc3f
     home: https://gitea.io
     icon: https://cdn.jsdelivr.net/gh/go-gitea/gitea@main/public/assets/img/logo.svg
     keywords:
@@ -109,10 +109,10 @@ entries:
     version: 1.0.0
   grafana-dash:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.923322911Z"
+    created: "2026-07-02T10:36:54.965728587Z"
     description: Grafana 控制台（轻量化单副本）；对接 Prometheus/Loki 等请在 values 或通过 ConfigMap provisioning
       扩展
-    digest: ab7c02f403f6bc2d192cba1660dbda9847ddf6a824c7919187af66a379817382
+    digest: 9290fbaabbe172239b6cedf736b2df5b9b95d46ca5bd6b4d384bd4d830061e17
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/grafana/grafana-original.svg
     keywords:
     - grafana
@@ -125,10 +125,10 @@ entries:
     version: 0.1.0
   hadoop-dev:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.923464576Z"
+    created: "2026-07-02T10:36:54.965874045Z"
     description: Hadoop 栈说明占位（HDFS/YARN/HA 请用 Stackable/ZetaScale 官方或云上 EMR）；本 chart
       不部署集群
-    digest: 977db57e77d32708c786a49affa496b4243632d90c4ab584dcf7a044387e3d4c
+    digest: 50670b5feaf4e033360698905b900decd15866a3d769e9adbc321524f348ebd6
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/hadoop/hadoop-original.svg
     maintainers:
     - name: rancher-cloud-charts
@@ -139,9 +139,9 @@ entries:
   halo:
   - apiVersion: v2
     appVersion: 2.21.0
-    created: "2026-07-02T10:25:31.923922072Z"
+    created: "2026-07-02T10:36:54.96632697Z"
     description: Halo 是一个开源的内容管理系统，使用Java开发
-    digest: dc6b19ed7ef2d804c8c7eec55107c1b2cbe075f5b6f2735f119c7b5ca8909595
+    digest: cfaab3014c979a394657e3260ffe6d7c8f69c4b81beff5bdb1915a013b455e2a
     home: https://halo.run
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/markdown/markdown-original.svg
     keywords:
@@ -159,9 +159,9 @@ entries:
     version: 1.0.0
   harbor-registry:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.924083434Z"
+    created: "2026-07-02T10:36:54.966508805Z"
     description: 'Harbor 说明型占位 — 请使用 goharbor 官方 Helm（本 chart 可仅装 NOTES） '
-    digest: 6481da35fd6d6cd60cb5e28d5bb0903ba2d6005e9bfb203e768471e32091a43f
+    digest: 3d287948281d19079fe334946cbaf1ce86426f2a285e3e1e1e61473d4fc0a532
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/harbor/harbor-original.svg
     keywords:
     - harbor
@@ -174,9 +174,9 @@ entries:
     version: 0.1.0
   janus-webrtc:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.924318694Z"
+    created: "2026-07-02T10:36:54.966756161Z"
     description: Meetecho Janus Gateway 占位 Helm（SFU/MCU）；RTP/STUN/TURN 需单独规划
-    digest: 6b68e23f79c518522405f9c611de64b17cd28593af34d069dcdb937586e3a617
+    digest: 43ccc611bfb4b46d2d33ecf30f3534c2cf43a21f703c14b2309235ce1b016783
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/firefox/firefox-original.svg
     keywords:
     - janus
@@ -192,9 +192,9 @@ entries:
       catalog.cattle.io/release-name: jenkins
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-07-02T10:25:31.924971043Z"
+    created: "2026-07-02T10:36:54.966987428Z"
     description: A Helm chart for deploying the kafka application
-    digest: 2317efb1306904c51476470a974f0530045e23983d3d7fcb4a8fd28c76994276
+    digest: 42aa5fe6b127fc9ae6dfb7294b9770f4b3439e9dbed1c9a2b0f4095c39e086f5
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/jenkins/jenkins-original.svg
     keywords:
@@ -211,9 +211,9 @@ entries:
     version: 1.0.8
   k6-cronjobs:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.925624885Z"
+    created: "2026-07-02T10:36:54.967238401Z"
     description: k6（Grafana OSS）按计划 CronJob 跑 RPS/场景压测，脚本挂载自 ConfigMap
-    digest: 19446515787c5ee419791624fefe6c7ac0c6c6b449b2117d912f906b667af9f1
+    digest: 9d5f9521d11d8248bda72364db0e57225504b48a7c2984527afd69101352fd49
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/k6/k6-original.svg
     keywords:
     - k6
@@ -229,9 +229,9 @@ entries:
       catalog.cattle.io/release-name: kafka
     apiVersion: v2
     appVersion: 4.0.0
-    created: "2026-07-02T10:25:31.925875032Z"
+    created: "2026-07-02T10:36:54.967474045Z"
     description: A Helm chart for deploying the kafka application
-    digest: 93725f395a627b77fa5392d7c02d7476e24e3d4f24a6f900f02b54ee4ae6f9dd
+    digest: cfafe16f15da060c0f4eb3e7f423948e48dab8c0be5234e158e216592f07b06f
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/apachekafka/apachekafka-original.svg
     keywords:
@@ -249,10 +249,10 @@ entries:
   kong-gateway:
   - apiVersion: v2
     appVersion: "3.9"
-    created: "2026-07-02T10:25:31.926282605Z"
+    created: "2026-07-02T10:36:54.967989576Z"
     description: Kong API 网关：优先外链（托管 Kong / SLB）；可选内装 DB-less 声明式网关。 自定义 declarative
       YAML；无 _helpers.tpl。
-    digest: 04ccdb008919da9a50b01876bdfbd35266d4808d6a1d58699feeada7313e9b04
+    digest: a731fed00330e3cf89d599b3af678a04b3f90701753463081c6e1c37bb6d727d
     icon: https://cdn.jsdelivr.net/npm/simple-icons@11/icons/kong.svg
     keywords:
     - kong
@@ -267,9 +267,9 @@ entries:
     version: 1.0.0
   kubemq-standalone:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.926511743Z"
+    created: "2026-07-02T10:36:54.968525584Z"
     description: KubeMQ 单机占位（消息中间件）；生产请按官方集群/CRD 指引扩展
-    digest: f2079034841e51bbd80ac82c9d9fd3d50367e5f77e8f1e56443361d7a300633a
+    digest: 0ccf327d2fa1f81803f167e0a724a25a294b60258879230f7a761ba20b642fa6
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/kubernetes/kubernetes-original.svg
     keywords:
     - kubemq
@@ -281,9 +281,9 @@ entries:
     version: 0.1.0
   locust-live:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.926816213Z"
+    created: "2026-07-02T10:36:54.969098242Z"
     description: Locust 分布式压力测试 — Master Web UI + Worker，脚本来自 ConfigMap
-    digest: 7ff09dfd53880fa7cf1f8ca20ce063baccb9c4a38c9647a833831ee4810aa092
+    digest: 592215f782b1fcfc42e83834b3304e5aa08da87b1644b802d98a4b7481b205b5
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/python/python-original.svg
     keywords:
     - locust
@@ -296,9 +296,9 @@ entries:
     version: 0.1.0
   logstash-oss:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.927003924Z"
+    created: "2026-07-02T10:36:54.969345107Z"
     description: Logstash OSS（单副本）占位；beats/tcp → Elasticsearch HTTP
-    digest: 4219fde9e4a8cc04e8c3ab83333e5b760ffa53d39a02b083bda243ed49fc04fe
+    digest: db4fc13058cac4e5a1e82e2bbf10cd1d4fb913c1454a21f7b0f5d605897b8d02
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/elasticsearch/elasticsearch-original.svg
     keywords:
     - logstash
@@ -312,9 +312,9 @@ entries:
   mall4j:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2026-07-02T10:25:31.927340523Z"
+    created: "2026-07-02T10:36:54.969706734Z"
     description: Mall4j 是一款基于Spring Boot的开源电商系统
-    digest: b96990c2a5a58b013873a5b357a2e6e2938cdc133a6626038490ebddc5d86e12
+    digest: 995756a6a813fe7a656e9013665af6704572414fa0f2153144bdeb5847c33ef6
     home: https://mall4j.com
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/woocommerce/woocommerce-original.svg
     keywords:
@@ -335,10 +335,10 @@ entries:
     version: 1.0.0
   mediamtx-live:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.927605188Z"
+    created: "2026-07-02T10:36:54.969988203Z"
     description: MediaMTX（原名 rtsp-simple-server）—— 轻量 RTS P/ RTMP/WebRTC/HLS/Low-Latency
       HLS 一体化网关（bluenviron）
-    digest: b9279d1b0e437fd064a80aaa67ba51d7fa3fde43a6e1773e97c1c2b4a56984e9
+    digest: cad1f54e48f86bbd65f83298d75430944343d9267aea5a95b2086a959d8e3c5d
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/firefox/firefox-original.svg
     keywords:
     - mediamtx
@@ -352,7 +352,7 @@ entries:
   middleware-bundle:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2026-07-02T10:25:31.929643691Z"
+    created: "2026-07-02T10:36:54.972059141Z"
     dependencies:
     - condition: mysql.enabled
       name: mysql
@@ -372,7 +372,7 @@ entries:
       version: 2024.01.10
     description: 'Umbrella chart：一键拉起常用中间件（各组件仍有独立 Helm，可单独安装）。 子 chart 已嵌入 charts/（Rancher
       / helm-git 可直接 template）；更新单体后请按需同步并重打版本。 '
-    digest: 66f8ebdb0974e3ad168d4a07040aeec32c5c10c95327daa55e124b98b2f5da8b
+    digest: 15bb7100bb16e8fb9219ec6cac9a3444b96e916bdf29dd8ffe728e232de16f2b
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/helm/helm-original.svg
     keywords:
     - mysql
@@ -390,9 +390,9 @@ entries:
   milvus:
   - apiVersion: v2
     appVersion: v2.2.12
-    created: "2026-07-02T10:25:31.930092951Z"
+    created: "2026-07-02T10:36:54.972458838Z"
     description: A Helm chart for Milvus vector database
-    digest: d38ebecb3cf93c3e3583ebed7d34e97bb037cff003c0228b0393f39ed472cdd6
+    digest: 49ec95509ef8856d34b6414242a624d19353e85bb0ccef5247ca844509616b78
     home: https://milvus.io/
     icon: https://cdn.jsdelivr.net/npm/simple-icons@11/icons/milvus.svg
     keywords:
@@ -415,9 +415,9 @@ entries:
       catalog.cattle.io/release-name: minio
     apiVersion: v2
     appVersion: "2024-01-10"
-    created: "2026-07-02T10:25:31.930911912Z"
+    created: "2026-07-02T10:36:54.973183925Z"
     description: A Helm chart for MinIO Object Storage
-    digest: 5412667171a5ddeb5adccf425562900a9e0bbbaf0ada8db8f19ceaeddd8ec7f0
+    digest: b113d6539d57f46638617fb6b5eb832be0450470b4488d6c013dafbcbe868983
     home: https://min.io/
     icon: https://cdn.jsdelivr.net/gh/minio/minio@master/.github/logo.svg
     keywords:
@@ -438,9 +438,9 @@ entries:
       catalog.cattle.io/release-name: minio
     apiVersion: v2
     appVersion: "2023-06-09"
-    created: "2026-07-02T10:25:31.930533415Z"
+    created: "2026-07-02T10:36:54.972805738Z"
     description: A Helm chart for MinIO Object Storage
-    digest: e5cd452c93d24f1477b25837cec89bdfeb3e94b6cdaa304ad77ae8aafbb8e301
+    digest: 35ccc9710c7520c4275ec1ba44bb47dbdcb9d09651a59a82c34dc7f359561e52
     home: https://min.io/
     icon: https://cdn.jsdelivr.net/gh/minio/minio@master/.github/logo.svg
     keywords:
@@ -462,9 +462,9 @@ entries:
       catalog.cattle.io/release-name: mongodb
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-07-02T10:25:31.931278648Z"
+    created: "2026-07-02T10:36:54.973417276Z"
     description: A Helm chart for deploying the kafka application
-    digest: 29ed08f6c2a2c81ee6f4a017243dff364f2d86dc33cfe69892d1c09324c85e88
+    digest: e156c9cb38a3fd03f58bf61977f8daa538ffcb137a914c7773e121daa423966c
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/mongodb/mongodb-original.svg
     keywords:
@@ -484,9 +484,9 @@ entries:
       catalog.cattle.io/release-name: mysql
     apiVersion: v2
     appVersion: "8.0"
-    created: "2026-07-02T10:25:31.932684589Z"
+    created: "2026-07-02T10:36:54.974196533Z"
     description: A Helm chart for MySQL Database
-    digest: 4807ac7849c4ca9637f448fc909c0be9eb9c1aae253ed994451e3bb5743106f8
+    digest: ff7686a7fc0a172c8dab8018dd8aadbffa997cf6b5a7f51142a75715cdf69025
     home: https://www.mysql.com/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/mysql/mysql-original.svg
     keywords:
@@ -505,9 +505,9 @@ entries:
       catalog.cattle.io/release-name: mysql
     apiVersion: v2
     appVersion: "5.7"
-    created: "2026-07-02T10:25:31.932357167Z"
+    created: "2026-07-02T10:36:54.973901138Z"
     description: A Helm chart for MySQL Database
-    digest: d212894e557f76291872d3f551d9b5549324e901e4943665c8814d299439f8cd
+    digest: 95f3d3ffee249242a1efc1ccec44e73e74f408bcac4cd80cd8c8d1d98ff01b91
     home: https://www.mysql.com/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/mysql/mysql-original.svg
     keywords:
@@ -526,9 +526,9 @@ entries:
       catalog.cattle.io/release-name: mysql
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-07-02T10:25:31.931656204Z"
+    created: "2026-07-02T10:36:54.973607787Z"
     description: A Helm chart for deploying the mysql application
-    digest: f3b5a09e86157623f7f88911a10078f79c7114ae323a736a87cd29576bb5c931
+    digest: 4a7efcc2d1d18c3521ceb8ed1c542bc6fa32981f95bdef06868825a7df6508e4
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/mysql/mysql-original.svg
     keywords:
@@ -548,9 +548,9 @@ entries:
       catalog.cattle.io/release-name: nacos
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-07-02T10:25:31.932969722Z"
+    created: "2026-07-02T10:36:54.974766714Z"
     description: A Helm chart for deploying the mysql application
-    digest: 89e1fe3393048d14c74c174555dc39c644744cf70b2c09e1111eaf93ffe09873
+    digest: 7d1b20b250d73508e2c74461057861d989285129c51ea57cd931d0c64fe3e85a
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/java/java-original.svg
     keywords:
@@ -570,10 +570,10 @@ entries:
       catalog.cattle.io/release-name: nfs-subdir-external-provisioner
     apiVersion: v2
     appVersion: 4.0.2
-    created: "2026-07-02T10:25:31.933501236Z"
+    created: "2026-07-02T10:36:54.975998002Z"
     description: 'NFS 子目录 External Provisioner（沿用 kubernetes-sigs 官方 Chart 模板）。 默认镜像经华为云
       SWR 三方同步（可按 Region 改写）；安装前须在表单中填写 NFS 服务器与导出路径。 '
-    digest: 8991faa4009374caf42ef28605795c16f70ddeb8f310470c511316c9580373ed
+    digest: b8e82d4dc7a010f629d75ccda5cb10b1b3135b60fb61aca283a66eb3d8d905c8
     home: https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/kubernetes/kubernetes-original.svg
     keywords:
@@ -597,9 +597,9 @@ entries:
       catalog.cattle.io/release-name: nginx-ingress-controller
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-07-02T10:25:31.933735966Z"
+    created: "2026-07-02T10:36:54.976317Z"
     description: A nginx ingress controller
-    digest: a160516d304ec5c1b3c38f77eb667fee832953e50bdf04128e9b7b11f687d704
+    digest: 883610a8a5010aa5fbd59e3b68549e9616c278b98870f61f315f17066a12bb37
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/nginx/nginx-original.svg
     keywords:
@@ -616,9 +616,9 @@ entries:
     version: 1.0.2
   nginx-web:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.93395246Z"
+    created: "2026-07-02T10:36:54.976580727Z"
     description: NGINX HTTP 网关（轻量化；镜像默认走华为云 SWR docker.io 前缀）
-    digest: 12f90f7ee07f0f03f9ea113dbc36179b77222ad9665dabedd628ed408c3f11ab
+    digest: 5afdf4a402e9ac147227da0383d71940a04957d070221c93e662decbb5e17804
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/nginx/nginx-original.svg
     keywords:
     - nginx
@@ -630,9 +630,9 @@ entries:
     version: 0.1.0
   ome-live:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.934210443Z"
+    created: "2026-07-02T10:36:54.976846266Z"
     description: OvenMediaEngine（低频起步占位 Chart）— 详见 README 挂载官方 Origin/Edge XML
-    digest: e5bbb451b04ec897eb49a4b8af9298b690f464acbef1dcd1d2ddf37dc83ad3bc
+    digest: 2d5d6c75230f1e4ff01a415c4db7b266eb214bc6250eb3bb505e14fc060369be
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/premierepro/premierepro-original.svg
     keywords:
     - ome
@@ -645,9 +645,9 @@ entries:
     version: 0.1.0
   onlyoffice-docs:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.934443829Z"
+    created: "2026-07-02T10:36:54.977084385Z"
     description: ONLYOFFICE Docs 占位（文书协同编辑）；JWT/存储请参阅官方文档
-    digest: f50a36e1be506778fd7f0160ca12bb51fa3d82ece0a648147ea2a78ad02e487a
+    digest: 5403f9d6e0f921f8e26898c96a8d468b77068ae2107b66fb9d60b1be255567ce
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/vscode/vscode-original.svg
     maintainers:
     - name: rancher-cloud-charts
@@ -657,10 +657,10 @@ entries:
     version: 0.1.0
   openclaw-runner:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.934673829Z"
+    created: "2026-07-02T10:36:54.97734734Z"
     description: 'OpenClaw AI Agent 占位运行态；生产推荐 openclaw-operator / 官方文档。镜像默认可经华为 SWR
       前缀拉取 ghcr.io '
-    digest: b4e4999edd475da9672381128e4a2807fd6917511737f0ae85b1182d929bd596
+    digest: f62bf7e6262fd4b413355917596c8971b5eaf6511bb881166060bb7293b452f2
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/graphql/graphql-plain.svg
     keywords:
     - openclaw
@@ -672,9 +672,9 @@ entries:
     version: 0.1.0
   openresty-web:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.934902748Z"
+    created: "2026-07-02T10:36:54.977555193Z"
     description: OpenResty（Nginx + LuaJIT）轻量化部署，镜像默认适配华为云 SWR 前缀
-    digest: 9611fa8f66288d984aae197fac8afa19638d330eb853e3205a95fbf00163fe75
+    digest: 6eda55568a88418c2822c574ea93837c120d9492ec4febc4a2c52f24d1a4b69d
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/nginx/nginx-original.svg
     keywords:
     - openresty
@@ -686,9 +686,9 @@ entries:
     version: 0.1.0
   oracle-free-db:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.935116267Z"
+    created: "2026-07-02T10:36:54.977769368Z"
     description: gvenzl Oracle Free（单副本占位用；生产慎用）
-    digest: 1cbe984866e7356de37c33fc187dfba5ea3477ed8c4550ba99ee46df50a0abba
+    digest: 4aaed5de3a72dd39d529a8486ce1446a6fb375711173adeeeec9b1ba07ad0455
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/oracle/oracle-original.svg
     maintainers:
     - name: rancher-cloud-charts
@@ -698,9 +698,9 @@ entries:
     version: 0.1.0
   pingora-proxy:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.935343312Z"
+    created: "2026-07-02T10:36:54.97800339Z"
     description: Pingora / 自建代理运行时占位 Helm（可调镜像与命令，Ingress 对齐旧集群）
-    digest: a910d7143489f0f2eaf856d3e94c92f0de1641a277748ccdd48272e6b5403b41
+    digest: 7ea706663448d46a354521e634cc486d40fd482c4029439128ac65cb58972749
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/cloudflare/cloudflare-original.svg
     maintainers:
     - name: rancher-cloud-charts
@@ -713,9 +713,9 @@ entries:
       catalog.cattle.io/release-name: postgresql
     apiVersion: v2
     appVersion: "16"
-    created: "2026-07-02T10:25:31.935639716Z"
+    created: "2026-07-02T10:36:54.978328569Z"
     description: A minimal Helm chart for PostgreSQL（单体；也可被 middleware-bundle 引用）
-    digest: a09f56666519a08a3f01a4c90d42ca037dc11adbabfb5b332f7e2372a469f72e
+    digest: 86a13c2f56fd6b1c1b16f0a02fd6cdcad4588fbe4505ab0958f80ecc879b248d
     home: https://www.postgresql.org/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/postgresql/postgresql-original.svg
     keywords:
@@ -730,9 +730,9 @@ entries:
   prometheus:
   - apiVersion: v2
     appVersion: v2.45.0
-    created: "2026-07-02T10:25:31.936026679Z"
+    created: "2026-07-02T10:36:54.978695426Z"
     description: A Helm chart for Prometheus monitoring system
-    digest: 5758ee60a6e9d9db5496aa5ca4a72d7226e38e4b9dfa272e6249bc403e199668
+    digest: 9f09df9a9ab2e0c9fd5b23d6bb9b630392298ec9434118ec86189a552f496dfc
     home: https://prometheus.io/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/prometheus/prometheus-original.svg
     keywords:
@@ -754,9 +754,9 @@ entries:
       catalog.cattle.io/release-name: rabbitmq
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-07-02T10:25:31.936241912Z"
+    created: "2026-07-02T10:36:54.978912306Z"
     description: A Helm chart for deploying the mysql application
-    digest: 905bfd31a32a1dc0f05a577260b9f7d477d07872abf3a565ccca2ad3ada926fa
+    digest: 4711354bdc5f1435706f55ec9358fb808bc8c885e952663596c60e6e6bd16257
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/rabbitmq/rabbitmq-original.svg
     keywords:
@@ -776,9 +776,9 @@ entries:
       catalog.cattle.io/release-name: redis
     apiVersion: v2
     appVersion: "7.2"
-    created: "2026-07-02T10:25:31.937293599Z"
+    created: "2026-07-02T10:36:54.979980886Z"
     description: A Helm chart for Redis in-memory data store
-    digest: e757f36a5c2a947888456a01c49324c9396bd5f8064239220500da34ceb5b9dd
+    digest: 69aaaa5aa9d4738497ffba4c3c45dd4c6c214961477950ef06160d297494cb69
     home: https://redis.io/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/redis/redis-original.svg
     keywords:
@@ -798,9 +798,9 @@ entries:
       catalog.cattle.io/release-name: redis
     apiVersion: v2
     appVersion: "7.0"
-    created: "2026-07-02T10:25:31.937008335Z"
+    created: "2026-07-02T10:36:54.979693646Z"
     description: A Helm chart for Redis in-memory data store
-    digest: 615e36fbf8f9835a81a24cdd160ea4e02cb1ddbf661fc27fea107a6cbdd5d90b
+    digest: 75e972e751c56db5fe1d8475e7721b46a17f9f3b7ba2a5fa8c7a34618a19dd5d
     home: https://redis.io/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/redis/redis-original.svg
     keywords:
@@ -820,9 +820,9 @@ entries:
       catalog.cattle.io/release-name: redis
     apiVersion: v2
     appVersion: "6.2"
-    created: "2026-07-02T10:25:31.936693927Z"
+    created: "2026-07-02T10:36:54.979396779Z"
     description: A Helm chart for Redis in-memory data store
-    digest: 02446ea24e91e553e2d2579757b6c87dbfcdc35bf95802f2329456ba6802faa4
+    digest: 912977b83c1f359dbd1d208e5d53720527aa74ffa78c5418e2b15adc0a8aa8c9
     home: https://redis.io/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/redis/redis-original.svg
     keywords:
@@ -842,9 +842,9 @@ entries:
       catalog.cattle.io/release-name: redis
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-07-02T10:25:31.936413513Z"
+    created: "2026-07-02T10:36:54.979079985Z"
     description: A Helm chart for deploying the mysql application
-    digest: 3b737e98fb73e71ad654219b308b57003d10655653219fd99533672e1d479902
+    digest: 163d830be4d6b6807ee281bda5bbc2399f9f6e3718e41aaeb6a759db079735b3
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/redis/redis-original.svg
     keywords:
@@ -861,10 +861,10 @@ entries:
     version: 1.0.1
   rocketmq-k8s:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.937498442Z"
+    created: "2026-07-02T10:36:54.98018933Z"
     description: 'RocketMQ Namesrv + Broker 极简双 Deployment（单机试跑）；生产请改为官方 Operator/Helm、持久化
       Broker 存储 '
-    digest: 806eae8015dfb8c29da1ab13747625411ae0814bc3e5a1a8bf6c549d19e1e5f7
+    digest: d1491a77b855fa73a21088f8499e982c6cd522fea4758e9d3464bacab97ee7ad
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/apachekafka/apachekafka-original.svg
     keywords:
     - rocketmq
@@ -876,9 +876,9 @@ entries:
     version: 0.1.0
   ruoyi-vue:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.938054061Z"
+    created: "2026-07-02T10:36:54.980424123Z"
     description: RuoYi 若依占位 Helm（镜像需自行选择与同步至华为云 SWR）
-    digest: 5cb2cd674a8899635ef3ced7276f85468846922d834f5d176cc7e5b1c51c34fe
+    digest: 7ebe3150e381c22e0b9df1d4883d37f5d77e7ef7518d7906b2c417ff1c6d1f5f
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/vuejs/vuejs-original.svg
     maintainers:
     - name: rancher-cloud-charts
@@ -888,9 +888,9 @@ entries:
     version: 0.1.0
   rustfs:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.938727546Z"
+    created: "2026-07-02T10:36:54.980646152Z"
     description: RustFS（S3 兼容）占位部署 — 按需改镜像与端口
-    digest: b04e626720d2861646502af174763bc418285614de52f4e9571350e27c2aef53
+    digest: 4a5ac802d8873323df704ca8975de9985b4fb07ce9cbdf805ecc514deb5184c2
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/rust/rust-original.svg
     maintainers:
     - name: rancher-cloud-charts
@@ -903,7 +903,7 @@ entries:
       catalog.cattle.io/release-name: server
     apiVersion: v2
     appVersion: "1.0"
-    created: "2026-07-02T10:25:31.941250985Z"
+    created: "2026-07-02T10:36:54.984176802Z"
     dependencies:
     - condition: mysql.enabled
       name: mysql
@@ -923,7 +923,7 @@ entries:
       version: 1.2.0
     description: A composite Helm chart for common server components (MySQL, Redis,
       MinIO)
-    digest: 0895bbd7fc84c1235134539cf568bc143a18d3f991b32da0ddf07b12d7a0114c
+    digest: 3671eefccd6220fd1e9a267d1c232e58e1aab4f0c2935ea208cfd6294123e69f
     home: https://example.com/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/docker/docker-original.svg
     keywords:
@@ -946,7 +946,7 @@ entries:
       catalog.cattle.io/release-name: server
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-07-02T10:25:31.941895631Z"
+    created: "2026-07-02T10:36:54.984903261Z"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -957,7 +957,7 @@ entries:
       repository: file://charts/mysql
       version: 1.0.15
     description: A Helm chart for deploying the server application
-    digest: 221d4b0222e842a4a8c7fce7c05beeecfc39a3f4fd675fee19e10b18d5ab4a3b
+    digest: 991f14f5a52c905d88ea3bf9305bea7b4cddc7c52a1e536b711b651267d6107b
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/kubernetes/kubernetes-original.svg
     keywords:
@@ -975,9 +975,9 @@ entries:
   shopxo:
   - apiVersion: v2
     appVersion: v2.6.0
-    created: "2026-07-02T10:25:31.94224852Z"
+    created: "2026-07-02T10:36:54.985298951Z"
     description: A Helm chart for ShopXO e-commerce system
-    digest: ecf7068fa34e919f6333af2cfcffc9107491c5192fbf111427d3c02b4d2670e1
+    digest: 40ba68ec9f5da9581956f7905ed34e10528af480359fdf6585933b5a9ef67fbc
     home: https://shopxo.net/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/woocommerce/woocommerce-original.svg
     keywords:
@@ -1000,9 +1000,9 @@ entries:
       catalog.cattle.io/release-name: snowy
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-07-02T10:25:31.942743286Z"
+    created: "2026-07-02T10:36:54.985799694Z"
     description: A Helm chart for deploying the Snowy application
-    digest: 4158d230170d604699d2cf4493c7c8601fe555e934ad90bfaf5f5c6241952476
+    digest: 50925673120593aa3a63b25a804f1d311aef4d61fcd828fb1d03ac7e2cbe170e
     home: https://example.com/snowy
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/spring/spring-original.svg
     keywords:
@@ -1021,9 +1021,9 @@ entries:
   spring-boot-admin:
   - apiVersion: v2
     appVersion: 2.7.10
-    created: "2026-07-02T10:25:31.943064967Z"
+    created: "2026-07-02T10:36:54.986130715Z"
     description: Spring Boot Admin 是一个用于监控Spring Boot应用的管理界面
-    digest: cbcfb182d38fa031b825b2c3202d17f4d51eed93fabbaf84a0723b4313d66183
+    digest: c299a9389e79c0da7c429b4f3fc72138ad9d0499b0018be1de635ff5c89f6628
     home: https://codecentric.github.io/spring-boot-admin/
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/spring/spring-original.svg
     keywords:
@@ -1042,10 +1042,10 @@ entries:
     version: 1.0.0
   srs-live:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.943380958Z"
+    created: "2026-07-02T10:36:54.986521044Z"
     description: 'OSSRS SRS（推拉流 / HLS / HTTP-FLV），镜像默认可走华为云 SWR 前缀；WebRTC/RTP 需按节点出口
       IP/NAT 调 candidate 或 hostNetwork。 '
-    digest: 79d5134730a0236ef4b3e0133ef97ec1d08037f5fbd0c8634f013202a7c4842e
+    digest: 823a6b45e7a480953a933ca9abb75a35115e2fac0b4a84be12ec00e0e82bc10f
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/firefox/firefox-original.svg
     keywords:
     - srs
@@ -1060,19 +1060,19 @@ entries:
     version: 0.1.0
   supabase:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.953202029Z"
+    created: "2026-07-02T10:36:54.996613694Z"
     description: Supabase is the Postgres development platform.
-    digest: 20933c1cab17d03fa7776c7ec60b2fc64a18138dafdca9122444f3658a4f333d
+    digest: 61c5c24218ee9df936607bbdfdf907463c51a0a020e165b1b28483354c32be65
     icon: https://avatars.githubusercontent.com/u/54469796?s=280&v=4
     name: supabase
     type: application
     urls:
-    - https://jiapeng1004.github.io/rancher-cloud-charts/supabase-2.0.24.tgz
-    version: 2.0.24
+    - https://jiapeng1004.github.io/rancher-cloud-charts/supabase-2.0.23.tgz
+    version: 2.0.23
   - annotations:
       catalog.cattle.io/release-name: supabase
     apiVersion: v2
-    created: "2026-07-02T10:25:31.950107342Z"
+    created: "2026-07-02T10:36:54.993304242Z"
     dependencies:
     - condition: kong.enabled
       name: kong
@@ -1129,7 +1129,7 @@ entries:
     description: Self-hosted Supabase stack on Kubernetes（基于上游 Helm 结构与 docker-compose），
       默认值预置华为云 SWR 「ddn-k8s/docker.io/…」前缀；附带 Rancher questions.yaml。 所有子 chart 显式声明变量，无隐式
       range 传递。
-    digest: d7f7a6cda1a7fb9a27c3c23b3be31f449d689d723e3238101e1c2b9f3b32c4cd
+    digest: 23452220249cba16738fc2ddcdaa81d9274c115aabf12e31867670bce9efd93f
     home: https://supabase.com
     icon: https://avatars.githubusercontent.com/u/54469796?s=280&v=4
     keywords:
@@ -1150,10 +1150,10 @@ entries:
     version: 2.0.21
   traefik-gateway:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.953800589Z"
+    created: "2026-07-02T10:36:54.996884744Z"
     description: 'Traefik 静态配置文件起步（无 IngressRoute CRD）；生产建议 helm repo add traefik
       https://helm.traefik.io/traefik '
-    digest: 24c34b0801d9a316d8a6f77a9369b41fecef04f1c07c8abfad183b6fff9be8b8
+    digest: 151ef090bae712b44f3e17b7783b0a0bfb9f49605ca7668342b6521f3cdb4c98
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/traefikproxy/traefikproxy-original.svg
     keywords:
     - traefik
@@ -1165,9 +1165,9 @@ entries:
     version: 0.1.0
   wordpress-site:
   - apiVersion: v2
-    created: "2026-07-02T10:25:31.954547547Z"
+    created: "2026-07-02T10:36:54.997520206Z"
     description: WordPress（Apache+PHP 官方镜像）占位；需外部 MySQL/MariaDB
-    digest: c8937bf823e1c17984514bb0768dca059a0579246d5fb8c50008bfbc63c3b06d
+    digest: 67558be87f4c8d4e9412961fec8d490f3738b381eb48a0f80ff501fb091ac9fb
     icon: https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/wordpress/wordpress-original.svg
     keywords:
     - wordpress
@@ -1177,4 +1177,4 @@ entries:
     urls:
     - https://jiapeng1004.github.io/rancher-cloud-charts/wordpress-site-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-02T10:25:31.920767702Z"
+generated: "2026-07-02T10:36:54.963082077Z"
