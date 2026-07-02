@@ -77,9 +77,9 @@ questions:
   - variable: secret.jwt.secret
     type: password
     default: "your-super-secret-jwt-token-with-at-least-32-characters-long"
-    label: JWT 密钥（≥32 字符）
+    label: JWT 签名密钥（≥32 字符）
     description: >-
-      Supabase / PostgREST / Realtime 等共用；请务必在生产改为随机串（默认仅为满足长度演示）。
+      Supabase / PostgREST / Realtime 等共用的签名密钥；请务必在生产改为随机串（openssl rand -hex 32）。
     min_length: 32
     required: true
     group: 密钥与安全
@@ -140,6 +140,79 @@ questions:
     required: true
     group: 密钥与安全
 
+  - variable: secret.meta.cryptoKey
+    type: password
+    default: "your-encryption-key-32-chars-min"
+    label: Meta 加密密钥（≥32 字符）
+    description: >-
+      用于加密敏感元数据；生成方式：openssl rand -hex 32
+    min_length: 32
+    group: 密钥与安全
+
+  - variable: secret.analytics.publicAccessToken
+    type: password
+    default: "your-super-secret-and-long-logflare-key-public"
+    label: Analytics Public Access Token
+    description: Logflare 公钥
+    group: 密钥与安全
+
+  - variable: secret.analytics.privateAccessToken
+    type: password
+    default: "your-super-secret-and-long-logflare-key-private"
+    label: Analytics Private Access Token
+    description: Logflare 私钥
+    group: 密钥与安全
+
+  - variable: secret.smtp.username
+    type: string
+    default: "fake_mail_user"
+    label: SMTP 用户名
+    group: 密钥与安全
+
+  - variable: secret.smtp.password
+    type: password
+    default: "fake_mail_password"
+    label: SMTP 密码
+    group: 密钥与安全
+
+  - variable: secret.dashboard.username
+    type: string
+    default: "supabase"
+    label: Studio 用户名
+    group: 密钥与安全
+
+  - variable: secret.dashboard.password
+    type: password
+    default: "this_password_is_insecure_and_should_be_updated"
+    label: Studio 密码
+    group: 密钥与安全
+
+  - variable: secret.s3.keyId
+    type: string
+    default: "625729a08b95bf1b7ff351a663f3a23c"
+    label: S3 Access Key ID
+    description: S3 兼容存储的 Access Key
+    group: 密钥与安全
+
+  - variable: secret.s3.accessKey
+    type: password
+    default: "850181e4652dd023b7a98c58ae0d2d34bd487ee0cc3254aed6eda37307425907"
+    label: S3 Secret Access Key
+    description: S3 兼容存储的 Secret Key
+    group: 密钥与安全
+
+  - variable: secret.minio.user
+    type: string
+    default: "supa-storage"
+    label: MinIO 用户名
+    group: 密钥与安全
+
+  - variable: secret.minio.password
+    type: password
+    default: "secret1234"
+    label: MinIO 密码
+    group: 密钥与安全
+
   # --- Auth 外部 URL ---
   - variable: environment.auth.API_EXTERNAL_URL
     type: string
@@ -183,6 +256,30 @@ questions:
     type: boolean
     default: true
     label: 部署 Vector（日志管线）
+    group: 组件
+
+  - variable: deployment.rest.enabled
+    type: boolean
+    default: true
+    label: 部署 PostgREST（REST API）
+    group: 组件
+
+  - variable: deployment.meta.enabled
+    type: boolean
+    default: true
+    label: 部署 Postgres Meta（数据库管理）
+    group: 组件
+
+  - variable: deployment.imgproxy.enabled
+    type: boolean
+    default: true
+    label: 部署 imgproxy（图片处理）
+    group: 组件
+
+  - variable: deployment.functions.enabled
+    type: boolean
+    default: true
+    label: 部署 Edge Functions（边缘函数）
     group: 组件
 
   # --- 镜像（常用） ---

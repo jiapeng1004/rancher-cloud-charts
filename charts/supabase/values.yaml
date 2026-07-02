@@ -11,24 +11,30 @@
 ## 3. 配置跨组件引用（通过子 chart 的 xxxRef 字段）
 
 ## ============================================================================
-## 全局 Secrets 配置
+## 全局配置
+## ============================================================================
+
+global:
+  storageClassName: ""
+
+## ============================================================================
+## Secret 配置（与 questions.yaml 对齐）
 ## ============================================================================
 ## 这些值会被注入到集群 Secret 中，各子 chart 通过 secretRef 显式引用
 
-global:
-  ## 所有需要持久卷的组件（Postgres、MinIO、imgproxy）共用此 StorageClass
-  storageClassName: ""
-
-  ## JWT 密钥
+secret:
+  ## JSON Web Tokens
   jwt:
     anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE"
     serviceKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q"
     secret: "your-super-secret-jwt-token-with-at-least-32-characters-long"
 
-  ## 数据库凭证
+  ## PostgreSQL credentials
   db:
     password: "your-super-secret-and-long-postgres-password"
     database: "postgres"
+    host: ""
+    port: ""
 
   ## Analytics 凭证
   analytics:
