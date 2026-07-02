@@ -600,7 +600,7 @@ image:
     pullSecrets: []
 
   storage:
-    repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/storage-api
+    repository: docker.m.daocloud.io/supabase/storage-api
     pullPolicy: IfNotPresent
     tag: "v1.48.26"
     pullSecrets: []

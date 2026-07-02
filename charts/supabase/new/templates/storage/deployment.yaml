@@ -232,6 +232,10 @@ spec:
           envFrom:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          command:
+            - "/bin/sh"
+            - "-c"
+            - 'export DATABASE_URL=$DB_DRIVER://$DB_USER:$DB_PASSWORD_ENC@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=$DB_SSL && echo $DATABASE_URL && exec node dist/start/server.js'
           {{- with .Values.deployment.storage.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
