@@ -4,76 +4,39 @@ categories:
   - database
 
 questions:
-  # --- Ingress / Kong ---
   - variable: ingress.enabled
     type: boolean
     default: true
-    label: 启用 Ingress（指向 Kong Gateway）
+    label: 启用 Ingress
     description: Kong 网关对外的 HTTP Ingress；关闭时需自行暴露 Service。
     group: Ingress
 
   - variable: ingress.className
     type: string
-    default: nginx
-    label: IngressClass（Kong，K8s 1.18+）
-    description: Kong Ingress 控制器类名；Studio 可单独覆盖 **ingress.studio.className**。
+    default: "nginx"
+    label: IngressClass
+    description: Ingress 控制器类名。
     group: Ingress
 
-  - variable: ingress.kongHostname
+  - variable: ingress.hosts[0].host
     type: string
-    default: supabase.local
-    label: Kong / API 对外域名
-    description: 写入 Kong Ingress 的唯一 host；与 **environment.auth.API_EXTERNAL_URL** 根域名一致。
+    default: "supabase.local"
+    label: API 对外域名
+    description: 写入 Ingress 的唯一 host；与 Auth 外部 URL 根域名一致。
     group: Ingress
     required: true
     show_if: ingress.enabled=true
 
-  - variable: ingress.tlsSecretName
+  - variable: global.storageClassName
     type: string
     default: ""
-    label: TLS Secret（Kong；Studio 默认复用）
-    description: |-
-      非空则 Kong Ingress 启用 HTTPS。**Studio Ingress** 默认同名 Secret；
-      Studio 独占证书时在 YAML 填写 **ingress.studio.tlsSecretName**。
-    group: Ingress
-    required: false
-    show_if: ingress.enabled=true
+    label: 全局 PVC StorageClass（必填）
+    description: >-
+      所有需要持久卷的组件共用此 StorageClass。
+      必须填写集群中存在的 StorageClass 名称，如 local-path、nfs-client 等。
+    group: 持久卷
+    required: true
 
-  - variable: ingress.studio.enabled
-    type: boolean
-    default: false
-    label: 为 Studio 单独创建 Ingress
-    description: Kong 仅 API；勾选后另一条 Ingress，使用「Studio 对外域名」。
-    group: Ingress
-    required: false
-    show_if: deployment.studio.enabled=true
-
-  - variable: ingress.studio.hostname
-    type: string
-    default: ""
-    label: Studio 对外域名
-    description: 与浏览器访问 Studio 一致；勾选上一项时常填。
-    group: Ingress
-    required: false
-    show_if: ingress.studio.enabled=true
-
-  - variable: ingress.studio.path
-    type: string
-    default: /
-    label: Studio Ingress 路径
-    group: Ingress
-    required: false
-    show_if: ingress.studio.enabled=true
-
-  - variable: ingress.studio.className
-    type: string
-    default: ""
-    label: Studio IngressClass（留空继承 Kong）
-    group: Ingress
-    required: false
-    show_if: ingress.studio.enabled=true
-
-  # --- 密钥与数据库 ---
   - variable: secret.jwt.secret
     type: password
     default: "your-super-secret-jwt-token-with-at-least-32-characters-long"
@@ -116,26 +79,16 @@ questions:
 
   - variable: secret.db.database
     type: string
-    default: postgres
-    label: 数据库库名（默认 postgres）
+    default: "postgres"
+    label: 数据库库名
     group: Postgres
-
-  - variable: global.storageClassName
-    type: string
-    default: ""
-    label: 全局 PVC StorageClass（必填）
-    description: >-
-      所有需要持久卷的组件（Postgres、MinIO、imgproxy）共用此 StorageClass。
-      必须填写集群中存在的 StorageClass 名称，如 local-path、nfs-client 等。
-    group: 持久卷（StorageClass）
-    required: true
 
   - variable: secret.realtime.secretKeyBase
     type: password
     default: "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq"
     label: Realtime SECRET_KEY_BASE（≥43 字符）
     description: >-
-      Phoenix 等价机密；占位符时请改为 openssl rand -base64 64 等形式。**不少于 43 字符**可避免常见自检失败。
+      Phoenix 等价机密；生成方式：openssl rand -base64 64。**不少于 43 字符**可避免常见自检失败。
     min_length: 43
     required: true
     group: 密钥与安全
@@ -213,110 +166,249 @@ questions:
     label: MinIO 密码
     group: 密钥与安全
 
-  # --- Auth 外部 URL ---
   - variable: environment.auth.API_EXTERNAL_URL
     type: string
     default: "http://supabase.local"
     label: Auth 外部 API 根 URL（必填）
     description: >-
-      用户浏览器/客户端访问的网关根地址，形如 https://supabase.example.com（与 Ingress/反代入口一致）。
+      用户浏览器/客户端访问的网关根地址，形如 https://supabase.example.com（与 Ingress 入口一致）。
     required: true
-    group: 对外 URL（Auth）
+    group: 对外 URL
 
   - variable: environment.auth.GOTRUE_SITE_URL
     type: string
     default: "http://supabase.local"
-    label: GOTRUE_SITE_URL（GoTrue 站点 URL）
+    label: GOTRUE_SITE_URL
     description: >-
-      此值会通过 env 整块注入 Auth（GoTrue）容器，并非无用字段。通常与 API_EXTERNAL_URL 同源；邮件重定向仍会读 GOTRUE_SITE_URL。
-    group: 对外 URL（Auth）
+      GoTrue 站点 URL，通常与 API_EXTERNAL_URL 同源；邮件重定向会读此值。
+    group: 对外 URL
 
-  # --- 组件开关 ---
   - variable: deployment.studio.enabled
     type: boolean
     default: true
     label: 部署 Studio 管理控制台
-    group: 组件
+    group: 组件开关
 
   - variable: deployment.minio.enabled
     type: boolean
     default: false
     label: 部署内置 MinIO（对象存储）
     description: >-
-      Compose 常与 Storage 联用；无对象存储时请改 **true** 或接云厂商 S3 并在 YAML 配置。
-    group: 组件
+      无对象存储时请改 **true** 或接云厂商 S3 并在 YAML 配置。
+    group: 组件开关
 
   - variable: deployment.analytics.enabled
     type: boolean
     default: true
     label: 部署 Logflare / Analytics（分析）
-    group: 组件
+    group: 组件开关
 
   - variable: deployment.vector.enabled
     type: boolean
     default: true
     label: 部署 Vector（日志管线）
-    group: 组件
+    group: 组件开关
 
   - variable: deployment.rest.enabled
     type: boolean
     default: true
     label: 部署 PostgREST（REST API）
-    group: 组件
+    group: 组件开关
 
   - variable: deployment.meta.enabled
     type: boolean
     default: true
     label: 部署 Postgres Meta（数据库管理）
-    group: 组件
+    group: 组件开关
 
   - variable: deployment.imgproxy.enabled
     type: boolean
     default: true
     label: 部署 imgproxy（图片处理）
-    group: 组件
+    group: 组件开关
 
   - variable: deployment.functions.enabled
     type: boolean
     default: true
     label: 部署 Edge Functions（边缘函数）
-    group: 组件
+    group: 组件开关
 
-  # --- 镜像（常用） ---
+  - variable: deployment.auth.enabled
+    type: boolean
+    default: true
+    label: 部署 GoTrue（认证服务）
+    group: 组件开关
+
+  - variable: deployment.kong.enabled
+    type: boolean
+    default: true
+    label: 部署 Kong（API 网关）
+    group: 组件开关
+
+  - variable: deployment.realtime.enabled
+    type: boolean
+    default: true
+    label: 部署 Realtime（WebSocket）
+    group: 组件开关
+
+  - variable: deployment.storage.enabled
+    type: boolean
+    default: true
+    label: 部署 Storage API（对象存储服务）
+    group: 组件开关
+
   - variable: image.db.repository
     type: string
     default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres"
-    label: 数据库镜像仓库（supabase/postgres）
-    group: 镜像（默认国内前缀）
+    label: 数据库镜像仓库
+    group: 镜像（国内前缀）
 
   - variable: image.db.tag
     type: string
     default: "15.8.1.085"
     label: 数据库镜像标签
-    group: 镜像（默认国内前缀）
+    group: 镜像（国内前缀）
 
   - variable: image.kong.repository
     type: string
     default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong/kong"
     label: Kong 镜像仓库
-    group: 镜像（默认国内前缀）
+    group: 镜像（国内前缀）
 
   - variable: image.kong.tag
     type: string
     default: "3.9.1"
     label: Kong 镜像标签
-    group: 镜像（默认国内前缀）
+    group: 镜像（国内前缀）
 
   - variable: image.minio.repository
     type: string
     default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio"
-    label: MinIO 服务端镜像仓库（Docker Hub minio/minio）
-    description: >-
-      MinIO/MC 为国内拉取已从 Chainguard 改为 **`minio/minio`、`minio/mc`**。
-    group: 镜像（默认国内前缀）
+    label: MinIO 镜像仓库
+    group: 镜像（国内前缀）
 
   - variable: image.minio.tag
     type: string
-    default: "RELEASE.2024-01-10T00-54-08Z"
+    default: "latest"
     label: MinIO 镜像标签
-    group: 镜像（默认国内前缀）
+    group: 镜像（国内前缀）
+
+  - variable: image.auth.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/gotrue"
+    label: Auth / GoTrue 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.auth.tag
+    type: string
+    default: "v2.186.0"
+    label: Auth 镜像标签
+    group: 镜像（国内前缀）
+
+  - variable: image.studio.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/studio"
+    label: Studio 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.studio.tag
+    type: string
+    default: "2026.04.27-sha-5f60601"
+    label: Studio 镜像标签
+    group: 镜像（国内前缀）
+
+  - variable: image.rest.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgrest/postgrest"
+    label: PostgREST 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.rest.tag
+    type: string
+    default: "v14.8"
+    label: PostgREST 镜像标签
+    group: 镜像（国内前缀）
+
+  - variable: image.realtime.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/realtime"
+    label: Realtime 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.realtime.tag
+    type: string
+    default: "v2.76.5"
+    label: Realtime 镜像标签
+    group: 镜像（国内前缀）
+
+  - variable: image.storage.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/storage-api"
+    label: Storage API 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.storage.tag
+    type: string
+    default: "v1.48.26"
+    label: Storage API 镜像标签
+    group: 镜像（国内前缀）
+
+  - variable: image.meta.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres-meta"
+    label: Postgres Meta 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.meta.tag
+    type: string
+    default: "v0.96.3"
+    label: Postgres Meta 镜像标签
+    group: 镜像（国内前缀）
+
+  - variable: image.functions.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/edge-runtime"
+    label: Edge Functions 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.functions.tag
+    type: string
+    default: "v1.71.2"
+    label: Edge Functions 镜像标签
+    group: 镜像（国内前缀）
+
+  - variable: image.analytics.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/logflare"
+    label: Analytics / Logflare 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.analytics.tag
+    type: string
+    default: "1.36.1"
+    label: Analytics 镜像标签
+    group: 镜像（国内前缀）
+
+  - variable: image.vector.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/timberio/vector"
+    label: Vector 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.vector.tag
+    type: string
+    default: "0.53.0-alpine"
+    label: Vector 镜像标签
+    group: 镜像（国内前缀）
+
+  - variable: image.imgproxy.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/darthsim/imgproxy"
+    label: imgproxy 镜像仓库
+    group: 镜像（国内前缀）
+
+  - variable: image.imgproxy.tag
+    type: string
+    default: "v3.30.1"
+    label: imgproxy 镜像标签
+    group: 镜像（国内前缀）

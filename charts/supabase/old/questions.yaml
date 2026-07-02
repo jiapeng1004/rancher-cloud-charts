@@ -1,0 +1,322 @@
+categories:
+  - supabase
+  - postgres
+  - database
+
+questions:
+  # --- Ingress / Kong ---
+  - variable: ingress.enabled
+    type: boolean
+    default: true
+    label: 启用 Ingress（指向 Kong Gateway）
+    description: Kong 网关对外的 HTTP Ingress；关闭时需自行暴露 Service。
+    group: Ingress
+
+  - variable: ingress.className
+    type: string
+    default: "nginx"
+    label: IngressClass（Kong，K8s 1.18+）
+    description: Kong Ingress 控制器类名；Studio 可单独覆盖 **ingress.studio.className**。
+    group: Ingress
+
+  - variable: ingress.kongHostname
+    type: string
+    default: "supabase.local"
+    label: Kong / API 对外域名
+    description: 写入 Kong Ingress 的唯一 host；与 **auth.environment.API_EXTERNAL_URL** 根域名一致。
+    group: Ingress
+    required: true
+    show_if: ingress.enabled=true
+
+  - variable: ingress.tlsSecretName
+    type: string
+    default: ""
+    label: TLS Secret（Kong；Studio 默认复用）
+    description: |-
+      非空则 Kong Ingress 启用 HTTPS。**Studio Ingress** 默认同名 Secret；
+      Studio 独占证书时在 YAML 填写 **ingress.studio.tlsSecretName**。
+    group: Ingress
+    required: false
+    show_if: ingress.enabled=true
+
+  - variable: ingress.studio.enabled
+    type: boolean
+    default: false
+    label: 为 Studio 单独创建 Ingress
+    description: Kong 仅 API；勾选后另一条 Ingress，使用「Studio 对外域名」。
+    group: Ingress
+    required: false
+    show_if: studio.enabled=true
+
+  - variable: ingress.studio.hostname
+    type: string
+    default: ""
+    label: Studio 对外域名
+    description: 与浏览器访问 Studio 一致；勾选上一项时常填。
+    group: Ingress
+    required: false
+    show_if: ingress.studio.enabled=true
+
+  - variable: ingress.studio.path
+    type: string
+    default: "/"
+    label: Studio Ingress 路径
+    group: Ingress
+    required: false
+    show_if: ingress.studio.enabled=true
+
+  - variable: ingress.studio.className
+    type: string
+    default: ""
+    label: Studio IngressClass（留空继承 Kong）
+    group: Ingress
+    required: false
+    show_if: ingress.studio.enabled=true
+
+  # --- 密钥与数据库 ---
+  - variable: secret.jwt.secret
+    type: password
+    default: "your-super-secret-jwt-token-with-at-least-32-characters-long"
+    label: JWT 签名密钥（≥32 字符）
+    description: >-
+      Supabase / PostgREST / Realtime 等共用的签名密钥；请务必在生产改为随机串（openssl rand -hex 32）。
+    min_length: 32
+    required: true
+    group: 密钥与安全
+
+  - variable: db.enabled
+    type: boolean
+    default: true
+    label: 部署内置 Postgres（StatefulSet）
+    description: >-
+      「关」时使用外链库，需填写主机与端口。**关**时必须确保库已就绪并完成扩展/迁移。
+    group: Postgres
+
+  - variable: secret.db.host
+    type: string
+    default: ""
+    label: 外链 Postgres 主机名
+    description: 仅在 **关闭内置库**（db.enabled=false）时必填；不写协议前缀。
+    group: Postgres
+
+  - variable: secret.db.port
+    type: string
+    default: "5432"
+    label: 外链 Postgres 端口
+    group: Postgres
+
+  - variable: secret.db.password
+    type: password
+    default: "your-super-secret-and-long-postgres-password"
+    label: Postgres 密码
+    description: >-
+      内置库或外链库的 postgres 口令；表单安装后请务必更换。
+    required: true
+    group: Postgres
+
+  - variable: secret.db.database
+    type: string
+    default: "postgres"
+    label: 数据库库名（默认 postgres）
+    group: Postgres
+
+  - variable: global.storageClassName
+    type: string
+    default: ""
+    label: 全局 PVC StorageClass（必填）
+    description: >-
+      所有需要持久卷的组件（Postgres、MinIO、imgproxy）共用此 StorageClass。
+      必须填写集群中存在的 StorageClass 名称，如 local-path、nfs-client 等。
+    group: 持久卷（StorageClass）
+    required: true
+
+  - variable: secret.realtime.secretKeyBase
+    type: password
+    default: "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq"
+    label: Realtime SECRET_KEY_BASE（≥43 字符）
+    description: >-
+      Phoenix 等价机密；占位符时请改为 openssl rand -base64 64 等形式。**不少于 43 字符**可避免常见自检失败。
+    min_length: 43
+    required: true
+    group: 密钥与安全
+
+  - variable: secret.meta.cryptoKey
+    type: password
+    default: "your-encryption-key-32-chars-min"
+    label: Meta 加密密钥（≥32 字符）
+    description: >-
+      用于加密敏感元数据；生成方式：openssl rand -hex 32
+    min_length: 32
+    group: 密钥与安全
+
+  - variable: secret.analytics.publicAccessToken
+    type: password
+    default: "your-super-secret-and-long-logflare-key-public"
+    label: Analytics Public Access Token
+    description: Logflare 公钥
+    group: 密钥与安全
+
+  - variable: secret.analytics.privateAccessToken
+    type: password
+    default: "your-super-secret-and-long-logflare-key-private"
+    label: Analytics Private Access Token
+    description: Logflare 私钥
+    group: 密钥与安全
+
+  - variable: secret.smtp.username
+    type: string
+    default: "fake_mail_user"
+    label: SMTP 用户名
+    group: 密钥与安全
+
+  - variable: secret.smtp.password
+    type: password
+    default: "fake_mail_password"
+    label: SMTP 密码
+    group: 密钥与安全
+
+  - variable: secret.dashboard.username
+    type: string
+    default: "supabase"
+    label: Studio 用户名
+    group: 密钥与安全
+
+  - variable: secret.dashboard.password
+    type: password
+    default: "this_password_is_insecure_and_should_be_updated"
+    label: Studio 密码
+    group: 密钥与安全
+
+  - variable: secret.s3.keyId
+    type: string
+    default: "625729a08b95bf1b7ff351a663f3a23c"
+    label: S3 Access Key ID
+    description: S3 兼容存储的 Access Key
+    group: 密钥与安全
+
+  - variable: secret.s3.accessKey
+    type: password
+    default: "850181e4652dd023b7a98c58ae0d2d34bd487ee0cc3254aed6eda37307425907"
+    label: S3 Secret Access Key
+    description: S3 兼容存储的 Secret Key
+    group: 密钥与安全
+
+  - variable: secret.minio.user
+    type: string
+    default: "supa-storage"
+    label: MinIO 用户名
+    group: 密钥与安全
+
+  - variable: secret.minio.password
+    type: password
+    default: "secret1234"
+    label: MinIO 密码
+    group: 密钥与安全
+
+  # --- Auth 外部 URL ---
+  - variable: auth.environment.API_EXTERNAL_URL
+    type: string
+    default: "http://supabase.local"
+    label: Auth 外部 API 根 URL（必填）
+    description: >-
+      用户浏览器/客户端访问的网关根地址，形如 https://supabase.example.com（与 Ingress/反代入口一致）。
+    required: true
+    group: 对外 URL（Auth）
+
+  - variable: auth.environment.GOTRUE_SITE_URL
+    type: string
+    default: "http://supabase.local"
+    label: GOTRUE_SITE_URL（GoTrue 站点 URL）
+    description: >-
+      此值会通过 env 整块注入 Auth（GoTrue）容器，并非无用字段。通常与 API_EXTERNAL_URL 同源；邮件重定向仍会读 GOTRUE_SITE_URL。
+    group: 对外 URL（Auth）
+
+  # --- 组件开关 ---
+  - variable: studio.enabled
+    type: boolean
+    default: true
+    label: 部署 Studio 管理控制台
+    group: 组件
+
+  - variable: minio.enabled
+    type: boolean
+    default: false
+    label: 部署内置 MinIO（对象存储）
+    description: >-
+      Compose 常与 Storage 联用；无对象存储时请改 **true** 或接云厂商 S3 并在 YAML 配置。
+    group: 组件
+
+  - variable: analytics.enabled
+    type: boolean
+    default: true
+    label: 部署 Logflare / Analytics（分析）
+    group: 组件
+
+  - variable: vector.enabled
+    type: boolean
+    default: true
+    label: 部署 Vector（日志管线）
+    group: 组件
+
+  - variable: rest.enabled
+    type: boolean
+    default: true
+    label: 部署 PostgREST（REST API）
+    group: 组件
+
+  - variable: meta.enabled
+    type: boolean
+    default: true
+    label: 部署 Postgres Meta（数据库管理）
+    group: 组件
+
+  - variable: imgproxy.enabled
+    type: boolean
+    default: true
+    label: 部署 imgproxy（图片处理）
+    group: 组件
+
+  - variable: functions.enabled
+    type: boolean
+    default: true
+    label: 部署 Edge Functions（边缘函数）
+    group: 组件
+
+  # --- 镜像（常用） ---
+  - variable: db.image.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/supabase/postgres"
+    label: 数据库镜像仓库（supabase/postgres）
+    group: 镜像（默认国内前缀）
+
+  - variable: db.image.tag
+    type: string
+    default: "15.8.1.085"
+    label: 数据库镜像标签
+    group: 镜像（默认国内前缀）
+
+  - variable: kong.image.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kong"
+    label: Kong 镜像仓库
+    group: 镜像（默认国内前缀）
+
+  - variable: kong.image.tag
+    type: string
+    default: "3.9.1"
+    label: Kong 镜像标签
+    group: 镜像（默认国内前缀）
+
+  - variable: minio.image.repository
+    type: string
+    default: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio"
+    label: MinIO 服务端镜像仓库（Docker Hub minio/minio）
+    description: >-
+      MinIO/MC 为国内拉取已从 Chainguard 改为 **`minio/minio`、`minio/mc`**。
+    group: 镜像（默认国内前缀）
+
+  - variable: minio.image.tag
+    type: string
+    default: "RELEASE.2024-01-10T00-54-08Z"
+    label: MinIO 镜像标签
+    group: 镜像（默认国内前缀）
