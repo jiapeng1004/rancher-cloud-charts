@@ -7,7 +7,7 @@
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
   {{- end }}
 {{- end }}
-apiVersion: networking.k8s.io/v1
+apiVersion: {{ include "supabase.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
