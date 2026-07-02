@@ -18,7 +18,7 @@ questions:
     description: Ingress 控制器类名。
     group: Ingress
 
-  - variable: ingress.hosts[0].host
+  - variable: ingress.hostname
     type: string
     default: "supabase.local"
     label: API 对外域名

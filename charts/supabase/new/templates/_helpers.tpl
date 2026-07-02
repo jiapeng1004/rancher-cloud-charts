@@ -65,14 +65,14 @@ Create the name of the service account to use
 Return the appropriate apiVersion for Ingress.
 networking.k8s.io/v1        → K8s 1.19+
 networking.k8s.io/v1beta1   → K8s 1.14–1.22
-extensions/v1beta1          → K8s 1.14–1.22 (fallback)
+extensions/v1beta1          → K8s < 1.14
 */}}
 {{- define "supabase.ingress.apiVersion" -}}
-{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
   {{- print "networking.k8s.io/v1" -}}
-{{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
   {{- print "networking.k8s.io/v1beta1" -}}
-{{- else }}
+{{- else -}}
   {{- print "extensions/v1beta1" -}}
-{{- end }}
+{{- end -}}
 {{- end }}

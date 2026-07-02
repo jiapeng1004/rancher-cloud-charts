@@ -1069,6 +1069,8 @@ autoscaling:
 ingress:
   enabled: true
   className: "nginx"
+  ## 扁平 hostname，避免数组索引导致的深合并丢失 paths
+  hostname: "supabase.local"
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     # cert-manager.io/cluster-issuer: "letsencrypt-staging"
