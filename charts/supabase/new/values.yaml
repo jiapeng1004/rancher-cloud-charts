@@ -644,10 +644,10 @@ environment:
     DB_DRIVER: postgres
     ## SSL mode options: disable, allow, prefer, require, verify-ca, verify-full
     DB_SSL: disable
-    API_EXTERNAL_URL: http://supabase.local
+    API_EXTERNAL_URL: 'http://{{ .Values.ingress.hostname }}'
     GOTRUE_API_HOST: "0.0.0.0"
     GOTRUE_API_PORT: "9999"
-    GOTRUE_SITE_URL: http://supabase.local
+    GOTRUE_SITE_URL: 'http://{{ .Values.ingress.hostname }}'
     GOTRUE_URI_ALLOW_LIST: "*"
     GOTRUE_DISABLE_SIGNUP: "false"
     GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
@@ -776,7 +776,7 @@ environment:
     POSTGRES_PORT: 5432
     DEFAULT_ORGANIZATION_NAME: Default Organization
     DEFAULT_PROJECT_NAME: Default Project
-    SUPABASE_PUBLIC_URL: http://supabase.local
+    SUPABASE_PUBLIC_URL: 'http://{{ .Values.ingress.hostname }}'
     NEXT_PUBLIC_ENABLE_LOGS: true
     ## Set value to bigquery to use Big Query backend for analytics (postgres or bigquery)
     NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
